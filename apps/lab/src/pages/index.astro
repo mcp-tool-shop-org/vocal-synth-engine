@@ -1,0 +1,306 @@
+---
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>VocalSynth Cockpit</title>
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>VocalSynth Cockpit</h1>
+        <div id="health-status" class="status-badge">Checking daemon...</div>
+      </header>
+
+      <div class="grid">
+        <section class="panel">
+          <h2>Score (JSON)</h2>
+          <textarea id="score-input" rows="15" spellcheck="false">{
+  "bpm": 120,
+  "notes": [
+    {
+      "id": "n1",
+      "startSec": 0.0,
+      "durationSec": 0.5,
+      "midi": 60,
+      "velocity": 0.8,
+      "timbre": "ah"
+    },
+    {
+      "id": "n2",
+      "startSec": 0.5,
+      "durationSec": 0.5,
+      "midi": 64,
+      "velocity": 0.8,
+      "timbre": "oo"
+    },
+    {
+      "id": "n3",
+      "startSec": 1.0,
+      "durationSec": 1.0,
+      "midi": 67,
+      "velocity": 0.8,
+      "vibrato": {
+        "rateHz": 5.5,
+        "depthCents": 50,
+        "onsetSec": 0.2
+      }
+    }
+  ]
+}</textarea>
+          <div class="controls">
+            <button id="btn-render" class="primary">Render</button>
+            <button id="btn-play" disabled>Play</button>
+            <button id="btn-download" disabled>Download WAV</button>
+          </div>
+          <audio id="audio-player" controls style="display: none;"></audio>
+        </section>
+
+        <div class="side-panels">
+          <section class="panel">
+            <h2>Telemetry</h2>
+            <pre id="telemetry-output">No data yet.</pre>
+          </section>
+
+          <section class="panel">
+            <h2>Provenance</h2>
+            <pre id="provenance-output">No data yet.</pre>
+          </section>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
+
+<style>
+  :root {
+    --bg: #1e1e1e;
+    --panel-bg: #2d2d2d;
+    --text: #e0e0e0;
+    --accent: #4a90e2;
+    --accent-hover: #357abd;
+    --border: #444;
+    --error: #e74c3c;
+    --success: #2ecc71;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1rem;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+
+  .status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    background: var(--border);
+  }
+  .status-badge.ok { background: var(--success); color: #000; }
+  .status-badge.error { background: var(--error); color: #fff; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+  }
+
+  .side-panels {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .panel {
+    background: var(--panel-bg);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  h2 {
+    margin-top: 0;
+    font-size: 1.1rem;
+    color: #aaa;
+    margin-bottom: 1rem;
+  }
+
+  textarea {
+    width: 100%;
+    background: #1a1a1a;
+    color: #00ff00;
+    border: 1px solid var(--border);
+    padding: 1rem;
+    font-family: monospace;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    resize: vertical;
+    box-sizing: border-box;
+  }
+
+  .controls {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    background: var(--border);
+    color: var(--text);
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  button.primary {
+    background: var(--accent);
+    color: white;
+  }
+
+  button.primary:hover:not(:disabled) {
+    background: var(--accent-hover);
+  }
+
+  pre {
+    background: #1a1a1a;
+    padding: 1rem;
+    border-radius: 4px;
+    overflow-x: auto;
+    font-size: 0.85rem;
+    margin: 0;
+    color: #ccc;
+  }
+</style>
+
+<script>
+  const DAEMON_URL = 'http://localhost:3001';
+  
+  const statusBadge = document.getElementById('health-status')!;
+  const scoreInput = document.getElementById('score-input') as HTMLTextAreaElement;
+  const btnRender = document.getElementById('btn-render') as HTMLButtonElement;
+  const btnPlay = document.getElementById('btn-play') as HTMLButtonElement;
+  const btnDownload = document.getElementById('btn-download') as HTMLButtonElement;
+  const audioPlayer = document.getElementById('audio-player') as HTMLAudioElement;
+  const telemetryOutput = document.getElementById('telemetry-output')!;
+  const provenanceOutput = document.getElementById('provenance-output')!;
+
+  let currentWavUrl: string | null = null;
+
+  // Check health
+  async function checkHealth() {
+    try {
+      const res = await fetch(`${DAEMON_URL}/api/health`);
+      if (res.ok) {
+        const data = await res.json();
+        statusBadge.textContent = `Daemon OK (v${data.engineVersion} | ${data.commit.substring(0,7)})`;
+        statusBadge.className = 'status-badge ok';
+      } else {
+        throw new Error('Bad status');
+      }
+    } catch (e) {
+      statusBadge.textContent = 'Daemon Offline';
+      statusBadge.className = 'status-badge error';
+    }
+  }
+
+  checkHealth();
+  setInterval(checkHealth, 5000);
+
+  btnRender.addEventListener('click', async () => {
+    try {
+      btnRender.disabled = true;
+      btnRender.textContent = 'Rendering...';
+      
+      const score = JSON.parse(scoreInput.value);
+      
+      const res = await fetch(`${DAEMON_URL}/api/render`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ score })
+      });
+      
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Render failed');
+      }
+      
+      const data = await res.json();
+      
+      // Update UI
+      telemetryOutput.textContent = JSON.stringify(data.telemetry, null, 2);
+      provenanceOutput.textContent = JSON.stringify(data.provenance, null, 2);
+      
+      // Handle audio
+      if (currentWavUrl) URL.revokeObjectURL(currentWavUrl);
+      
+      const binaryString = atob(data.wavBase64);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      
+      const blob = new Blob([bytes], { type: 'audio/wav' });
+      currentWavUrl = URL.createObjectURL(blob);
+      
+      audioPlayer.src = currentWavUrl;
+      btnPlay.disabled = false;
+      btnDownload.disabled = false;
+      
+    } catch (e: any) {
+      alert(`Error: ${e.message}`);
+    } finally {
+      btnRender.disabled = false;
+      btnRender.textContent = 'Render';
+    }
+  });
+
+  btnPlay.addEventListener('click', () => {
+    if (currentWavUrl) {
+      audioPlayer.currentTime = 0;
+      audioPlayer.play();
+    }
+  });
+
+  btnDownload.addEventListener('click', () => {
+    if (currentWavUrl) {
+      const a = document.createElement('a');
+      a.href = currentWavUrl;
+      a.download = `render-${Date.now()}.wav`;
+      a.click();
+    }
+  });
+</script>

@@ -7,6 +7,7 @@
   "scripts": {
     "build": "tsc",
     "inspect": "tsx src/cli/inspect.ts",
+    "daemon": "tsx src/server/dev-daemon.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -21,12 +22,16 @@
   },
   "homepage": "https://github.com/mcp-tool-shop-org/vocal-synth-engine#readme",
   "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
     "@types/node": "^25.3.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "zod": "^4.3.6"
   },
   "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
     "wavefile": "^11.0.0"
   }
 }
