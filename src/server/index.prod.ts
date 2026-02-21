@@ -1,26 +1,14 @@
-import express from 'express';
-import cors from 'cors';
 import { createServer } from 'node:http';
 import { WebSocketServer } from 'ws';
 import { resolve, join } from 'node:path';
 import { existsSync } from 'node:fs';
+import express from 'express';
+import { createApp } from './app.js';
 
-import { healthRouter } from './routes/health.js';
-import { renderRouter } from './routes/render.js';
-import { rendersRouter } from './routes/renders.js';
-
-const app = express();
+const app = createApp();
 const server = createServer(app);
 
-app.use(cors());
-app.use(express.json({ limit: '50mb' }));
-
-// API Routes
-app.use('/api/health', healthRouter);
-app.use('/api/render', renderRouter);
-app.use('/api/renders', rendersRouter);
-
-// Serve static Astro app
+// Serve static Vite app
 const cockpitDist = resolve(process.cwd(), 'apps/cockpit/dist');
 if (existsSync(cockpitDist)) {
   console.log(`Serving static files from ${cockpitDist}`);
@@ -56,5 +44,5 @@ wss.on('connection', (ws) => {
 
 const port = Number(process.env.PORT ?? 4321);
 server.listen(port, () => {
-  console.log(`VocalSynth Cockpit running at http://localhost:${port}`);
+  console.log(`VocalSynth Cockpit (PROD) running at http://localhost:${port}`);
 });
