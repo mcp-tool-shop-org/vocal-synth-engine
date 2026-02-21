@@ -11,7 +11,6 @@ import { rendersRouter } from './routes/renders.js';
 
 const app = express();
 const server = createServer(app);
-const wss = new WebSocketServer({ server });
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
@@ -25,15 +24,15 @@ app.use('/api/renders', rendersRouter);
 const cockpitDist = resolve(process.cwd(), 'apps/cockpit/dist');
 if (existsSync(cockpitDist)) {
   console.log(`Serving static files from ${cockpitDist}`);
-  app.use(express.static(cockpitDist));
-  
-  // SPA fallback
-  app.use((req, res) => {
-    if (req.path.startsWith('/api/')) {
-      res.status(404).json({ error: 'Not found' });
-      return;
+  app.use(express.static(cockpitDist, { index: false }));
+
+  // Fallback: serve index.html for any unknown GET
+  app.use((req, res, next) => {
+    if (req.method === 'GET' && !req.path.startsWith('/api/')) {
+      res.sendFile(join(cockpitDist, "index.html"));
+    } else {
+      next();
     }
-    res.sendFile(join(cockpitDist, 'index.html'));
   });
 } else {
   console.warn(`Warning: Cockpit dist not found at ${cockpitDist}. Run 'npm run build:cockpit' first.`);
@@ -43,7 +42,9 @@ if (existsSync(cockpitDist)) {
 }
 
 // WebSocket setup (stubbed for future)
+const wss = new WebSocketServer({ server, path: "/ws" });
 wss.on('connection', (ws) => {
+  ws.send(JSON.stringify({ type: "hello", msg: "ws connected" }));
   console.log('Client connected via WebSocket');
   ws.on('message', (message) => {
     console.log('Received:', message.toString());
@@ -53,7 +54,7 @@ wss.on('connection', (ws) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+const port = Number(process.env.PORT ?? 4321);
+server.listen(port, () => {
+  console.log(`VocalSynth Cockpit running at http://localhost:${port}`);
 });

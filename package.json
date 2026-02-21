@@ -5,14 +5,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev:cockpit": "npm --prefix apps/cockpit run dev",
+    "build:cockpit": "npm --prefix apps/cockpit run build",
+    "build:server": "tsc -p tsconfig.json",
+    "build": "npm run build:cockpit && npm run build:server",
+    "start": "node dist/server/index.js",
     "dev": "npm run dev:server",
     "dev:server": "tsx src/server/index.ts",
-    "start": "node dist/server/index.js",
-    "inspect": "tsx src/cli/inspect.ts",
-    "build:cockpit": "npm run build --prefix apps/cockpit",
-    "build": "npm run build:cockpit && npm run build:server",
-    "build:server": "tsc",
-    "dev:cockpit": "npm run dev --prefix apps/cockpit"
+    "inspect": "tsx src/cli/inspect.ts"
   },
   "repository": {
     "type": "git",

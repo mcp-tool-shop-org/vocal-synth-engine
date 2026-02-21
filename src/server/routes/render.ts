@@ -5,21 +5,21 @@ export const renderRouter = Router();
 
 renderRouter.post('/', async (req, res) => {
   try {
-    const { score, config = {} } = req.body;
-    if (!score) {
-      return res.status(400).json({ error: 'Missing score in request body' });
-    }
+    const { score, config } = req.body ?? {};
+    if (!score) throw new Error("Missing score");
+    if (!config) throw new Error("Missing config");
 
     const result = await renderScoreToWav({ score, config });
 
+    // simplest transport: base64 (works everywhere)
     res.json({
-      wavBase64: result.wavBase64,
+      ok: true,
+      durationSec: result.durationSec,
       telemetry: result.telemetry,
       provenance: result.provenance,
-      durationSec: result.durationSec
+      wavBase64: result.wavBase64,
     });
-  } catch (error: any) {
-    console.error('Render error:', error);
-    res.status(500).json({ error: error.message || 'Internal server error' });
+  } catch (err: any) {
+    res.status(400).json({ ok: false, error: err?.message ?? String(err) });
   }
 });

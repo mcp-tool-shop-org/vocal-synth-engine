@@ -62,6 +62,7 @@
             <div class="transport-controls">
               <button id="btn-render-play" class="primary">⚙️ Render + Play</button>
               <button id="btn-render">⚙️ Render</button>
+              <button id="btn-save-render">💾 Save Render</button>
               <button id="btn-play" disabled>▶ Play</button>
               <button id="btn-stop" disabled>■ Stop</button>
               <label class="loop-toggle"><input type="checkbox" id="toggle-loop"> ⟳ Loop</label>
@@ -590,6 +591,7 @@
   // Transport
   const btnRenderPlay = document.getElementById('btn-render-play') as HTMLButtonElement;
   const btnRender = document.getElementById('btn-render') as HTMLButtonElement;
+  const btnSaveRender = document.getElementById('btn-save-render') as HTMLButtonElement;
   const btnPlay = document.getElementById('btn-play') as HTMLButtonElement;
   const btnStop = document.getElementById('btn-stop') as HTMLButtonElement;
   const btnDownload = document.getElementById('btn-download') as HTMLButtonElement;
@@ -852,15 +854,16 @@
   async function loadBank() {
     try {
       const res = await fetch(`${DAEMON_URL}/api/renders`);
-      const renders = await res.json();
+      const data = await res.json();
+      const renders = data.renders || [];
       
       bankList.innerHTML = '';
       renders.forEach((r: any) => {
         const el = document.createElement('div');
         el.className = 'bank-item';
         
-        const dur = r.telemetry?.durationSec?.toFixed(2) || '0.00';
-        const commit = r.provenance?.commit?.substring(0,7) || 'unknown';
+        const dur = r.durationSec?.toFixed(2) || '0.00';
+        const commit = r.commit?.substring(0,7) || 'unknown';
         
         el.innerHTML = `
           <div class="bank-item-header">
@@ -1017,7 +1020,42 @@
     const renderTimeMs = data.telemetry.renderTimeMs || 0;
     statusStrip.textContent = `Rendered in ${renderTimeMs.toFixed(1)}ms | RTF: ${rtf.toFixed(3)}`;
 
-    showToast(`Rendered ${dur.toFixed(2)}s • Saved as ${data.name}`);
+    showToast(`Rendered ${dur.toFixed(2)}s`);
+  }
+
+  async function doSaveRender() {
+    btnSaveRender.disabled = true;
+    statusStrip.textContent = 'Saving render...';
+    
+    score.bpm = parseInt(inpBpm.value, 10);
+
+    const config = {
+      maxPolyphony: parseInt(inpPolyphony.value, 10),
+      deterministic: inpDeterminism.value,
+      rngSeed: parseInt(inpSeed.value, 10),
+      defaultTimbre: inpDefaultTimbre.value
+    };
+    
+    const name = prompt("Enter a name for this render:");
+    if (name === null) {
+      btnSaveRender.disabled = false;
+      statusStrip.textContent = 'Ready';
+      return;
+    }
+
+    const res = await fetch(`${DAEMON_URL}/api/renders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, score, config })
+    });
+    
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Save failed');
+    }
+    
+    const data = await res.json();
+    showToast(`Saved as ${data.meta.name}`);
     loadBank(); // Refresh bank
   }
 
@@ -1034,6 +1072,12 @@
     } 
     catch (e: any) { alert(e.message); statusStrip.textContent = `Error: ${e.message}`; }
     finally { btnRender.disabled = false; btnRenderPlay.disabled = false; }
+  });
+
+  btnSaveRender.addEventListener('click', async () => {
+    try { await doSaveRender(); } 
+    catch (e: any) { alert(e.message); statusStrip.textContent = `Error: ${e.message}`; }
+    finally { btnSaveRender.disabled = false; }
   });
 
   // Audio events
