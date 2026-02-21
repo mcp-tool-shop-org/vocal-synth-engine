@@ -1,0 +1,32 @@
+{
+  "name": "vocal-synth-engine",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "inspect": "tsx src/cli/inspect.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mcp-tool-shop-org/vocal-synth-engine.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mcp-tool-shop-org/vocal-synth-engine/issues"
+  },
+  "homepage": "https://github.com/mcp-tool-shop-org/vocal-synth-engine#readme",
+  "devDependencies": {
+    "@types/node": "^25.3.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "zod": "^4.3.6"
+  },
+  "dependencies": {
+    "wavefile": "^11.0.0"
+  }
+}
