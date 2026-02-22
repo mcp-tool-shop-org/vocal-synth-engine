@@ -1,0 +1,7 @@
+{
+  "id": "default-voice",
+  "name": "Default Voice",
+  "description": "Clean lab vowel oscillator (AH).",
+  "tags": ["lab", "neutral"],
+  "defaultTimbre": "AH"
+}

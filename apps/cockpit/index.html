@@ -45,7 +45,7 @@
           <section class="panel controls-panel">
             <h2>Engine Config</h2>
             <div class="control-grid">
-              <label>Preset:
+              <label>Voice:
                 <select id="inp-preset">
                   <option value="default-voice">Loading...</option>
                 </select>
@@ -146,6 +146,10 @@
                 </div>
               </div>
 
+              <div id="no-voices-banner" class="no-voices-banner" style="display:none;">
+                No voices installed on this server.
+              </div>
+
               <!-- MIDI Input -->
               <div class="live-midi-bar">
                 <label>MIDI: <select id="midi-input"><option value="">None</option></select></label>
@@ -155,9 +159,10 @@
 
               <!-- Live Controls -->
               <div class="live-controls-grid">
-                <label>Preset:
+                <label>Voice:
                   <select id="live-preset"></select>
                 </label>
+                <span id="voice-info" class="voice-info"></span>
                 <label>Timbre:
                   <select id="live-timbre"></select>
                 </label>
@@ -915,6 +920,34 @@
     font-size: 0.75rem;
     color: var(--accent);
     text-align: right;
+  }
+  .no-voices-banner {
+    background: #442200;
+    color: #ffaa33;
+    padding: 0.6rem 1rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+  .voice-info {
+    grid-column: 1 / -1;
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: -0.5rem;
+  }
+  .voice-info .voice-tags {
+    display: inline;
+    margin-left: 0.5rem;
+  }
+  .voice-info .voice-tag {
+    display: inline-block;
+    background: #333;
+    color: #aaa;
+    font-size: 0.7rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    margin-left: 0.25rem;
   }
 
   /* Live Action Buttons */

@@ -42,7 +42,8 @@ export function listPresetIds(): string[] {
 }
 
 /**
- * Get full preset metadata for the /api/presets endpoint.
+ * Get full voice library metadata for the /api/presets endpoint.
+ * Reads meta.json (human-friendly) + voicepreset.json (technical) per voice.
  */
 export function listPresets() {
   const ids = listPresetIds();
@@ -50,11 +51,23 @@ export function listPresets() {
     try {
       const manifestPath = join(PRESET_DIR, id, 'voicepreset.json');
       const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
+      const timbres = (manifest.timbres || []).map((t: any) => t.name);
+
+      // Load meta.json if present; fallback to manifest fields
+      const metaPath = join(PRESET_DIR, id, 'meta.json');
+      let meta: any = {};
+      if (existsSync(metaPath)) {
+        try { meta = JSON.parse(readFileSync(metaPath, 'utf-8')); } catch {}
+      }
+
       return {
         id,
-        name: manifest.id || id,
+        name: meta.name || manifest.id || id,
+        description: meta.description || '',
+        tags: meta.tags || [],
+        defaultTimbre: meta.defaultTimbre || timbres[0] || '',
+        timbres,
         sampleRateHz: manifest.sampleRateHz,
-        timbres: (manifest.timbres || []).map((t: any) => t.name),
         version: manifest.version,
       };
     } catch {

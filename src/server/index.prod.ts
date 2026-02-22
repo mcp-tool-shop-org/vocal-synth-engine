@@ -15,11 +15,11 @@ const server = createServer(app);
 // Boot log: preset + render store info
 const presetInfo = getPresetDirInfo();
 const renderStoreDir = resolve(process.env.RENDER_STORE_DIR || '.vscockpit/renders');
-console.log(`[boot] PRESET_DIR  = ${presetInfo.presetDir} (${presetInfo.count} presets: ${presetInfo.presets.join(', ') || 'NONE'})`);
+console.log(`[boot] PRESET_DIR  = ${presetInfo.presetDir} (${presetInfo.count} voices: ${presetInfo.presets.join(', ') || 'NONE'})`);
 console.log(`[boot] RENDER_STORE_DIR = ${renderStoreDir}`);
 
 if (presetInfo.count === 0) {
-  console.warn(`[boot] ⚠ WARNING: No presets found in ${presetInfo.presetDir}. Renders will fail until presets are deployed.`);
+  console.warn(`[boot] WARNING: No voices found in ${presetInfo.presetDir}. Renders will fail until voices are deployed.`);
 }
 
 // Serve static Vite app

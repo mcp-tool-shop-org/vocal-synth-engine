@@ -1,0 +1,7 @@
+{
+  "id": "bright-lab",
+  "name": "Bright Lab",
+  "description": "Brighter variant of the lab vowel oscillator.",
+  "tags": ["lab", "bright"],
+  "defaultTimbre": "AH"
+}

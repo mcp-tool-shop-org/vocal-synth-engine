@@ -689,18 +689,20 @@
       const data = await res.json();
       serverPresets = data.presets || [];
 
+      const noVoicesBanner = document.getElementById('no-voices-banner');
       inpPreset.innerHTML = '';
       if (serverPresets.length === 0) {
         const opt = document.createElement('option');
         opt.value = '';
-        opt.textContent = '(no presets on server)';
+        opt.textContent = '(no voices on server)';
         inpPreset.appendChild(opt);
-        showToast('⚠ No presets found on server');
+        if (noVoicesBanner) noVoicesBanner.style.display = '';
       } else {
+        if (noVoicesBanner) noVoicesBanner.style.display = 'none';
         serverPresets.forEach((p: any) => {
           const opt = document.createElement('option');
           opt.value = p.id;
-          opt.textContent = `${p.id} (${(p.timbres || []).join(', ')})`;
+          opt.textContent = p.name || p.id;
           inpPreset.appendChild(opt);
         });
         // Update timbre dropdown from first preset
@@ -733,7 +735,13 @@
 
   inpPreset.addEventListener('change', () => {
     const preset = serverPresets.find((p: any) => p.id === inpPreset.value);
-    if (preset) updateTimbreDropdown(preset);
+    if (preset) {
+      updateTimbreDropdown(preset);
+      // Set timbre to voice's default
+      if (preset.defaultTimbre && preset.timbres?.includes(preset.defaultTimbre)) {
+        inpDefaultTimbre.value = preset.defaultTimbre;
+      }
+    }
   });
 
   // ============================================================
@@ -897,6 +905,8 @@
 
   // ── Live preset/timbre sync ────────────────────────────────
 
+  const voiceInfo = document.getElementById('voice-info')!;
+
   function populateLivePresets() {
     livePresetSelect.innerHTML = '';
     if (serverPresets.length === 0) {
@@ -904,15 +914,30 @@
       opt.value = '';
       opt.textContent = '(none)';
       livePresetSelect.appendChild(opt);
+      voiceInfo.textContent = '';
       return;
     }
     serverPresets.forEach((p: any) => {
       const opt = document.createElement('option');
       opt.value = p.id;
-      opt.textContent = p.id;
+      opt.textContent = p.name || p.id;
       livePresetSelect.appendChild(opt);
     });
     updateLiveTimbreDropdown(serverPresets[0]);
+    updateVoiceInfo(serverPresets[0]);
+  }
+
+  function updateVoiceInfo(preset: any) {
+    if (!preset) { voiceInfo.textContent = ''; return; }
+    let html = preset.description || '';
+    if (preset.tags && preset.tags.length > 0) {
+      html += '<span class="voice-tags">';
+      for (const tag of preset.tags) {
+        html += `<span class="voice-tag">${tag}</span>`;
+      }
+      html += '</span>';
+    }
+    voiceInfo.innerHTML = html;
   }
 
   function updateLiveTimbreDropdown(preset: any) {
@@ -928,7 +953,15 @@
 
   livePresetSelect.addEventListener('change', () => {
     const preset = serverPresets.find((p: any) => p.id === livePresetSelect.value);
-    if (preset) updateLiveTimbreDropdown(preset);
+    if (preset) {
+      updateLiveTimbreDropdown(preset);
+      updateVoiceInfo(preset);
+      // Set timbre to voice's default if current timbre not available
+      const timbres: string[] = preset.timbres || [];
+      if (timbres.length > 0 && !timbres.includes(liveTimbreSelect.value)) {
+        liveTimbreSelect.value = preset.defaultTimbre || timbres[0];
+      }
+    }
     sendParamUpdate();
   });
   liveTimbreSelect.addEventListener('change', sendParamUpdate);
