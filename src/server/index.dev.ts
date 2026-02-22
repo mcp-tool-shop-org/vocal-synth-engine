@@ -3,6 +3,7 @@ import { WebSocketServer } from 'ws';
 import { resolve } from 'node:path';
 import { createApp } from './app.js';
 import { createServer as createViteServer } from 'vite';
+import { requireWsAuth } from './middleware/auth.js';
 
 async function startDevServer() {
   const app = createApp();
@@ -25,7 +26,13 @@ async function startDevServer() {
 
   // WebSocket setup (stubbed for future)
   const wss = new WebSocketServer({ server, path: "/ws" });
-  wss.on('connection', (ws) => {
+  wss.on('connection', (ws, req) => {
+    const url = new URL(req.url || '/', `http://${req.headers.host}`);
+    const token = url.searchParams.get('token') ?? undefined;
+    if (!requireWsAuth(token)) {
+      ws.close(4001, 'Unauthorized');
+      return;
+    }
     ws.send(JSON.stringify({ type: "hello", msg: "ws connected" }));
     console.log('Client connected via WebSocket');
     ws.on('message', (message) => {

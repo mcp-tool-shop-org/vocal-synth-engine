@@ -19,7 +19,7 @@ export type RenderMeta = {
   };
 };
 
-const root = path.resolve(process.cwd(), ".vscockpit/renders");
+const root = path.resolve(process.env.RENDER_STORE_DIR || ".vscockpit/renders");
 
 function ensureRoot() {
   fs.mkdirSync(root, { recursive: true });

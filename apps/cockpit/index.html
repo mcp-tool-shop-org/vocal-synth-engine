@@ -10,7 +10,10 @@
   <body>
     <main class="container">
       <header>
-        <h1>VocalSynth Cockpit</h1>
+        <div class="header-left">
+          <a href="https://mcptoolshop.com/lab/" class="back-link">&larr; Lab</a>
+          <h1>VocalSynth Cockpit</h1>
+        </div>
         <div id="health-status" class="status-badge">Checking daemon...</div>
       </header>
 
@@ -235,6 +238,17 @@
   }
 
   h1 { margin: 0; font-size: 1.5rem; }
+  .header-left { display: flex; align-items: center; gap: 1rem; }
+  .back-link {
+    color: #888;
+    text-decoration: none;
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+  .back-link:hover { color: var(--text); border-color: #555; }
 
   .status-badge {
     padding: 0.25rem 0.75rem;

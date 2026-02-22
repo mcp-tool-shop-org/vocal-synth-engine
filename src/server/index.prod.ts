@@ -4,6 +4,7 @@ import { resolve, join } from 'node:path';
 import { existsSync } from 'node:fs';
 import express from 'express';
 import { createApp } from './app.js';
+import { requireWsAuth } from './middleware/auth.js';
 
 const app = createApp();
 const server = createServer(app);
@@ -31,7 +32,13 @@ if (existsSync(cockpitDist)) {
 
 // WebSocket setup (stubbed for future)
 const wss = new WebSocketServer({ server, path: "/ws" });
-wss.on('connection', (ws) => {
+wss.on('connection', (ws, req) => {
+  const url = new URL(req.url || '/', `http://${req.headers.host}`);
+  const token = url.searchParams.get('token') ?? undefined;
+  if (!requireWsAuth(token)) {
+    ws.close(4001, 'Unauthorized');
+    return;
+  }
   ws.send(JSON.stringify({ type: "hello", msg: "ws connected" }));
   console.log('Client connected via WebSocket');
   ws.on('message', (message) => {

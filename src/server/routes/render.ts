@@ -4,11 +4,24 @@ import { saveLastRender } from '../storage/renderStore.js';
 
 export const renderRouter = Router();
 
+const MAX_RENDER_DURATION_SEC = Number(process.env.MAX_RENDER_DURATION_SEC) || 60;
+
 renderRouter.post('/', async (req, res) => {
   try {
     const { score, config } = req.body ?? {};
     if (!score) throw new Error("Missing score");
     if (!config) throw new Error("Missing config");
+
+    // Safety: cap render duration
+    const notes = score.notes || [];
+    let maxEndSec = 0;
+    for (const n of notes) {
+      const end = (n.startSec || 0) + (n.durationSec || 0);
+      if (end > maxEndSec) maxEndSec = end;
+    }
+    if (maxEndSec > MAX_RENDER_DURATION_SEC) {
+      throw new Error(`Score duration ${maxEndSec.toFixed(1)}s exceeds max ${MAX_RENDER_DURATION_SEC}s`);
+    }
 
     const result = await renderScoreToWav({ score, config });
 
