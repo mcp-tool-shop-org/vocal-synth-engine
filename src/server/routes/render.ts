@@ -44,6 +44,30 @@ renderRouter.post('/', async (req, res) => {
       audioUrl: '/api/renders/last/audio.wav',
     });
   } catch (err: any) {
+    // Phase 5: human-readable preset errors
+    if (err?.code === 'PRESET_NOT_FOUND') {
+      res.status(404).json({
+        ok: false,
+        code: 'PRESET_NOT_FOUND',
+        message: err.message,
+        presetId: err.presetId,
+        presetDir: err.presetDir,
+        available: err.available,
+      });
+      return;
+    }
+
+    // ENOENT from file system (missing asset files, etc.)
+    if (err?.code === 'ENOENT') {
+      res.status(500).json({
+        ok: false,
+        code: 'ASSET_NOT_FOUND',
+        message: `File not found: ${err.path}. The preset assets may be missing from the deployment.`,
+        error: err.message,
+      });
+      return;
+    }
+
     res.status(400).json({ ok: false, error: err?.message ?? String(err) });
   }
 });

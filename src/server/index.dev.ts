@@ -4,10 +4,15 @@ import { resolve } from 'node:path';
 import { createApp } from './app.js';
 import { createServer as createViteServer } from 'vite';
 import { requireWsAuth } from './middleware/auth.js';
+import { getPresetDirInfo } from './services/renderScoreToWav.js';
 
 async function startDevServer() {
   const app = createApp();
   const server = createServer(app);
+
+  // Boot log: preset info
+  const presetInfo = getPresetDirInfo();
+  console.log(`[boot] PRESET_DIR  = ${presetInfo.presetDir} (${presetInfo.count} presets: ${presetInfo.presets.join(', ') || 'NONE'})`);
 
   // Create Vite server in middleware mode
   const vite = await createViteServer({

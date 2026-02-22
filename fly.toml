@@ -6,7 +6,8 @@ primary_region = "iad"
 [env]
   NODE_ENV = "production"
   RENDER_STORE_DIR = "/data/renders"
-  APP_VERSION = "1.0.0"
+  PRESET_DIR = "/app/presets"
+  APP_VERSION = "1.1.0"
 
 [http_service]
   internal_port = 4321

@@ -5,9 +5,20 @@ import { existsSync } from 'node:fs';
 import express from 'express';
 import { createApp } from './app.js';
 import { requireWsAuth } from './middleware/auth.js';
+import { getPresetDirInfo } from './services/renderScoreToWav.js';
 
 const app = createApp();
 const server = createServer(app);
+
+// Boot log: preset + render store info
+const presetInfo = getPresetDirInfo();
+const renderStoreDir = resolve(process.env.RENDER_STORE_DIR || '.vscockpit/renders');
+console.log(`[boot] PRESET_DIR  = ${presetInfo.presetDir} (${presetInfo.count} presets: ${presetInfo.presets.join(', ') || 'NONE'})`);
+console.log(`[boot] RENDER_STORE_DIR = ${renderStoreDir}`);
+
+if (presetInfo.count === 0) {
+  console.warn(`[boot] ⚠ WARNING: No presets found in ${presetInfo.presetDir}. Renders will fail until presets are deployed.`);
+}
 
 // Serve static Vite app
 const cockpitDist = resolve(process.cwd(), 'apps/cockpit/dist');

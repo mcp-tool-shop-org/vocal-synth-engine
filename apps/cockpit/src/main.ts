@@ -1,17 +1,18 @@
   const DAEMON_URL = '';
-  
+
   // --- State ---
   let score = {
     bpm: 120,
     notes: [
-      { id: "n1", startSec: 0.0, durationSec: 0.5, midi: 60, velocity: 0.8, timbre: "ah" },
-      { id: "n2", startSec: 0.5, durationSec: 0.5, midi: 64, velocity: 0.8, timbre: "oo" },
+      { id: "n1", startSec: 0.0, durationSec: 0.5, midi: 60, velocity: 0.8, timbre: "AH" },
+      { id: "n2", startSec: 0.5, durationSec: 0.5, midi: 64, velocity: 0.8 },
       { id: "n3", startSec: 1.0, durationSec: 1.0, midi: 67, velocity: 0.8, vibrato: { rateHz: 5.5, depthCents: 50, onsetSec: 0.2 } }
     ]
   };
   let selectedNoteId: string | null = null;
   let currentWavUrl: string | null = null;
   let currentDaemonCommit = '';
+  let serverPresets: any[] = [];
 
   // --- DOM Elements ---
   const statusBadge = document.getElementById('health-status')!;
@@ -29,6 +30,7 @@
   const statusStrip = document.getElementById('status-strip')!;
   
   // Config
+  const inpPreset = document.getElementById('inp-preset') as HTMLSelectElement;
   const inpPolyphony = document.getElementById('inp-polyphony') as HTMLInputElement;
   const inpDeterminism = document.getElementById('inp-determinism') as HTMLSelectElement;
   const inpSeed = document.getElementById('inp-seed') as HTMLInputElement;
@@ -536,6 +538,7 @@
     score.bpm = parseInt(inpBpm.value, 10);
 
     const config = {
+      presetId: inpPreset.value,
       maxPolyphony: parseInt(inpPolyphony.value, 10),
       deterministic: inpDeterminism.value,
       rngSeed: parseInt(inpSeed.value, 10),
@@ -550,7 +553,14 @@
     
     if (!res.ok) {
       const err = await res.json();
-      throw new Error(err.error || 'Render failed');
+      if (err.code === 'PRESET_NOT_FOUND') {
+        const avail = err.available?.join(', ') || 'none';
+        throw new Error(`Preset '${err.presetId}' not found on server. Available: [${avail}]`);
+      }
+      if (err.code === 'ASSET_NOT_FOUND') {
+        throw new Error(`Preset asset missing on server: ${err.message}`);
+      }
+      throw new Error(err.error || err.message || 'Render failed');
     }
     
     const data = await res.json();
@@ -671,6 +681,62 @@
     }
   });
 
+  // --- Preset Loading ---
+  async function loadPresets() {
+    try {
+      const res = await fetch(`${DAEMON_URL}/api/presets`);
+      if (!res.ok) throw new Error('Failed to fetch presets');
+      const data = await res.json();
+      serverPresets = data.presets || [];
+
+      inpPreset.innerHTML = '';
+      if (serverPresets.length === 0) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = '(no presets on server)';
+        inpPreset.appendChild(opt);
+        showToast('⚠ No presets found on server');
+      } else {
+        serverPresets.forEach((p: any) => {
+          const opt = document.createElement('option');
+          opt.value = p.id;
+          opt.textContent = `${p.id} (${(p.timbres || []).join(', ')})`;
+          inpPreset.appendChild(opt);
+        });
+        // Update timbre dropdown from first preset
+        updateTimbreDropdown(serverPresets[0]);
+      }
+    } catch (e) {
+      console.error('Failed to load presets', e);
+    }
+  }
+
+  function updateTimbreDropdown(preset: any) {
+    if (!preset?.timbres) return;
+    // Update default timbre dropdown
+    inpDefaultTimbre.innerHTML = '';
+    preset.timbres.forEach((t: string) => {
+      const opt = document.createElement('option');
+      opt.value = t;
+      opt.textContent = t;
+      inpDefaultTimbre.appendChild(opt);
+    });
+    // Update inspector timbre dropdown
+    inspTimbre.innerHTML = '<option value="">(Default)</option>';
+    preset.timbres.forEach((t: string) => {
+      const opt = document.createElement('option');
+      opt.value = t;
+      opt.textContent = t;
+      inspTimbre.appendChild(opt);
+    });
+  }
+
+  inpPreset.addEventListener('change', () => {
+    const preset = serverPresets.find((p: any) => p.id === inpPreset.value);
+    if (preset) updateTimbreDropdown(preset);
+  });
+
   // Init
   updateUI();
+  loadPresets();
   loadBank();

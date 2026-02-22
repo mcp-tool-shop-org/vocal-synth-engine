@@ -21,10 +21,14 @@ COPY --from=builder /app/dist dist/
 COPY --from=builder /app/apps/cockpit/dist apps/cockpit/dist/
 COPY package.json ./
 
+# Bake presets into the image
+COPY presets/ presets/
+
 RUN mkdir -p /data/renders && chown -R vsynth:vsynth /data
 
 ENV NODE_ENV=production
 ENV RENDER_STORE_DIR=/data/renders
+ENV PRESET_DIR=/app/presets
 ENV PORT=4321
 
 USER vsynth

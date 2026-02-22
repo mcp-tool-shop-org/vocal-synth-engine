@@ -4,26 +4,92 @@ import wavefile from 'wavefile';
 const { WaveFile } = wavefile;
 import { loadVoicePreset } from '../../preset/loader.js';
 import { StreamingVocalSynthEngine, StreamingVocalSynthConfig } from '../../engine/StreamingVocalSynthEngine.js';
-import { resolve } from 'node:path';
+import { resolve, join } from 'node:path';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 
-const PRESET_PATH = resolve(process.env.PRESET_PATH || 'test-preset/voicepreset.json');
-let presetCache: any = null;
+// --- Preset directory discovery ---
+const PRESET_DIR = resolve(process.env.PRESET_DIR || 'presets');
+const presetCache: Map<string, any> = new Map();
 
-async function getPreset() {
-  if (!presetCache) presetCache = await loadVoicePreset(PRESET_PATH);
-  return presetCache;
+/**
+ * Resolve a preset ID to its manifest path.
+ * Looks for <PRESET_DIR>/<presetId>/voicepreset.json
+ */
+function resolvePresetPath(presetId: string): string {
+  const manifestPath = join(PRESET_DIR, presetId, 'voicepreset.json');
+  if (!existsSync(manifestPath)) {
+    const available = listPresetIds();
+    const err: any = new Error(
+      `Preset '${presetId}' not found. Available presets: [${available.join(', ')}]`
+    );
+    err.code = 'PRESET_NOT_FOUND';
+    err.presetId = presetId;
+    err.presetDir = PRESET_DIR;
+    err.available = available;
+    throw err;
+  }
+  return manifestPath;
+}
+
+/**
+ * List all valid preset IDs found in PRESET_DIR.
+ */
+export function listPresetIds(): string[] {
+  if (!existsSync(PRESET_DIR)) return [];
+  return readdirSync(PRESET_DIR, { withFileTypes: true })
+    .filter(d => d.isDirectory() && existsSync(join(PRESET_DIR, d.name, 'voicepreset.json')))
+    .map(d => d.name);
+}
+
+/**
+ * Get full preset metadata for the /api/presets endpoint.
+ */
+export function listPresets() {
+  const ids = listPresetIds();
+  return ids.map(id => {
+    try {
+      const manifestPath = join(PRESET_DIR, id, 'voicepreset.json');
+      const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
+      return {
+        id,
+        name: manifest.id || id,
+        sampleRateHz: manifest.sampleRateHz,
+        timbres: (manifest.timbres || []).map((t: any) => t.name),
+        version: manifest.version,
+      };
+    } catch {
+      return { id, name: id, error: 'Failed to read manifest' };
+    }
+  });
+}
+
+async function getPreset(presetId: string) {
+  if (!presetCache.has(presetId)) {
+    const manifestPath = resolvePresetPath(presetId);
+    presetCache.set(presetId, await loadVoicePreset(manifestPath));
+  }
+  return presetCache.get(presetId)!;
 }
 
 function getGitCommit() {
   try { return execSync('git rev-parse HEAD').toString().trim(); } catch (e) { return 'unknown'; }
 }
 
+/** Return PRESET_DIR and count for boot logging */
+export function getPresetDirInfo() {
+  return { presetDir: PRESET_DIR, count: listPresetIds().length, presets: listPresetIds() };
+}
+
 export async function renderScoreToWav({ score, config }: { score: any; config: any }) {
-  const preset = await getPreset();
+  // Resolve preset — accept presetId or fall back to "default-voice"
+  const presetId = config.presetId || 'default-voice';
+  const preset = await getPreset(presetId);
+  const presetPath = resolvePresetPath(presetId);
+
   const synthConfig: StreamingVocalSynthConfig = {
     sampleRateHz: preset.manifest.sampleRateHz,
     blockSize: config.blockSize || 1024,
-    presetPath: PRESET_PATH,
+    presetPath,
     deterministic: config.deterministic || "exact",
     rngSeed: config.rngSeed !== undefined ? config.rngSeed : 123456789,
     defaultTimbre: config.defaultTimbre || Object.keys(preset.timbres)[0],
@@ -77,7 +143,7 @@ export async function renderScoreToWav({ score, config }: { score: any; config: 
     if (Math.abs(outBuffer[i]) > maxVal) maxVal = Math.abs(outBuffer[i]);
   }
   const peakDbfs = maxVal > 0 ? 20 * Math.log10(maxVal) : -Infinity;
-  
+
   if (maxVal > 0) {
     for (let i = 0; i < totalSamples; i++) outBuffer[i] /= maxVal;
   }
@@ -100,7 +166,7 @@ export async function renderScoreToWav({ score, config }: { score: any; config: 
   const scoreHash = createHash('sha256').update(JSON.stringify(score)).digest('hex');
   const wavHash = createHash('sha256').update(wavBuffer).digest('hex');
 
-  const provenance = { commit, scoreHash, wavHash, config: synthConfig };
+  const provenance = { commit, scoreHash, wavHash, config: synthConfig, presetId };
   const telemetry = {
     maxAbsDelta, maxDeltaIndex, maxDeltaTimeSec: maxDeltaIndex / synthConfig.sampleRateHz,
     totalSamples, blocksRendered, durationSec: actualDurationSec, scoreDurationSec: maxEndSec,

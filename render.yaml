@@ -9,8 +9,10 @@ services:
         value: production
       - key: RENDER_STORE_DIR
         value: /data/renders
+      - key: PRESET_DIR
+        value: /app/presets
       - key: APP_VERSION
-        value: "1.0.0"
+        value: "1.1.0"
       - key: AUTH_TOKEN
         sync: false
       - key: PORT
