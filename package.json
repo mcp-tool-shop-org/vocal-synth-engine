@@ -11,7 +11,7 @@
     "build": "npm run build:cockpit && npm run build:server",
     "start": "node dist/server/index.prod.js",
     "dev": "npm run dev:server",
-    "dev:server": "tsx src/server/index.dev.ts",
+    "dev:server": "tsx watch --ignore apps/cockpit/** src/server/index.dev.ts",
     "inspect": "tsx src/cli/inspect.ts"
   },
   "repository": {

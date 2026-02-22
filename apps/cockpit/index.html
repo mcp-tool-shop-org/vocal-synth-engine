@@ -14,11 +14,23 @@
         <div id="health-status" class="status-badge">Checking daemon...</div>
       </header>
 
+      <div id="commit-mismatch-banner" class="banner warning" style="display: none;">
+        <span id="commit-mismatch-text"></span>
+        <div class="banner-actions">
+          <button id="btn-banner-load">Load anyway</button>
+          <button id="btn-banner-render">Re-render now</button>
+          <button id="btn-banner-dismiss">Dismiss</button>
+        </div>
+      </div>
+
       <div class="grid">
         <!-- Render Bank -->
         <div class="col-bank">
           <section class="panel bank-panel">
-            <h2>Render Bank</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h2 style="margin: 0;">Render Bank</h2>
+              <button id="btn-compare" disabled>Compare (0/2)</button>
+            </div>
             <div class="bank-list" id="bank-list">
               <!-- Renders injected here -->
             </div>
@@ -128,6 +140,14 @@
                 <div class="label">RTF</div>
                 <div class="value">--</div>
               </div>
+              <div class="tile" id="tile-peak">
+                <div class="label">Peak dBFS</div>
+                <div class="value">--</div>
+              </div>
+              <div class="tile" id="tile-voices">
+                <div class="label">Max Voices</div>
+                <div class="value">--</div>
+              </div>
               <div class="tile" id="tile-duration" style="grid-column: 1 / -1;">
                 <div class="label">Duration</div>
                 <div class="value">--</div>
@@ -160,6 +180,19 @@
     <audio id="audio-player" style="display: none;"></audio>
     
     <div id="toast-container" class="toast-container"></div>
+
+    <!-- Compare Modal -->
+    <div id="compare-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>A/B Compare</h2>
+          <button id="btn-close-compare">✕</button>
+        </div>
+        <div class="compare-grid" id="compare-grid">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+    </div>
   </body>
 </html>
 
@@ -211,6 +244,74 @@
   }
   .status-badge.ok { background: var(--success); color: #000; }
   .status-badge.error { background: var(--error); color: #fff; }
+
+  .banner {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+  }
+  .banner.warning {
+    background: var(--warn);
+    color: #000;
+  }
+  .banner-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .banner-actions button {
+    background: rgba(0,0,0,0.2);
+    color: #000;
+    border: 1px solid rgba(0,0,0,0.3);
+  }
+  .banner-actions button:hover {
+    background: rgba(0,0,0,0.3);
+  }
+
+  .modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  .modal-content {
+    background: var(--panel-bg);
+    padding: 2rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    width: 80%;
+    max-width: 800px;
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  .modal-header h2 { margin: 0; }
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+  .compare-col {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .compare-stat {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem;
+    background: #222;
+    border-radius: 4px;
+  }
 
   .grid {
     display: grid;

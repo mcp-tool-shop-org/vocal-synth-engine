@@ -10,6 +10,7 @@ export type RenderMeta = {
   scoreHash: string;
   wavHash: string;
   durationSec: number;
+  pinned?: boolean;
   summary?: {
     polyphony?: number;
     deterministic?: string;
@@ -42,7 +43,13 @@ export function listRenders(): RenderMeta[] {
     } catch (e) { return null; }
   }).filter(Boolean) as RenderMeta[];
 
-  metas.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+  metas.sort((a, b) => {
+    if (a.id === "last" && b.id !== "last") return -1;
+    if (a.id !== "last" && b.id === "last") return 1;
+    if (a.pinned && !b.pinned) return -1;
+    if (!a.pinned && b.pinned) return 1;
+    return a.createdAt < b.createdAt ? 1 : -1;
+  });
   return metas;
 }
 
@@ -116,11 +123,58 @@ export function saveRender(args: {
   return meta;
 }
 
-export function updateRenderName(id: string, name: string) {
+export function saveLastRender(args: {
+  score: any;
+  config: any;
+  telemetry: any;
+  provenance: any;
+  wavBytes: Buffer;
+  durationSec: number;
+}): RenderMeta {
+  ensureRoot();
+  const id = "last";
+  const dir = getRenderDir(id);
+  fs.mkdirSync(dir, { recursive: true });
+
+  const scoreStr = JSON.stringify(args.score, null, 2);
+  const configStr = JSON.stringify(args.config, null, 2);
+
+  const scoreHash = sha256Short(scoreStr);
+  const wavHash = sha256Short(args.wavBytes);
+  const commit = (args.provenance?.commit ?? "unknown").slice(0, 7);
+
+  const meta: RenderMeta = {
+    id,
+    name: "Last Render",
+    createdAt: new Date().toISOString(),
+    commit,
+    scoreHash,
+    wavHash,
+    durationSec: args.durationSec,
+    summary: {
+      polyphony: args.config?.maxPolyphony,
+      deterministic: args.config?.deterministic,
+      bpm: args.score?.bpm,
+      preset: args.config?.presetPath,
+    },
+  };
+
+  fs.writeFileSync(path.join(dir, "meta.json"), JSON.stringify(meta, null, 2));
+  fs.writeFileSync(path.join(dir, "score.json"), scoreStr);
+  fs.writeFileSync(path.join(dir, "config.json"), configStr);
+  fs.writeFileSync(path.join(dir, "telemetry.json"), JSON.stringify(args.telemetry, null, 2));
+  fs.writeFileSync(path.join(dir, "provenance.json"), JSON.stringify(args.provenance, null, 2));
+  fs.writeFileSync(path.join(dir, "audio.wav"), args.wavBytes);
+
+  return meta;
+}
+
+export function updateRenderMeta(id: string, updates: Partial<RenderMeta>) {
   const metaPath = path.join(getRenderDir(id), "meta.json");
   if (fs.existsSync(metaPath)) {
     const meta = JSON.parse(fs.readFileSync(metaPath, "utf8"));
-    meta.name = name;
+    if (updates.name !== undefined) meta.name = updates.name;
+    if (updates.pinned !== undefined) meta.pinned = updates.pinned;
     fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2));
     return meta;
   }

@@ -33,9 +33,21 @@ export async function renderScoreToWav({ score, config }: { score: any; config: 
   const engine = new StreamingVocalSynthEngine(synthConfig, preset, score);
 
   let maxEndSec = 0;
+  const events: { time: number; type: 'start' | 'end' }[] = [];
   for (const note of score.notes || []) {
     const endSec = note.startSec + note.durationSec;
     if (endSec > maxEndSec) maxEndSec = endSec;
+    events.push({ time: note.startSec, type: 'start' });
+    events.push({ time: endSec, type: 'end' });
+  }
+
+  events.sort((a, b) => a.time === b.time ? (a.type === 'end' ? -1 : 1) : a.time - b.time);
+  let currentVoices = 0;
+  let voicesMax = 0;
+  for (const ev of events) {
+    if (ev.type === 'start') currentVoices++;
+    else currentVoices--;
+    if (currentVoices > voicesMax) voicesMax = currentVoices;
   }
 
   const tailSec = 0.3;
@@ -64,6 +76,8 @@ export async function renderScoreToWav({ score, config }: { score: any; config: 
   for (let i = 0; i < totalSamples; i++) {
     if (Math.abs(outBuffer[i]) > maxVal) maxVal = Math.abs(outBuffer[i]);
   }
+  const peakDbfs = maxVal > 0 ? 20 * Math.log10(maxVal) : -Infinity;
+  
   if (maxVal > 0) {
     for (let i = 0; i < totalSamples; i++) outBuffer[i] /= maxVal;
   }
@@ -90,12 +104,13 @@ export async function renderScoreToWav({ score, config }: { score: any; config: 
   const telemetry = {
     maxAbsDelta, maxDeltaIndex, maxDeltaTimeSec: maxDeltaIndex / synthConfig.sampleRateHz,
     totalSamples, blocksRendered, durationSec: actualDurationSec, scoreDurationSec: maxEndSec,
-    tailSec, renderTimeMs, rtf
+    notesEndSec: maxEndSec,
+    tailSec, renderTimeMs, rtf,
+    peakDbfs, voicesMax
   };
 
   return {
     wavBytes: Buffer.from(wavBuffer),
-    wavBase64: Buffer.from(wavBuffer).toString('base64'),
     telemetry,
     provenance,
     durationSec: actualDurationSec

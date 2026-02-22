@@ -1,3 +1,574 @@
+---
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>VocalSynth Cockpit</title>
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>VocalSynth Cockpit</h1>
+        <div id="health-status" class="status-badge">Checking daemon...</div>
+      </header>
+
+      <div class="grid">
+        <!-- Render Bank -->
+        <div class="col-bank">
+          <section class="panel bank-panel">
+            <h2>Render Bank</h2>
+            <div class="bank-list" id="bank-list">
+              <!-- Renders injected here -->
+            </div>
+          </section>
+        </div>
+
+        <div class="col-main">
+          <!-- Quick Controls -->
+          <section class="panel controls-panel">
+            <h2>Engine Config</h2>
+            <div class="control-grid">
+              <label>Preset: 
+                <select id="inp-preset">
+                  <option value="test-preset/voicepreset.json">Default Voice</option>
+                </select>
+              </label>
+              <label>Def. Timbre: 
+                <select id="inp-default-timbre">
+                  <option value="ah">ah</option>
+                  <option value="oo">oo</option>
+                  <option value="ee">ee</option>
+                </select>
+              </label>
+              <label>Polyphony: <input type="number" id="inp-polyphony" value="4" min="1" max="16"></label>
+              <label>Determinism: 
+                <select id="inp-determinism">
+                  <option value="exact">Exact</option>
+                  <option value="fast">Fast</option>
+                </select>
+              </label>
+              <label>Seed: <input type="number" id="inp-seed" value="123456789"></label>
+              <label>BPM: <input type="number" id="inp-bpm" value="120"></label>
+            </div>
+          </section>
+
+          <!-- Transport -->
+          <section class="panel transport-panel">
+            <div class="transport-controls">
+              <button id="btn-render-play" class="primary">⚙️ Render + Play</button>
+              <button id="btn-render">⚙️ Render</button>
+              <button id="btn-save-render">💾 Save Render</button>
+              <button id="btn-play" disabled>▶ Play</button>
+              <button id="btn-stop" disabled>■ Stop</button>
+              <label class="loop-toggle"><input type="checkbox" id="toggle-loop"> ⟳ Loop</label>
+              <button id="btn-download" disabled>↓ WAV</button>
+            </div>
+            <div class="status-strip" id="status-strip">Ready</div>
+          </section>
+
+          <!-- Piano Roll Editor -->
+          <section class="panel editor-panel">
+            <div class="editor-header">
+              <h2>Piano Roll</h2>
+              <div class="editor-tools">
+                <span class="hint">Click to add • Drag to move/resize • Del to remove</span>
+              </div>
+            </div>
+            
+            <div class="piano-roll-container" id="pr-container">
+              <div class="piano-roll-content" id="pr-content">
+                <!-- Grid and notes injected via JS -->
+              </div>
+            </div>
+
+            <!-- Note Inspector -->
+            <div class="note-inspector" id="note-inspector" style="display: none;">
+              <h3>Note Inspector</h3>
+              <div class="inspector-grid">
+                <label>Timbre: 
+                  <select id="insp-timbre">
+                    <option value="">(Default)</option>
+                    <option value="ah">ah</option>
+                    <option value="oo">oo</option>
+                    <option value="ee">ee</option>
+                  </select>
+                </label>
+                <label>Velocity: <input type="range" id="insp-vel" min="0" max="1" step="0.01"></label>
+                <label>Portamento (s): <input type="range" id="insp-porta" min="0" max="0.5" step="0.01" value="0"></label>
+                <label>Breathiness: <input type="range" id="insp-breath" min="0" max="1" step="0.01" value="0"></label>
+                
+                <div class="vib-group">
+                  <label class="toggle-label"><input type="checkbox" id="insp-vib-toggle"> Vibrato</label>
+                  <label>Rate (Hz): <input type="range" id="insp-vib-rate" min="1" max="10" step="0.1"></label>
+                  <label>Depth (ct): <input type="range" id="insp-vib-depth" min="0" max="100" step="1"></label>
+                  <label>Onset (s): <input type="range" id="insp-vib-onset" min="0" max="1" step="0.05"></label>
+                </div>
+              </div>
+            </div>
+
+            <details class="advanced-json">
+              <summary>Advanced (Score JSON)</summary>
+              <textarea id="score-input" rows="10" spellcheck="false"></textarea>
+            </details>
+          </section>
+        </div>
+
+        <div class="col-side">
+          <!-- Telemetry -->
+          <section class="panel telemetry-panel">
+            <h2>Telemetry</h2>
+            <div class="metric-tiles">
+              <div class="tile" id="tile-clicks">
+                <div class="label">Max Δ (Clicks)</div>
+                <div class="value">--</div>
+              </div>
+              <div class="tile" id="tile-rtf">
+                <div class="label">RTF</div>
+                <div class="value">--</div>
+              </div>
+              <div class="tile" id="tile-duration" style="grid-column: 1 / -1;">
+                <div class="label">Duration</div>
+                <div class="value">--</div>
+                <div class="sub-label" id="tile-duration-sub">--</div>
+              </div>
+            </div>
+            <details class="raw-details">
+              <summary>Raw Telemetry</summary>
+              <pre id="telemetry-output">No data yet.</pre>
+            </details>
+          </section>
+
+          <!-- Provenance -->
+          <section class="panel provenance-panel">
+            <h2>Flight Recorder</h2>
+            <div class="prov-list">
+              <div><strong>Commit:</strong> <span id="prov-commit" class="hash">--</span></div>
+              <div><strong>Score Hash:</strong> <span id="prov-score" class="hash">--</span></div>
+              <div><strong>WAV Hash:</strong> <span id="prov-wav" class="hash">--</span></div>
+              <div id="prov-config" class="prov-config"></div>
+            </div>
+            <details class="raw-details">
+              <summary>Raw Provenance</summary>
+              <pre id="provenance-output">No data yet.</pre>
+            </details>
+          </section>
+        </div>
+      </div>
+    </main>
+    <audio id="audio-player" style="display: none;"></audio>
+    
+    <div id="toast-container" class="toast-container"></div>
+  </body>
+</html>
+
+<style>
+  :root {
+    --bg: #121212;
+    --panel-bg: #1e1e1e;
+    --text: #e0e0e0;
+    --accent: #4a90e2;
+    --accent-hover: #357abd;
+    --border: #333;
+    --error: #e74c3c;
+    --success: #2ecc71;
+    --warn: #f39c12;
+    --note-bg: #4a90e2;
+    --note-selected: #f39c12;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+
+  .container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1rem;
+  }
+
+  h1 { margin: 0; font-size: 1.5rem; }
+
+  .status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    background: var(--border);
+  }
+  .status-badge.ok { background: var(--success); color: #000; }
+  .status-badge.error { background: var(--error); color: #fff; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 280px 2.5fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .col-main, .col-side, .col-bank {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .panel {
+    background: var(--panel-bg);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  h2 {
+    margin-top: 0;
+    font-size: 1.1rem;
+    color: #aaa;
+    margin-bottom: 1rem;
+  }
+
+  /* Render Bank */
+  .bank-panel {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .bank-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .bank-item {
+    background: #222;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.75rem;
+    font-size: 0.85rem;
+    position: relative;
+  }
+  .bank-item:hover { border-color: #555; }
+  .bank-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.25rem;
+  }
+  .bank-item-name {
+    font-weight: bold;
+    color: var(--accent);
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    color: var(--accent);
+    font-size: 0.9rem;
+    padding: 0;
+    width: 100%;
+  }
+  .bank-item-name:focus {
+    outline: none;
+    border-bottom: 1px solid var(--accent);
+  }
+  .bank-item-meta {
+    color: #888;
+    font-size: 0.75rem;
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .bank-item-actions {
+    display: flex;
+    gap: 0.25rem;
+  }
+  .bank-item-actions button {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.75rem;
+    background: #333;
+  }
+  .bank-item-actions button:hover { background: #555; }
+
+  /* Controls */
+  .control-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+  }
+  .control-grid label {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.85rem;
+    color: #888;
+    gap: 0.25rem;
+  }
+  .control-grid input, .control-grid select {
+    background: #2a2a2a;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.4rem;
+    border-radius: 4px;
+    font-family: monospace;
+  }
+
+  /* Transport */
+  .transport-controls {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  .loop-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  .status-strip {
+    font-size: 0.85rem;
+    color: #888;
+    background: #1a1a1a;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-family: monospace;
+  }
+
+  /* Piano Roll */
+  .editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  .editor-header h2 { margin: 0; }
+  .hint { font-size: 0.8rem; color: #666; }
+  
+  .piano-roll-container {
+    width: 100%;
+    height: 350px;
+    background: #111;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: auto;
+    position: relative;
+    cursor: crosshair;
+  }
+  .piano-roll-content {
+    position: relative;
+    background-image: linear-gradient(#222 1px, transparent 1px), linear-gradient(90deg, #222 1px, transparent 1px);
+    background-size: 100px 14px; /* 100px = 1sec, 14px = 1 semitone */
+  }
+  .pr-grid-line-h {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #333;
+    pointer-events: none;
+  }
+  .pr-grid-line-h.c-note {
+    background: #555;
+    height: 2px;
+  }
+  .pr-note {
+    position: absolute;
+    background: var(--note-bg);
+    border-radius: 2px;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.5);
+    cursor: move;
+    user-select: none;
+  }
+  .pr-note:hover { filter: brightness(1.2); }
+  .pr-note.selected { background: var(--note-selected); z-index: 10; }
+  .pr-resize-handle {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    cursor: ew-resize;
+    background: rgba(255,255,255,0.2);
+  }
+
+  /* Note Inspector */
+  .note-inspector {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: #222;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+  .note-inspector h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+    color: var(--accent);
+  }
+  .inspector-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+  .inspector-grid label {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.8rem;
+    color: #aaa;
+    gap: 0.3rem;
+  }
+  .inspector-grid input[type="range"] { width: 100%; }
+  .vib-group {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 1rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #333;
+  }
+  .toggle-label {
+    flex-direction: row !important;
+    align-items: center;
+  }
+
+  /* Advanced JSON */
+  .advanced-json { margin-top: 1.5rem; }
+  .advanced-json summary { cursor: pointer; color: #888; font-size: 0.9rem; }
+  textarea {
+    width: 100%;
+    background: #1a1a1a;
+    color: #00ff00;
+    border: 1px solid var(--border);
+    padding: 1rem;
+    font-family: monospace;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    resize: vertical;
+    box-sizing: border-box;
+    margin-top: 0.5rem;
+  }
+
+  /* Telemetry Tiles */
+  .metric-tiles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .tile {
+    background: #2a2a2a;
+    padding: 1rem;
+    border-radius: 6px;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+  .tile .label {
+    font-size: 0.7rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+  }
+  .tile .value {
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: monospace;
+  }
+  .tile .sub-label {
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 0.25rem;
+  }
+  .tile.ok { border-color: var(--success); }
+  .tile.warn { border-color: var(--warn); }
+  .tile.error { border-color: var(--error); }
+
+  /* Provenance */
+  .prov-list {
+    font-size: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .hash {
+    font-family: monospace;
+    background: #2a2a2a;
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    color: #aaa;
+  }
+  .prov-config {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+    color: #888;
+  }
+
+  /* Buttons */
+  button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    background: var(--border);
+    color: var(--text);
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+  }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  button:hover:not(:disabled) { background: #555; }
+  button.primary { background: var(--accent); color: white; }
+  button.primary:hover:not(:disabled) { background: var(--accent-hover); }
+
+  .raw-details { margin-top: 1rem; font-size: 0.85rem; }
+  pre {
+    background: #1a1a1a;
+    padding: 1rem;
+    border-radius: 4px;
+    overflow-x: auto;
+    font-size: 0.8rem;
+    margin: 0.5rem 0 0 0;
+    color: #ccc;
+  }
+
+  /* Toasts */
+  .toast-container {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    z-index: 1000;
+  }
+  .toast {
+    background: #333;
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    font-size: 0.9rem;
+    animation: slideIn 0.3s ease-out;
+  }
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+</style>
+
+<script>
   const DAEMON_URL = '';
   
   // --- State ---
@@ -53,8 +624,6 @@
   // Telemetry & Provenance
   const tileClicks = document.getElementById('tile-clicks')!;
   const tileRtf = document.getElementById('tile-rtf')!;
-  const tilePeak = document.getElementById('tile-peak')!;
-  const tileVoices = document.getElementById('tile-voices')!;
   const tileDuration = document.getElementById('tile-duration')!;
   const tileDurationSub = document.getElementById('tile-duration-sub')!;
   const telemetryOutput = document.getElementById('telemetry-output')!;
@@ -64,44 +633,9 @@
   const provConfig = document.getElementById('prov-config')!;
   const provenanceOutput = document.getElementById('provenance-output')!;
 
-  // Banner
-  const banner = document.getElementById('commit-mismatch-banner')!;
-  const bannerText = document.getElementById('commit-mismatch-text')!;
-  const btnBannerLoad = document.getElementById('btn-banner-load')!;
-  const btnBannerRender = document.getElementById('btn-banner-render')!;
-  const btnBannerDismiss = document.getElementById('btn-banner-dismiss')!;
-  let pendingScoreToLoad: any = null;
-
-  btnBannerDismiss.addEventListener('click', () => banner.style.display = 'none');
-  btnBannerLoad.addEventListener('click', () => {
-    if (pendingScoreToLoad) {
-      score = pendingScoreToLoad;
-      updateUI();
-      showToast('Score loaded');
-      pendingScoreToLoad = null;
-    }
-    banner.style.display = 'none';
-  });
-  btnBannerRender.addEventListener('click', async () => {
-    if (pendingScoreToLoad) {
-      score = pendingScoreToLoad;
-      updateUI();
-      pendingScoreToLoad = null;
-      await doRender();
-    }
-    banner.style.display = 'none';
-  });
-
   // Bank
   const bankList = document.getElementById('bank-list')!;
   const toastContainer = document.getElementById('toast-container')!;
-  const btnCompare = document.getElementById('btn-compare') as HTMLButtonElement;
-  const compareModal = document.getElementById('compare-modal')!;
-  const btnCloseCompare = document.getElementById('btn-close-compare')!;
-  const compareGrid = document.getElementById('compare-grid')!;
-  let selectedForCompare: string[] = [];
-
-  btnCloseCompare.addEventListener('click', () => compareModal.style.display = 'none');
 
   // --- Toasts ---
   function showToast(msg: string) {
@@ -327,25 +861,13 @@
       renders.forEach((r: any) => {
         const el = document.createElement('div');
         el.className = 'bank-item';
-        if (r.id === 'last') el.style.borderLeft = '3px solid var(--accent)';
         
         const dur = r.durationSec?.toFixed(2) || '0.00';
         const commit = r.commit?.substring(0,7) || 'unknown';
-        const pinIcon = r.pinned ? '⭐' : '☆';
-        const isChecked = selectedForCompare.includes(r.id) ? 'checked' : '';
         
-        const nameInput = r.id === 'last' 
-          ? `<span class="bank-item-name" style="display:inline-block; padding:2px 0;">${r.name}</span>`
-          : `<input type="text" class="bank-item-name" value="${r.name}" data-id="${r.id}">`;
-
-        const pinBtn = r.id === 'last' ? '' : `<button class="btn-bank-pin" data-id="${r.id}" data-pinned="${r.pinned ? 'true' : 'false'}" style="background:none;border:none;cursor:pointer;padding:0 0.5rem 0 0;">${pinIcon}</button>`;
-        const delBtn = r.id === 'last' ? '' : `<button class="btn-bank-del" data-id="${r.id}">🗑</button>`;
-
         el.innerHTML = `
           <div class="bank-item-header">
-            <input type="checkbox" class="bank-item-compare" data-id="${r.id}" ${isChecked} style="margin-right: 0.5rem;">
-            ${pinBtn}
-            ${nameInput}
+            <input type="text" class="bank-item-name" value="${r.name}" data-id="${r.id}">
           </div>
           <div class="bank-item-meta">
             <span>⏱ ${dur}s</span>
@@ -354,47 +876,14 @@
           <div class="bank-item-actions">
             <button class="btn-bank-play" data-id="${r.id}">▶ Play</button>
             <button class="btn-bank-load" data-id="${r.id}" data-commit="${commit}">Load Score</button>
-            ${delBtn}
+            <button class="btn-bank-del" data-id="${r.id}">🗑</button>
           </div>
         `;
         bankList.appendChild(el);
       });
 
       // Bind events
-      document.querySelectorAll('.bank-item-compare').forEach(cb => {
-        cb.addEventListener('change', (e) => {
-          const target = e.target as HTMLInputElement;
-          const id = target.dataset.id!;
-          if (target.checked) {
-            if (selectedForCompare.length >= 2) {
-              target.checked = false;
-              showToast('Max 2 renders for compare');
-              return;
-            }
-            selectedForCompare.push(id);
-          } else {
-            selectedForCompare = selectedForCompare.filter(x => x !== id);
-          }
-          btnCompare.textContent = `Compare (${selectedForCompare.length}/2)`;
-          btnCompare.disabled = selectedForCompare.length !== 2;
-        });
-      });
-
-      document.querySelectorAll('.btn-bank-pin').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-          const target = e.currentTarget as HTMLElement;
-          const id = target.dataset.id;
-          const pinned = target.dataset.pinned !== 'true';
-          await fetch(`${DAEMON_URL}/api/renders/${id}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ pinned })
-          });
-          loadBank();
-        });
-      });
-
-      document.querySelectorAll('input.bank-item-name').forEach(inp => {
+      document.querySelectorAll('.bank-item-name').forEach(inp => {
         inp.addEventListener('change', async (e) => {
           const target = e.target as HTMLInputElement;
           await fetch(`${DAEMON_URL}/api/renders/${target.dataset.id}`, {
@@ -420,18 +909,15 @@
           const id = target.dataset.id;
           const commit = target.dataset.commit;
           
+          if (commit !== currentDaemonCommit.substring(0,7)) {
+            alert(`Warning: This render was created on commit ${commit}. Your daemon is on ${currentDaemonCommit.substring(0,7)}. Re-render to compare apples-to-apples.`);
+          }
+
           const res = await fetch(`${DAEMON_URL}/api/renders/${id}/score`);
           if (res.ok) {
-            const loadedScore = await res.json();
-            if (commit && currentDaemonCommit && commit !== currentDaemonCommit.substring(0,7)) {
-              bannerText.textContent = `This render was created on commit ${commit}; you are on commit ${currentDaemonCommit.substring(0,7)}.`;
-              banner.style.display = 'flex';
-              pendingScoreToLoad = loadedScore;
-            } else {
-              score = loadedScore;
-              updateUI();
-              showToast('Score loaded');
-            }
+            score = await res.json();
+            updateUI();
+            showToast('Score loaded');
           }
         });
       });
@@ -440,9 +926,6 @@
         btn.addEventListener('click', async (e) => {
           const id = (e.target as HTMLElement).dataset.id;
           await fetch(`${DAEMON_URL}/api/renders/${id}`, { method: 'DELETE' });
-          selectedForCompare = selectedForCompare.filter(x => x !== id);
-          btnCompare.textContent = `Compare (${selectedForCompare.length}/2)`;
-          btnCompare.disabled = selectedForCompare.length !== 2;
           loadBank();
         });
       });
@@ -451,64 +934,6 @@
       console.error('Failed to load bank', e);
     }
   }
-
-  btnCompare.addEventListener('click', async () => {
-    if (selectedForCompare.length !== 2) return;
-    
-    try {
-      const [res1, res2] = await Promise.all([
-        fetch(`${DAEMON_URL}/api/renders/${selectedForCompare[0]}/meta`),
-        fetch(`${DAEMON_URL}/api/renders/${selectedForCompare[1]}/meta`)
-      ]);
-      
-      const m1 = await res1.json();
-      const m2 = await res2.json();
-      
-      // We need telemetry from the meta. Wait, is telemetry saved in meta?
-      // Let's fetch telemetry.json
-      const [t1Res, t2Res] = await Promise.all([
-        fetch(`${DAEMON_URL}/api/renders/${selectedForCompare[0]}/telemetry`),
-        fetch(`${DAEMON_URL}/api/renders/${selectedForCompare[1]}/telemetry`)
-      ]);
-      
-      const t1 = t1Res.ok ? await t1Res.json() : {};
-      const t2 = t2Res.ok ? await t2Res.json() : {};
-
-      compareGrid.innerHTML = `
-        <div class="compare-col">
-          <h3>${m1.name}</h3>
-          <div class="compare-stat"><span>Duration</span> <span>${m1.durationSec?.toFixed(2)}s</span></div>
-          <div class="compare-stat"><span>Peak dBFS</span> <span>${t1.peakDbfs !== undefined ? t1.peakDbfs.toFixed(1) : '--'} dB</span></div>
-          <div class="compare-stat"><span>Max Δ (Clicks)</span> <span>${t1.maxAbsDelta?.toFixed(4) || '--'}</span></div>
-          <div class="compare-stat"><span>Max Voices</span> <span>${t1.voicesMax || '--'}</span></div>
-          <div class="compare-stat"><span>Commit</span> <span class="hash">${m1.commit}</span></div>
-          <button class="btn-bank-play" data-id="${m1.id}" style="margin-top: 1rem;">▶ Play A</button>
-        </div>
-        <div class="compare-col">
-          <h3>${m2.name}</h3>
-          <div class="compare-stat"><span>Duration</span> <span>${m2.durationSec?.toFixed(2)}s</span></div>
-          <div class="compare-stat"><span>Peak dBFS</span> <span>${t2.peakDbfs !== undefined ? t2.peakDbfs.toFixed(1) : '--'} dB</span></div>
-          <div class="compare-stat"><span>Max Δ (Clicks)</span> <span>${t2.maxAbsDelta?.toFixed(4) || '--'}</span></div>
-          <div class="compare-stat"><span>Max Voices</span> <span>${t2.voicesMax || '--'}</span></div>
-          <div class="compare-stat"><span>Commit</span> <span class="hash">${m2.commit}</span></div>
-          <button class="btn-bank-play" data-id="${m2.id}" style="margin-top: 1rem;">▶ Play B</button>
-        </div>
-      `;
-      
-      compareGrid.querySelectorAll('.btn-bank-play').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const id = (e.target as HTMLElement).dataset.id;
-          audioPlayer.src = `${DAEMON_URL}/api/renders/${id}/audio.wav`;
-          audioPlayer.play();
-        });
-      });
-
-      compareModal.style.display = 'flex';
-    } catch (e) {
-      console.error('Compare failed', e);
-      showToast('Failed to load compare data');
-    }
-  });
 
   // --- Daemon Communication ---
   async function checkHealth() {
@@ -563,19 +988,11 @@
     const rtf = data.telemetry.rtf || 0;
     tileRtf.querySelector('.value')!.textContent = rtf > 0 ? rtf.toFixed(3) : '--';
     
-    const peakDbfs = data.telemetry.peakDbfs ?? -Infinity;
-    tilePeak.querySelector('.value')!.textContent = peakDbfs === -Infinity ? '-∞' : `${peakDbfs.toFixed(1)} dB`;
-    tilePeak.className = `tile ${peakDbfs > -0.1 ? 'error' : (peakDbfs > -3 ? 'warn' : 'ok')}`;
-
-    const voicesMax = data.telemetry.voicesMax || 0;
-    tileVoices.querySelector('.value')!.textContent = voicesMax.toString();
-    tileVoices.className = `tile ${voicesMax > config.maxPolyphony ? 'error' : (voicesMax === config.maxPolyphony ? 'warn' : 'ok')}`;
-
     const dur = data.telemetry.durationSec || 0;
-    const notesEndSec = data.telemetry.notesEndSec || 0;
+    const scoreDur = data.telemetry.scoreDurationSec || 0;
     const tail = data.telemetry.tailSec || 0;
     tileDuration.querySelector('.value')!.textContent = `${dur.toFixed(2)}s`;
-    tileDurationSub.textContent = `(notes ${notesEndSec.toFixed(2)}s + tail ${tail.toFixed(2)}s)`;
+    tileDurationSub.textContent = `(notes ${scoreDur.toFixed(2)}s + tail ${tail.toFixed(2)}s)`;
     
     telemetryOutput.textContent = JSON.stringify(data.telemetry, null, 2);
     
@@ -588,10 +1005,13 @@
     provenanceOutput.textContent = JSON.stringify(data.provenance, null, 2);
     
     // Audio
-    if (currentWavUrl && currentWavUrl.startsWith('blob:')) URL.revokeObjectURL(currentWavUrl);
+    if (currentWavUrl) URL.revokeObjectURL(currentWavUrl);
+    const binaryString = atob(data.wavBase64);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
     
-    // Add a cache-buster to the URL so the browser fetches the new last render
-    currentWavUrl = `${DAEMON_URL}${data.audioUrl}?t=${Date.now()}`;
+    const blob = new Blob([bytes], { type: 'audio/wav' });
+    currentWavUrl = URL.createObjectURL(blob);
     audioPlayer.src = currentWavUrl;
     
     btnPlay.disabled = false;
@@ -601,12 +1021,20 @@
     statusStrip.textContent = `Rendered in ${renderTimeMs.toFixed(1)}ms | RTF: ${rtf.toFixed(3)}`;
 
     showToast(`Rendered ${dur.toFixed(2)}s`);
-    loadBank(); // Refresh bank to show the updated "Last Render"
   }
 
   async function doSaveRender() {
     btnSaveRender.disabled = true;
     statusStrip.textContent = 'Saving render...';
+    
+    score.bpm = parseInt(inpBpm.value, 10);
+
+    const config = {
+      maxPolyphony: parseInt(inpPolyphony.value, 10),
+      deterministic: inpDeterminism.value,
+      rngSeed: parseInt(inpSeed.value, 10),
+      defaultTimbre: inpDefaultTimbre.value
+    };
     
     const name = prompt("Enter a name for this render:");
     if (name === null) {
@@ -615,10 +1043,10 @@
       return;
     }
 
-    const res = await fetch(`${DAEMON_URL}/api/renders/promote-last`, {
+    const res = await fetch(`${DAEMON_URL}/api/renders`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name })
+      body: JSON.stringify({ name, score, config })
     });
     
     if (!res.ok) {
@@ -674,3 +1102,4 @@
   // Init
   updateUI();
   loadBank();
+</script>
