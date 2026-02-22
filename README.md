@@ -1,72 +1,82 @@
 # Vocal Synth Engine
 
-A deterministic, playable vocal instrument designed for AI jam sessions.
+A deterministic vocal instrument engine built in TypeScript. Renders singing voices from score data using additive synthesis, voice presets, and real-time WebSocket streaming.
 
-## VoicePreset v0.1
+Built as the synthesis backend for [AI Jam Sessions](https://github.com/mcp-tool-shop-org/ai-jam-sessions).
 
-The `VoicePreset` is a frozen model artifact that contains the analysis data needed to synthesize a voice. It is designed to be deterministic, composable, and backend-agnostic.
+## What It Does
 
-### Structure
+- **Additive vocal synthesis** — harmonic partials + spectral envelope + noise residual
+- **Voice presets** — frozen analysis artifacts (`.f32` blobs) describing timbre, breathiness, vibrato
+- **Polyphonic rendering** — configurable max polyphony with per-voice state management
+- **Streaming output** — block-based renderer feeds a WebSocket server for real-time playback
+- **Score-driven** — takes JSON scores with MIDI note numbers, durations, and timbre automation
+- **Deterministic** — seeded RNG, exact or fast mode, reproducible output from the same inputs
 
-A preset consists of a `voicepreset.json` manifest and several binary `.f32` assets.
+## Architecture
 
-#### Manifest (`voicepreset.json`)
-
-```json
-{
-  "schema": "mcp-voice-engine.voicepreset",
-  "version": "0.1.0",
-  "id": "vp_human_female_001",
-  "sampleRateHz": 48000,
-  "analysis": {
-    "frameMs": 20,
-    "hopMs": 10,
-    "f0Method": "yin",
-    "maxHarmonics": 80,
-    "envelope": { "method": "cepstral_lifter", "lifterQ": 30 },
-    "noise": { "method": "residual_stft", "fftSize": 2048 }
-  },
-  "timbres": [
-    {
-      "name": "AH",
-      "kind": "vowel",
-      "assets": {
-        "harmonicsMag": "assets/AH_harmonics_mag.f32",
-        "envelopeDb": "assets/AH_envelope_db.f32",
-        "noiseDb": "assets/AH_noise_db.f32",
-        "freqHz": "assets/freq_axis_hz.f32"
-      },
-      "defaults": {
-        "hnrDb": 18,
-        "breathiness": 0.12,
-        "vibrato": { "rateHz": 5.8, "depthCents": 35, "onsetMs": 220 }
-      }
-    }
-  ]
-}
+```
+Score (JSON) ──> StreamingVocalSynthEngine ──> PCM blocks ──> WebSocket/WAV
+                        │
+                  VoicePreset (.f32)
+                  DSP (FFT, pitch)
+                  Curves (ADSR, vibrato, automation)
 ```
 
-#### Binary Assets
+**Key modules:**
 
-Assets are stored as little-endian `Float32Array` blobs:
+| Directory | Purpose |
+|-----------|---------|
+| `src/engine/` | Core synth engine — block renderer, streaming engine, ADSR/vibrato curves |
+| `src/dsp/` | Signal processing — FFT, pitch detection |
+| `src/preset/` | VoicePreset schema and loader |
+| `src/server/` | Express + WebSocket API server |
+| `src/cli/` | Preset inspector CLI |
+| `apps/cockpit/` | Browser-based cockpit UI |
+| `presets/` | Bundled voice preset data |
 
-- `harmonicsMag.f32`: Length `H`, linear magnitude. Indexed by harmonic number.
-- `envelopeDb.f32`: Length `M`, dB over frequency axis.
-- `noiseDb.f32`: Length `M`, dB over frequency axis.
-- `freq_axis_hz.f32`: Length `M`, shared frequency axis.
-
-### Tools
-
-#### `preset:inspect`
-
-Inspects a `VoicePreset` and prints its metadata, bounds, and a simulated telemetry report for a 1-second sustained note.
+## Quick Start
 
 ```bash
-npm run inspect <path-to-voicepreset.json>
+npm ci
+npm run dev
 ```
 
-Example:
+This starts the dev server with hot reload. The cockpit UI is available at `http://localhost:3000`.
+
+### Render a score
 
 ```bash
-npm run inspect test-preset/voicepreset.json
+# Inspect a voice preset
+npm run inspect presets/voicepreset.json
+
+# Build for production
+npm run build
+npm run start
 ```
+
+### API
+
+| Endpoint | Auth | Description |
+|----------|------|-------------|
+| `GET /api/health` | No | Health check |
+| `GET /api/presets` | No | List available voice presets |
+| `POST /api/render` | Yes | Render a score to audio |
+| `GET /api/renders` | Yes | List past renders |
+
+Auth is optional — enabled when `AUTH_TOKEN` is set in the environment.
+
+## VoicePreset Format
+
+A preset is a `voicepreset.json` manifest plus binary `.f32` assets:
+
+- **harmonicsMag** — linear magnitude per harmonic partial
+- **envelopeDb** — spectral envelope in dB over frequency
+- **noiseDb** — noise floor in dB over frequency
+- **freq_axis_hz** — shared frequency axis
+
+Presets are deterministic, composable, and backend-agnostic. See `src/preset/schema.ts` for the full type definition.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
