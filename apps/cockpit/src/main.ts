@@ -736,6 +736,264 @@
     if (preset) updateTimbreDropdown(preset);
   });
 
+  // ============================================================
+  // ── LIVE MODE ──────────────────────────────────────────────
+  // ============================================================
+
+  const btnLiveToggle = document.getElementById('btn-live-toggle') as HTMLButtonElement;
+  const liveStatus = document.getElementById('live-status')!;
+  const liveKeyboard = document.getElementById('live-keyboard')!;
+  const liveTelemetry = document.getElementById('live-telemetry')!;
+  const liveVoices = document.getElementById('live-voices')!;
+  const livePeak = document.getElementById('live-peak')!;
+  const liveRtf = document.getElementById('live-rtf')!;
+  const liveUnderruns = document.getElementById('live-underruns')!;
+
+  let liveWs: WebSocket | null = null;
+  let liveAudioCtx: AudioContext | null = null;
+  let liveWorkletNode: AudioWorkletNode | null = null;
+  let liveConnected = false;
+  let liveUnderrunCount = 0;
+  let activeKeys = new Set<string>(); // noteIds currently held
+
+  // QWERTY → MIDI mapping (2 octaves starting at C4=60)
+  const KEY_MAP: Record<string, number> = {
+    'a': 60, 'w': 61, 's': 62, 'e': 63, 'd': 64, 'f': 65,
+    't': 66, 'g': 67, 'y': 68, 'h': 69, 'u': 70, 'j': 71,
+    'k': 72, 'o': 73, 'l': 74, 'p': 75, ';': 76, "'": 77,
+  };
+
+  // Note names for display
+  const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  function midiNoteName(midi: number) {
+    return NOTE_NAMES[midi % 12] + Math.floor(midi / 12 - 1);
+  }
+  function isBlackKey(midi: number) {
+    return [1,3,6,8,10].includes(midi % 12);
+  }
+
+  // Render keyboard
+  function renderLiveKeyboard() {
+    liveKeyboard.innerHTML = '';
+    const keyEntries = Object.entries(KEY_MAP).sort((a,b) => a[1] - b[1]);
+
+    for (const [key, midi] of keyEntries) {
+      const el = document.createElement('div');
+      const black = isBlackKey(midi);
+      el.className = `key ${black ? 'black' : 'white'}`;
+      el.dataset.midi = String(midi);
+      el.dataset.key = key;
+      el.innerHTML = `<span>${midiNoteName(midi)}<br><small>${key.toUpperCase()}</small></span>`;
+
+      // Mouse events
+      el.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        triggerNoteOn(key, midi);
+      });
+      el.addEventListener('mouseup', () => triggerNoteOff(key));
+      el.addEventListener('mouseleave', () => {
+        if (activeKeys.has(`key-${key}`)) triggerNoteOff(key);
+      });
+
+      liveKeyboard.appendChild(el);
+    }
+  }
+  renderLiveKeyboard();
+
+  function triggerNoteOn(key: string, midi: number) {
+    const noteId = `key-${key}`;
+    if (activeKeys.has(noteId)) return;
+    activeKeys.add(noteId);
+
+    // Visual feedback
+    const el = liveKeyboard.querySelector(`[data-key="${key}"]`);
+    if (el) el.classList.add('active');
+
+    if (liveWs && liveConnected) {
+      liveWs.send(JSON.stringify({
+        type: 'note_on',
+        noteId,
+        midi,
+        velocity: 0.8,
+        timbre: inpDefaultTimbre.value || undefined,
+      }));
+    }
+  }
+
+  function triggerNoteOff(key: string) {
+    const noteId = `key-${key}`;
+    if (!activeKeys.has(noteId)) return;
+    activeKeys.delete(noteId);
+
+    const el = liveKeyboard.querySelector(`[data-key="${key}"]`);
+    if (el) el.classList.remove('active');
+
+    if (liveWs && liveConnected) {
+      liveWs.send(JSON.stringify({ type: 'note_off', noteId }));
+    }
+  }
+
+  // Keyboard events (only when not in inputs)
+  window.addEventListener('keydown', (e) => {
+    if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA' || document.activeElement?.tagName === 'SELECT') return;
+    if (e.repeat) return;
+
+    const midi = KEY_MAP[e.key.toLowerCase()];
+    if (midi !== undefined && liveConnected) {
+      e.preventDefault();
+      triggerNoteOn(e.key.toLowerCase(), midi);
+    }
+  });
+
+  window.addEventListener('keyup', (e) => {
+    const key = e.key.toLowerCase();
+    if (KEY_MAP[key] !== undefined) {
+      triggerNoteOff(key);
+    }
+  });
+
+  // ── Live connection ────────────────────────────────────────
+
+  async function connectLive() {
+    if (liveWs) disconnectLive();
+
+    liveStatus.textContent = 'Connecting...';
+    liveStatus.className = 'live-badge connecting';
+
+    // Init AudioContext + AudioWorklet
+    liveAudioCtx = new AudioContext({ sampleRate: 48000 });
+    try {
+      await liveAudioCtx.audioWorklet.addModule('/pcm-worklet.js');
+    } catch (err) {
+      console.error('Failed to load AudioWorklet:', err);
+      showToast('Failed to load audio worklet');
+      liveStatus.textContent = 'Error';
+      liveStatus.className = 'live-badge off';
+      return;
+    }
+
+    liveWorkletNode = new AudioWorkletNode(liveAudioCtx, 'pcm-worklet-processor');
+    liveWorkletNode.connect(liveAudioCtx.destination);
+
+    // Listen for underrun reports from worklet
+    liveWorkletNode.port.onmessage = (e) => {
+      if (e.data.type === 'underrun') {
+        liveUnderrunCount = e.data.count;
+        liveUnderruns.textContent = `Underruns: ${liveUnderrunCount}`;
+      }
+    };
+
+    // WebSocket
+    const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    liveWs = new WebSocket(`${proto}//${location.host}/ws`);
+    liveWs.binaryType = 'arraybuffer';
+
+    liveWs.addEventListener('open', () => {
+      liveWs!.send(JSON.stringify({ type: 'hello', protocolVersion: 1 }));
+    });
+
+    liveWs.addEventListener('message', (e) => {
+      if (e.data instanceof ArrayBuffer) {
+        // Binary = PCM audio block
+        const pcm = new Float32Array(e.data);
+        if (liveWorkletNode) {
+          liveWorkletNode.port.postMessage(pcm, [pcm.buffer]);
+        }
+        return;
+      }
+
+      // Text = JSON message
+      try {
+        const msg = JSON.parse(e.data);
+        handleLiveMessage(msg);
+      } catch (err) {
+        console.error('[live] Bad message:', err);
+      }
+    });
+
+    liveWs.addEventListener('close', () => {
+      liveConnected = false;
+      liveStatus.textContent = 'Disconnected';
+      liveStatus.className = 'live-badge off';
+      liveTelemetry.style.display = 'none';
+      btnLiveToggle.textContent = 'Connect Live';
+    });
+
+    liveWs.addEventListener('error', () => {
+      showToast('Live connection error');
+    });
+  }
+
+  function disconnectLive() {
+    // Release all keys
+    for (const noteId of activeKeys) {
+      const key = noteId.replace('key-', '');
+      const el = liveKeyboard.querySelector(`[data-key="${key}"]`);
+      if (el) el.classList.remove('active');
+    }
+    activeKeys.clear();
+
+    if (liveWs) {
+      liveWs.close();
+      liveWs = null;
+    }
+    if (liveWorkletNode) {
+      liveWorkletNode.disconnect();
+      liveWorkletNode = null;
+    }
+    if (liveAudioCtx) {
+      liveAudioCtx.close();
+      liveAudioCtx = null;
+    }
+    liveConnected = false;
+    liveUnderrunCount = 0;
+    liveStatus.textContent = 'Disconnected';
+    liveStatus.className = 'live-badge off';
+    liveTelemetry.style.display = 'none';
+    btnLiveToggle.textContent = 'Connect Live';
+  }
+
+  function handleLiveMessage(msg: any) {
+    switch (msg.type) {
+      case 'hello_ack':
+        liveConnected = true;
+        liveStatus.textContent = `Live (${msg.presetId})`;
+        liveStatus.className = 'live-badge on';
+        liveTelemetry.style.display = 'flex';
+        btnLiveToggle.textContent = 'Disconnect';
+        showToast(`Live connected: ${msg.timbres.join(', ')} @ ${msg.sampleRateHz}Hz`);
+        break;
+
+      case 'telemetry': {
+        const peak = msg.peakDbfs === -Infinity || msg.peakDbfs === null
+          ? '--' : `${msg.peakDbfs.toFixed(1)} dB`;
+        liveVoices.textContent = `Voices: ${msg.voicesActive}/${msg.voicesMax}`;
+        livePeak.textContent = `Peak: ${peak}`;
+        liveRtf.textContent = `RTF: ${msg.rtf?.toFixed(3) || '--'}`;
+        break;
+      }
+
+      case 'error':
+        console.error('[live] Server error:', msg.code, msg.message);
+        showToast(`Live error: ${msg.message}`);
+        break;
+
+      case 'note_ack':
+        if (msg.stolen) {
+          showToast(`Voice stolen for ${msg.noteId}`);
+        }
+        break;
+    }
+  }
+
+  btnLiveToggle.addEventListener('click', () => {
+    if (liveConnected || liveWs) {
+      disconnectLive();
+    } else {
+      connectLive();
+    }
+  });
+
   // Init
   updateUI();
   loadPresets();

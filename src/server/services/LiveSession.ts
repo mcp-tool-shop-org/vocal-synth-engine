@@ -44,6 +44,7 @@ export class LiveSession {
   private config: LiveSessionConfig;
   private createdAt: number = Date.now();
   private telemetryInterval: ReturnType<typeof setInterval> | null = null;
+  private renderLoopInterval: ReturnType<typeof setInterval> | null = null;
 
   // Recording state
   private recording: boolean = false;
@@ -90,6 +91,7 @@ export class LiveSession {
 
   /** Clean up timers and buffers on disconnect. */
   destroy() {
+    this.stopRenderLoop();
     this.stopTelemetry();
     this.engine = null;
     this.preset = null;
@@ -145,10 +147,12 @@ export class LiveSession {
     switch (command) {
       case 'play':
         this.engine.play();
+        this.startRenderLoop();
         this.send({ type: 'transport_ack', state: 'playing' } as TransportAckMessage);
         break;
 
       case 'stop':
+        this.stopRenderLoop();
         this.engine.stop();
         if (this.recording) this.handleRecordStop();
         this.send({ type: 'transport_ack', state: 'stopped' } as TransportAckMessage);
@@ -183,6 +187,7 @@ export class LiveSession {
     // Auto-play on first note if stopped
     if (!this.engine.isPlaying) {
       this.engine.play();
+      this.startRenderLoop();
     }
 
     const { voiceIndex, stolen } = this.engine.noteOn({
@@ -318,9 +323,39 @@ export class LiveSession {
     return out;
   }
 
-  // ── Render loop access ───────────────────────────────────────
+  // ── Render loop ─────────────────────────────────────────────
 
-  /** Render one block. Returns audio samples. */
+  /** Start the server-side render loop. Ticks at block rate, sends binary PCM. */
+  private startRenderLoop() {
+    this.stopRenderLoop();
+    if (!this.engine) return;
+
+    // blockSize=1024 / sr=48000 → ~21.33ms per block
+    const blockMs = (this.engine.blockSize / this.engine.sampleRateHz) * 1000;
+
+    this.renderLoopInterval = setInterval(() => {
+      if (!this.engine || !this.engine.isPlaying) return;
+
+      const block = this.engine.render();
+      this.captureBlock(block);
+
+      // Send raw Float32 PCM as binary WS frame
+      if (this.ws.readyState === 1 /* OPEN */) {
+        const buf = Buffer.from(block.buffer, block.byteOffset, block.byteLength);
+        this.ws.send(buf);
+      }
+    }, blockMs);
+  }
+
+  /** Stop the render loop. */
+  private stopRenderLoop() {
+    if (this.renderLoopInterval) {
+      clearInterval(this.renderLoopInterval);
+      this.renderLoopInterval = null;
+    }
+  }
+
+  /** Render one block on demand (for testing). Returns audio samples. */
   renderBlock(): Float32Array | null {
     if (!this.engine) return null;
     const block = this.engine.render();

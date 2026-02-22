@@ -83,6 +83,26 @@
             <div class="status-strip" id="status-strip">Ready</div>
           </section>
 
+          <!-- Live Mode -->
+          <section class="panel live-panel">
+            <div class="live-header">
+              <h2>Live Mode</h2>
+              <div class="live-controls">
+                <button id="btn-live-toggle">Connect Live</button>
+                <span id="live-status" class="live-badge off">Disconnected</span>
+              </div>
+            </div>
+            <div class="live-keyboard" id="live-keyboard">
+              <!-- Keyboard rendered via JS -->
+            </div>
+            <div class="live-telemetry" id="live-telemetry" style="display:none;">
+              <span id="live-voices">Voices: 0</span>
+              <span id="live-peak">Peak: --</span>
+              <span id="live-rtf">RTF: --</span>
+              <span id="live-underruns">Underruns: 0</span>
+            </div>
+          </section>
+
           <!-- Piano Roll Editor -->
           <section class="panel editor-panel">
             <div class="editor-header">
@@ -653,6 +673,71 @@
     font-size: 0.8rem;
     margin: 0.5rem 0 0 0;
     color: #ccc;
+  }
+
+  /* Live Mode */
+  .live-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  .live-header h2 { margin: 0; }
+  .live-controls { display: flex; gap: 0.75rem; align-items: center; }
+  .live-badge {
+    padding: 0.2rem 0.6rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: bold;
+  }
+  .live-badge.off { background: #333; color: #888; }
+  .live-badge.connecting { background: var(--warn); color: #000; }
+  .live-badge.on { background: var(--success); color: #000; }
+
+  .live-keyboard {
+    display: flex;
+    height: 80px;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    user-select: none;
+  }
+  .key {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 4px;
+    font-size: 0.6rem;
+    cursor: pointer;
+    transition: background 0.05s;
+    position: relative;
+    border-right: 1px solid #222;
+  }
+  .key.white { background: #ddd; color: #333; min-width: 24px; }
+  .key.black {
+    background: #222;
+    color: #888;
+    min-width: 16px;
+    flex: 0.6;
+    height: 55px;
+    margin-left: -8px;
+    margin-right: -8px;
+    z-index: 2;
+    border-radius: 0 0 3px 3px;
+    border-right: none;
+  }
+  .key.active { background: var(--accent) !important; color: #fff !important; }
+  .key.white:hover { background: #ccc; }
+  .key.black:hover { background: #444; }
+
+  .live-telemetry {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.75rem;
+    font-size: 0.75rem;
+    font-family: monospace;
+    color: #888;
   }
 
   /* Toasts */
