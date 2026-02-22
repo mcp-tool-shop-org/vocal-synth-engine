@@ -17,7 +17,7 @@ export function findPitchYin(signal: Float32Array, sampleRate: number): number {
     cmndf[tau] = diff[tau] * tau / runningSum;
   }
   
-  const threshold = 0.1;
+  const threshold = 0.3;
   let tauEstimate = -1;
   for (let tau = 2; tau < half; tau++) {
     if (cmndf[tau] < threshold) {
@@ -28,13 +28,18 @@ export function findPitchYin(signal: Float32Array, sampleRate: number): number {
   }
   
   if (tauEstimate === -1) {
+    // Fallback: find global CMNDF minimum, but constrain to plausible
+    // speech F0 range (50-500 Hz) to avoid octave errors
+    const minTau = Math.max(2, Math.floor(sampleRate / 500));
+    const maxTau = Math.min(half, Math.floor(sampleRate / 50));
     let minVal = Infinity;
-    for (let tau = 2; tau < half; tau++) {
+    for (let tau = minTau; tau < maxTau; tau++) {
       if (cmndf[tau] < minVal) {
         minVal = cmndf[tau];
         tauEstimate = tau;
       }
     }
+    if (tauEstimate === -1) tauEstimate = minTau;
   }
   
   return sampleRate / tauEstimate;
