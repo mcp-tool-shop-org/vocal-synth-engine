@@ -7,7 +7,9 @@ import { createApp } from './app.js';
 import { requireWsAuth } from './middleware/auth.js';
 import { getPresetDirInfo } from './services/renderScoreToWav.js';
 import { LiveSession } from './services/LiveSession.js';
+import { JamSessionManager } from './services/JamSessionManager.js';
 import type { ClientMessage } from '../types/live.js';
+import type { JamClientMessage } from '../types/jam.js';
 
 const app = createApp();
 const server = createServer(app);
@@ -89,6 +91,45 @@ wss.on('connection', (ws, req) => {
     console.error('[live] WebSocket error:', err.message);
     session.destroy();
     activeSessions.delete(ws);
+  });
+});
+
+// ── WebSocket: Jam Mode ──────────────────────────────────────
+const jamManager = new JamSessionManager();
+const wssJam = new WebSocketServer({ server, path: "/ws/jam" });
+
+wssJam.on('connection', (ws, req) => {
+  const url = new URL(req.url || '/', `http://${req.headers.host}`);
+  const token = url.searchParams.get('token') ?? undefined;
+  if (!requireWsAuth(token)) {
+    ws.close(4001, 'Unauthorized');
+    return;
+  }
+
+  jamManager.onConnect(ws);
+  console.log(`[jam] Client connected (${jamManager.activeConnectionCount} connections, ${jamManager.activeSessionCount} sessions)`);
+
+  ws.on('message', async (raw) => {
+    try {
+      const msg: JamClientMessage = JSON.parse(raw.toString());
+      await jamManager.handleMessage(ws, msg);
+    } catch (err: any) {
+      ws.send(JSON.stringify({
+        type: 'jam_error',
+        code: 'PARSE_ERROR',
+        message: `Invalid message: ${err.message}`,
+      }));
+    }
+  });
+
+  ws.on('close', () => {
+    jamManager.onDisconnect(ws);
+    console.log(`[jam] Client disconnected (${jamManager.activeConnectionCount} connections)`);
+  });
+
+  ws.on('error', (err) => {
+    console.error('[jam] WebSocket error:', err.message);
+    jamManager.onDisconnect(ws);
   });
 });
 

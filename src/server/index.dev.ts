@@ -6,7 +6,9 @@ import { createServer as createViteServer } from 'vite';
 import { requireWsAuth } from './middleware/auth.js';
 import { getPresetDirInfo } from './services/renderScoreToWav.js';
 import { LiveSession } from './services/LiveSession.js';
+import { JamSessionManager } from './services/JamSessionManager.js';
 import type { ClientMessage } from '../types/live.js';
+import type { JamClientMessage } from '../types/jam.js';
 
 async function startDevServer() {
   const app = createApp();
@@ -33,7 +35,7 @@ async function startDevServer() {
 
   // ── WebSocket: Live Mode ───────────────────────────────────
   const MAX_CONCURRENT_SESSIONS = Number(process.env.MAX_LIVE_SESSIONS) || 4;
-  const wss = new WebSocketServer({ server, path: "/ws" });
+  const wss = new WebSocketServer({ noServer: true });
   const activeSessions = new Map<WebSocket, LiveSession>();
 
   wss.on('connection', (ws, req) => {
@@ -78,6 +80,69 @@ async function startDevServer() {
       session.destroy();
       activeSessions.delete(ws);
     });
+  });
+
+  // ── WebSocket: Jam Mode ──────────────────────────────────────
+  const jamManager = new JamSessionManager();
+  const wssJam = new WebSocketServer({ noServer: true });
+
+  wssJam.on('connection', (ws, req) => {
+    const url = new URL(req.url || '/', `http://${req.headers.host}`);
+    const token = url.searchParams.get('token') ?? undefined;
+    if (!requireWsAuth(token)) {
+      ws.close(4001, 'Unauthorized');
+      return;
+    }
+
+    jamManager.onConnect(ws);
+    console.log(`[jam] Client connected (${jamManager.activeConnectionCount} connections, ${jamManager.activeSessionCount} sessions)`);
+
+    ws.on('message', async (raw) => {
+      try {
+        const msg: JamClientMessage = JSON.parse(raw.toString());
+        await jamManager.handleMessage(ws, msg);
+      } catch (err: any) {
+        ws.send(JSON.stringify({
+          type: 'jam_error',
+          code: 'PARSE_ERROR',
+          message: `Invalid message: ${err.message}`,
+        }));
+      }
+    });
+
+    ws.on('close', () => {
+      jamManager.onDisconnect(ws);
+      console.log(`[jam] Client disconnected (${jamManager.activeConnectionCount} connections)`);
+    });
+
+    ws.on('error', (err) => {
+      console.error('[jam] WebSocket error:', err.message);
+      jamManager.onDisconnect(ws);
+    });
+  });
+
+  // ── Manual upgrade routing ──────────────────────────────────────
+  // Vite HMR attaches its own 'upgrade' handler to the HTTP server.
+  // We must capture it and route explicitly to avoid double-handling.
+  const viteUpgradeHandlers = server.listeners('upgrade').slice();
+  server.removeAllListeners('upgrade');
+
+  server.on('upgrade', (req, socket, head) => {
+    const { pathname } = new URL(req.url || '/', `http://${req.headers.host}`);
+    if (pathname === '/ws') {
+      wss.handleUpgrade(req, socket, head, (ws) => {
+        wss.emit('connection', ws, req);
+      });
+    } else if (pathname === '/ws/jam') {
+      wssJam.handleUpgrade(req, socket, head, (ws) => {
+        wssJam.emit('connection', ws, req);
+      });
+    } else {
+      // Forward to Vite HMR
+      for (const handler of viteUpgradeHandlers) {
+        (handler as Function).call(server, req, socket, head);
+      }
+    }
   });
 
   const port = Number(process.env.PORT ?? 4321);
