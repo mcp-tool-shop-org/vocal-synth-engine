@@ -32,6 +32,7 @@ async function startDevServer() {
   app.use(vite.middlewares);
 
   // ── WebSocket: Live Mode ───────────────────────────────────
+  const MAX_CONCURRENT_SESSIONS = Number(process.env.MAX_LIVE_SESSIONS) || 4;
   const wss = new WebSocketServer({ server, path: "/ws" });
   const activeSessions = new Map<WebSocket, LiveSession>();
 
@@ -43,9 +44,15 @@ async function startDevServer() {
       return;
     }
 
+    if (activeSessions.size >= MAX_CONCURRENT_SESSIONS) {
+      ws.close(4002, 'Server full');
+      console.warn(`[live] Rejected connection: ${activeSessions.size}/${MAX_CONCURRENT_SESSIONS} sessions`);
+      return;
+    }
+
     const session = new LiveSession(ws);
     activeSessions.set(ws, session);
-    console.log(`[live] Client connected (${activeSessions.size} active sessions)`);
+    console.log(`[live] Client connected (${activeSessions.size}/${MAX_CONCURRENT_SESSIONS} sessions)`);
 
     ws.on('message', async (raw) => {
       try {

@@ -56,7 +56,9 @@ const DEFAULT_SESSION_CONFIG: LiveSessionConfig = {
  *   16..    float32  PCM samples    (blockSize × channels × 4 bytes)
  */
 const AUDIO_HEADER_SIZE = 16;
-const MAX_RECORD_SEC = 60; // cap recording at 60 seconds
+const MAX_RECORD_SEC = 60;          // cap recording at 60 seconds
+const MAX_MSGS_PER_SEC = 200;       // WS message rate limit per session
+const MAX_SEND_QUEUE_BYTES = 4 * 1024 * 1024; // 4 MB — skip audio frames if client is backed up
 
 function getGitCommit(): string {
   try { return execSync('git rev-parse HEAD').toString().trim(); } catch { return 'unknown'; }
@@ -79,6 +81,10 @@ export class LiveSession {
   private recording: boolean = false;
   private recordBuffer: Float32Array[] = [];
   private recordStartSample: number = 0;
+
+  // Rate limiter (sliding window)
+  private msgTimestamps: number[] = [];
+  private rateLimitWarned: boolean = false;
 
   constructor(ws: WebSocket) {
     this.ws = ws;
@@ -125,12 +131,31 @@ export class LiveSession {
     this.engine = null;
     this.preset = null;
     this.recordBuffer = [];
+    this.audioFrameBuf = null;
+    this.msgTimestamps = [];
   }
 
   // ── Message dispatch ─────────────────────────────────────────
 
   /** Handle a parsed client message. */
   async handleMessage(msg: ClientMessage): Promise<void> {
+    // Rate limit: sliding 1-second window
+    const now = Date.now();
+    this.msgTimestamps.push(now);
+    // Trim timestamps older than 1 second
+    while (this.msgTimestamps.length > 0 && this.msgTimestamps[0] < now - 1000) {
+      this.msgTimestamps.shift();
+    }
+    if (this.msgTimestamps.length > MAX_MSGS_PER_SEC) {
+      if (!this.rateLimitWarned) {
+        this.rateLimitWarned = true;
+        this.sendError('RATE_LIMITED', `Too many messages (>${MAX_MSGS_PER_SEC}/sec). Slow down.`);
+        console.warn(`[live] Rate limited session (${this.msgTimestamps.length} msgs in 1s)`);
+      }
+      return;
+    }
+    this.rateLimitWarned = false;
+
     switch (msg.type) {
       case 'hello':
         await this.init(msg.protocolVersion);
@@ -477,10 +502,13 @@ export class LiveSession {
       this.captureBlock(block);
 
       if (this.ws.readyState === 1 /* OPEN */) {
+        // Backpressure: skip frame if send queue is backed up
+        if (this.ws.bufferedAmount > MAX_SEND_QUEUE_BYTES) {
+          this.audioSeq++; // still advance seq so client detects gap
+          return;
+        }
         const frame = this.audioFrameBuf!;
-        // Update per-frame sequence number
         frame.writeUInt32LE(this.audioSeq++, 0);
-        // Copy PCM payload after header
         Buffer.from(block.buffer, block.byteOffset, block.byteLength).copy(frame, AUDIO_HEADER_SIZE);
         this.ws.send(frame);
       }
