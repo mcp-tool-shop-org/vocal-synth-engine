@@ -74,6 +74,9 @@ export class LiveSynthEngine {
   private paramBreath: Float32Array;
   private paramTimbreWeights: Record<string, Float32Array>;
 
+  // Global timbre morph weights (null = use per-voice timbre string)
+  private globalTimbreWeights: Record<string, number> | null = null;
+
   // Telemetry accumulators (reset on read)
   private peakSample: number = 0;
   private maxDelta: number = 0;
@@ -212,6 +215,11 @@ export class LiveSynthEngine {
     }
   }
 
+  /** Set global timbre morph weights (null = use per-voice timbre string). */
+  setTimbreWeights(weights: Record<string, number> | null) {
+    this.globalTimbreWeights = weights;
+  }
+
   // ── Render ───────────────────────────────────────────────────
 
   /** Render one block of audio. Returns Float32Array of samples. */
@@ -303,10 +311,16 @@ export class LiveSynthEngine {
         pAmp[i] = env * voice.velocity;
         pBreath[i] = voice.breathiness;
 
-        // Timbre weights
-        const activeTimbre = voice.timbre || this.config.defaultTimbre;
-        for (const t of timbres) {
-          pTW[t][i] = t === activeTimbre ? 1.0 : 0.0;
+        // Timbre weights — morphed if XY pad active, else hard switch
+        if (this.globalTimbreWeights && !voice.timbre) {
+          for (const t of timbres) {
+            pTW[t][i] = this.globalTimbreWeights[t] ?? 0;
+          }
+        } else {
+          const activeTimbre = voice.timbre || this.config.defaultTimbre;
+          for (const t of timbres) {
+            pTW[t][i] = t === activeTimbre ? 1.0 : 0.0;
+          }
         }
       }
 

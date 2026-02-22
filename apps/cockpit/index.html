@@ -146,6 +146,13 @@
                 </div>
               </div>
 
+              <!-- MIDI Input -->
+              <div class="live-midi-bar">
+                <label>MIDI: <select id="midi-input"><option value="">None</option></select></label>
+                <span id="midi-status" class="midi-badge off">No MIDI</span>
+                <label><input type="number" id="midi-channel" value="0" min="0" max="15" title="0 = all channels"> Ch</label>
+              </div>
+
               <!-- Live Controls -->
               <div class="live-controls-grid">
                 <label>Preset:
@@ -173,6 +180,33 @@
                   <input type="range" id="live-portamento" min="0" max="500" step="10" value="0">
                   <span class="slider-value" id="live-portamento-val">0 ms</span>
                 </label>
+              </div>
+
+              <!-- Metronome -->
+              <div class="live-metronome-bar">
+                <label><input type="checkbox" id="metro-toggle"> Metronome</label>
+                <label>BPM: <input type="number" id="metro-bpm" value="120" min="30" max="300" step="1"></label>
+                <label>Beats: <select id="metro-beats">
+                  <option value="4">4/4</option>
+                  <option value="3">3/4</option>
+                  <option value="2">2/4</option>
+                </select></label>
+                <label><input type="checkbox" id="metro-quantize"> Quantize</label>
+                <label>Grid: <select id="metro-grid" disabled>
+                  <option value="4">1/4</option>
+                  <option value="8">1/8</option>
+                  <option value="16">1/16</option>
+                </select></label>
+              </div>
+
+              <!-- XY Pad (Timbre Morph + Breathiness) -->
+              <div class="live-xy-pad-container">
+                <canvas id="xy-pad" width="200" height="200"></canvas>
+                <div class="xy-labels">
+                  <span class="xy-label-x">Timbre blend &rarr;</span>
+                  <span class="xy-label-y">&uarr; Breathiness</span>
+                  <span id="xy-readout">--</span>
+                </div>
               </div>
 
               <!-- Action Buttons -->
@@ -209,6 +243,16 @@
                   <div class="lt-label">RTF</div>
                   <div class="lt-value" id="live-rtf">--</div>
                 </div>
+              </div>
+
+              <!-- Latency Calibration -->
+              <div class="live-latency-bar" id="latency-bar" style="display:none;">
+                <button id="btn-tap-test">Tap Test</button>
+                <span class="latency-readout">
+                  WS RTT: <span id="lat-rtt">--</span>ms &nbsp;|&nbsp;
+                  Audio: <span id="lat-audio">--</span>ms &nbsp;|&nbsp;
+                  Total: <span id="lat-total">--</span>ms
+                </span>
               </div>
             </div>
           </section>
@@ -869,6 +913,81 @@
     background: var(--warn) !important;
     color: #000 !important;
   }
+
+  /* MIDI Bar */
+  .live-midi-bar {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+  }
+  .live-midi-bar label { display: flex; align-items: center; gap: 0.3rem; color: #888; }
+  .live-midi-bar select, .live-midi-bar input[type="number"] {
+    background: #2a2a2a; border: 1px solid var(--border); color: var(--text);
+    padding: 0.2rem 0.4rem; border-radius: 4px; font-family: monospace; font-size: 0.8rem;
+  }
+  .live-midi-bar input[type="number"] { width: 3rem; }
+  .midi-badge {
+    padding: 0.15rem 0.5rem; border-radius: 8px; font-size: 0.75rem; font-weight: bold;
+  }
+  .midi-badge.off { background: #333; color: #666; }
+  .midi-badge.on { background: var(--success); color: #000; }
+  .midi-badge.flash { background: var(--accent); color: #000; }
+
+  /* Metronome Bar */
+  .live-metronome-bar {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    font-size: 0.85rem;
+  }
+  .live-metronome-bar label { display: flex; align-items: center; gap: 0.3rem; color: #888; }
+  .live-metronome-bar input[type="number"], .live-metronome-bar select {
+    background: #2a2a2a; border: 1px solid var(--border); color: var(--text);
+    padding: 0.2rem 0.4rem; border-radius: 4px; font-family: monospace; font-size: 0.8rem;
+  }
+  .live-metronome-bar input[type="number"] { width: 4rem; }
+
+  /* XY Pad */
+  .live-xy-pad-container {
+    display: inline-flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+  }
+  #xy-pad {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    cursor: crosshair;
+    background: #1a1a1a;
+    touch-action: none;
+  }
+  .xy-labels {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    color: #666;
+  }
+  #xy-readout {
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: var(--accent);
+    margin-top: 0.5rem;
+  }
+
+  /* Latency Bar */
+  .live-latency-bar {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+  }
+  .latency-readout { color: #888; font-family: monospace; font-size: 0.8rem; }
+  .latency-readout span { color: var(--accent); }
 
   /* Live Telemetry Tiles */
   .live-tiles {

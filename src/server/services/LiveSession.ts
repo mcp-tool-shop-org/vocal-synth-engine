@@ -21,6 +21,7 @@ import {
   type NoteAckMessage,
   type RecordStatusMessage,
   type RecordSavedMessage,
+  type PongMessage,
 } from '../../types/live.js';
 import { saveRender } from '../storage/renderStore.js';
 import { createHash } from 'node:crypto';
@@ -183,6 +184,20 @@ export class LiveSession {
 
       case 'record_stop':
         this.handleRecordStop(msg.name);
+        break;
+
+      case 'timbre_morph':
+        if (this.engine) {
+          this.engine.setTimbreWeights(msg.weights);
+        }
+        break;
+
+      case 'ping':
+        this.send({
+          type: 'pong',
+          clientTimestamp: msg.clientTimestamp,
+          serverTimestamp: Date.now(),
+        } as PongMessage);
         break;
 
       default:

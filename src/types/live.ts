@@ -59,6 +59,16 @@ export interface RecordStopMessage {
   name?: string;             // name for the saved render
 }
 
+export interface TimbreMorphMessage {
+  type: 'timbre_morph';
+  weights: Record<string, number>; // e.g. { ah: 0.6, oo: 0.4, ee: 0.0 }
+}
+
+export interface PingMessage {
+  type: 'ping';
+  clientTimestamp: number;   // performance.now() at send time
+}
+
 export type ClientMessage =
   | HelloMessage
   | TransportMessage
@@ -66,7 +76,9 @@ export type ClientMessage =
   | NoteOffMessage
   | ParamUpdateMessage
   | RecordStartMessage
-  | RecordStopMessage;
+  | RecordStopMessage
+  | TimbreMorphMessage
+  | PingMessage;
 
 // ── Server → Client ──────────────────────────────────────────────
 
@@ -123,6 +135,12 @@ export interface NoteAckMessage {
   stolen: boolean;            // was a voice stolen?
 }
 
+export interface PongMessage {
+  type: 'pong';
+  clientTimestamp: number;   // echoed back
+  serverTimestamp: number;   // server's Date.now()
+}
+
 export type ServerMessage =
   | HelloAckMessage
   | ErrorMessage
@@ -130,7 +148,8 @@ export type ServerMessage =
   | RecordStatusMessage
   | RecordSavedMessage
   | TransportAckMessage
-  | NoteAckMessage;
+  | NoteAckMessage
+  | PongMessage;
 
 // ── Combined ─────────────────────────────────────────────────────
 

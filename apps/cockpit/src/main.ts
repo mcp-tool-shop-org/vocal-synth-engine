@@ -794,6 +794,43 @@
   let heldNoteOffs: string[] = []; // queued note_off noteIds while Hold is active
   let isRecording = false;
 
+  // MIDI input
+  const midiInputSelect = document.getElementById('midi-input') as HTMLSelectElement;
+  const midiStatus = document.getElementById('midi-status')!;
+  const midiChannelInput = document.getElementById('midi-channel') as HTMLInputElement;
+  let midiAccess: any = null; // WebMidi.MIDIAccess
+  let activeMidiInput: any = null; // WebMidi.MIDIInput
+  let midiFlashTimeout: number | null = null;
+
+  // Metronome
+  const metroToggle = document.getElementById('metro-toggle') as HTMLInputElement;
+  const metroBpm = document.getElementById('metro-bpm') as HTMLInputElement;
+  const metroBeats = document.getElementById('metro-beats') as HTMLSelectElement;
+  const metroQuantize = document.getElementById('metro-quantize') as HTMLInputElement;
+  const metroGrid = document.getElementById('metro-grid') as HTMLSelectElement;
+  let metronomeOn = false;
+  let metronomeTimerId: number | null = null;
+  let metronomeNextBeatTime = 0;
+  let metronomeCurrentBeat = 0;
+
+  // XY Pad
+  const xyPad = document.getElementById('xy-pad') as HTMLCanvasElement;
+  const xyReadout = document.getElementById('xy-readout')!;
+  let xyDragging = false;
+  let xyTimbreNames: string[] = [];
+  let xyX = 0; // 0..1
+  let xyY = 0; // 0..1
+  let xyLastSendTime = 0;
+
+  // Latency
+  const latencyBar = document.getElementById('latency-bar')!;
+  const btnTapTest = document.getElementById('btn-tap-test') as HTMLButtonElement;
+  const latRtt = document.getElementById('lat-rtt')!;
+  const latAudio = document.getElementById('lat-audio')!;
+  const latTotal = document.getElementById('lat-total')!;
+  let pingRtts: number[] = [];
+  let pingPending = 0;
+
   // ── Slider value displays ──────────────────────────────────
 
   liveVelocityInput.addEventListener('input', () => {
@@ -908,7 +945,7 @@
   }
   renderLiveKeyboard();
 
-  function triggerNoteOn(key: string, midi: number) {
+  function triggerNoteOn(key: string, midi: number, velocityOverride?: number) {
     const noteId = `key-${key}`;
     if (activeKeys.has(noteId)) return;
     activeKeys.add(noteId);
@@ -916,19 +953,40 @@
     const el = liveKeyboard.querySelector(`[data-key="${key}"]`);
     if (el) el.classList.add('active');
 
-    if (liveWs && liveConnected) {
-      liveWs.send(JSON.stringify({
-        type: 'note_on',
-        noteId,
-        midi,
-        velocity: parseFloat(liveVelocityInput.value),
-        breathiness: parseFloat(liveBreathinessInput.value) || undefined,
-        vibrato: parseInt(liveVibratoInput.value, 10) > 0
-          ? { depthCents: parseInt(liveVibratoInput.value, 10), rateHz: 5.5, onsetSec: 0.15 }
-          : undefined,
-        portamentoMs: parseInt(livePortamentoInput.value, 10) || undefined,
-        timbre: liveTimbreSelect.value || undefined,
-      }));
+    const sendNote = () => {
+      if (liveWs && liveConnected) {
+        liveWs.send(JSON.stringify({
+          type: 'note_on',
+          noteId,
+          midi,
+          velocity: velocityOverride ?? parseFloat(liveVelocityInput.value),
+          breathiness: parseFloat(liveBreathinessInput.value) || undefined,
+          vibrato: parseInt(liveVibratoInput.value, 10) > 0
+            ? { depthCents: parseInt(liveVibratoInput.value, 10), rateHz: 5.5, onsetSec: 0.15 }
+            : undefined,
+          portamentoMs: parseInt(livePortamentoInput.value, 10) || undefined,
+          timbre: liveTimbreSelect.value || undefined,
+        }));
+      }
+    };
+
+    // Quantize if metronome quantization is active
+    if (metronomeOn && metroQuantize.checked && liveAudioCtx) {
+      const bpm = parseInt(metroBpm.value, 10) || 120;
+      const gridDiv = parseInt(metroGrid.value, 10) || 4;
+      const gridSec = 60 / bpm / (gridDiv / 4);
+      const now = liveAudioCtx.currentTime;
+      const gridPos = now / gridSec;
+      const nextGrid = Math.ceil(gridPos) * gridSec;
+      const delayMs = (nextGrid - now) * 1000;
+      if (delayMs > gridSec * 500) {
+        // Close enough to current grid — send immediately
+        sendNote();
+      } else {
+        setTimeout(sendNote, delayMs);
+      }
+    } else {
+      sendNote();
     }
   }
 
@@ -1033,6 +1091,311 @@
       btnHold.textContent = 'Hold';
       flushHeldNotes();
     }
+  });
+
+  // ── MIDI Input ───────────────────────────────────────────────
+
+  function populateMidiInputs() {
+    if (!midiAccess) return;
+    const prev = midiInputSelect.value;
+    midiInputSelect.innerHTML = '<option value="">None</option>';
+    for (const [id, input] of midiAccess.inputs) {
+      const opt = document.createElement('option');
+      opt.value = id;
+      opt.textContent = (input as any).name || id;
+      midiInputSelect.appendChild(opt);
+    }
+    if (prev) midiInputSelect.value = prev;
+  }
+
+  function handleMidiMessage(e: any) {
+    const data = e.data as Uint8Array;
+    if (!data || data.length < 3) return;
+
+    const status = data[0] & 0xF0;
+    const channel = data[0] & 0x0F;
+    const filterCh = parseInt(midiChannelInput.value, 10);
+    if (filterCh > 0 && channel !== filterCh) return;
+
+    const midi = data[1];
+    const vel = data[2];
+
+    if (status === 0x90 && vel > 0) {
+      // Note On
+      triggerNoteOn(`midi-${midi}`, midi, vel / 127);
+      flashMidiBadge();
+    } else if (status === 0x80 || (status === 0x90 && vel === 0)) {
+      // Note Off
+      triggerNoteOff(`midi-${midi}`);
+    }
+  }
+
+  function flashMidiBadge() {
+    midiStatus.className = 'midi-badge flash';
+    if (midiFlashTimeout) clearTimeout(midiFlashTimeout);
+    midiFlashTimeout = window.setTimeout(() => {
+      midiStatus.className = activeMidiInput ? 'midi-badge on' : 'midi-badge off';
+    }, 100);
+  }
+
+  midiInputSelect.addEventListener('change', () => {
+    if (activeMidiInput) {
+      activeMidiInput.onmidimessage = null;
+      activeMidiInput = null;
+    }
+    const id = midiInputSelect.value;
+    if (id && midiAccess) {
+      activeMidiInput = midiAccess.inputs.get(id);
+      if (activeMidiInput) {
+        activeMidiInput.onmidimessage = handleMidiMessage;
+        midiStatus.textContent = 'MIDI OK';
+        midiStatus.className = 'midi-badge on';
+      }
+    } else {
+      midiStatus.textContent = 'No MIDI';
+      midiStatus.className = 'midi-badge off';
+    }
+  });
+
+  // Init MIDI (independent of WS connection)
+  if ((navigator as any).requestMIDIAccess) {
+    (navigator as any).requestMIDIAccess().then((access: any) => {
+      midiAccess = access;
+      populateMidiInputs();
+      access.onstatechange = () => populateMidiInputs();
+    }).catch(() => {
+      console.warn('[midi] Web MIDI not available');
+    });
+  }
+
+  // ── Metronome ──────────────────────────────────────────────
+
+  function scheduleMetronomeClick(time: number, isDownbeat: boolean) {
+    if (!liveAudioCtx) return;
+    const osc = liveAudioCtx.createOscillator();
+    const gain = liveAudioCtx.createGain();
+    osc.connect(gain).connect(liveAudioCtx.destination);
+    osc.frequency.value = isDownbeat ? 1000 : 800;
+    gain.gain.setValueAtTime(0.3, time);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
+    osc.start(time);
+    osc.stop(time + 0.05);
+  }
+
+  function startMetronome() {
+    if (!liveAudioCtx) return;
+    metronomeCurrentBeat = 0;
+    metronomeNextBeatTime = liveAudioCtx.currentTime + 0.05; // small initial delay
+    metronomeScheduler();
+  }
+
+  function metronomeScheduler() {
+    if (!metronomeOn || !liveAudioCtx) return;
+    const bpm = parseInt(metroBpm.value, 10) || 120;
+    const beatCount = parseInt(metroBeats.value, 10) || 4;
+    const beatDuration = 60 / bpm;
+    const lookahead = 0.1; // 100ms
+
+    while (metronomeNextBeatTime < liveAudioCtx.currentTime + lookahead) {
+      const isDownbeat = metronomeCurrentBeat % beatCount === 0;
+      scheduleMetronomeClick(metronomeNextBeatTime, isDownbeat);
+      metronomeNextBeatTime += beatDuration;
+      metronomeCurrentBeat++;
+    }
+
+    metronomeTimerId = window.setTimeout(metronomeScheduler, 25);
+  }
+
+  function stopMetronome() {
+    if (metronomeTimerId !== null) {
+      clearTimeout(metronomeTimerId);
+      metronomeTimerId = null;
+    }
+  }
+
+  metroToggle.addEventListener('change', () => {
+    metronomeOn = metroToggle.checked;
+    if (metronomeOn && liveAudioCtx) {
+      startMetronome();
+    } else {
+      stopMetronome();
+    }
+  });
+
+  metroQuantize.addEventListener('change', () => {
+    metroGrid.disabled = !metroQuantize.checked;
+  });
+
+  // ── XY Pad (Timbre Morph + Breathiness) ────────────────────
+
+  function computeTimbreWeights(x: number): Record<string, number> {
+    const names = xyTimbreNames;
+    const n = names.length;
+    const weights: Record<string, number> = {};
+    if (n === 0) return weights;
+    if (n === 1) { weights[names[0]] = 1; return weights; }
+
+    // Map X across [0, n-1] range, blend two adjacent timbres
+    const pos = x * (n - 1);
+    const lo = Math.floor(pos);
+    const hi = Math.min(lo + 1, n - 1);
+    const frac = pos - lo;
+
+    for (let i = 0; i < n; i++) {
+      if (i === lo && i === hi) weights[names[i]] = 1;
+      else if (i === lo) weights[names[i]] = 1 - frac;
+      else if (i === hi) weights[names[i]] = frac;
+      else weights[names[i]] = 0;
+    }
+    return weights;
+  }
+
+  function drawXyPad() {
+    const ctx = xyPad.getContext('2d')!;
+    const w = xyPad.width;
+    const h = xyPad.height;
+    ctx.clearRect(0, 0, w, h);
+
+    // Background
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(0, 0, w, h);
+
+    // Grid lines at timbre boundaries
+    const n = xyTimbreNames.length;
+    if (n > 1) {
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 1;
+      for (let i = 1; i < n; i++) {
+        const x = (i / (n - 1)) * w;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+    }
+
+    // Timbre labels along bottom
+    ctx.fillStyle = '#555';
+    ctx.font = '11px monospace';
+    ctx.textAlign = 'center';
+    for (let i = 0; i < n; i++) {
+      const x = n === 1 ? w / 2 : (i / (n - 1)) * w;
+      ctx.fillText(xyTimbreNames[i], x, h - 4);
+    }
+
+    // Breathiness label
+    ctx.fillStyle = '#444';
+    ctx.font = '10px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('breath', 4, 12);
+
+    // Crosshair
+    const cx = xyX * w;
+    const cy = (1 - xyY) * h; // Y inverted (0=bottom)
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, h); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(w, cy); ctx.stroke();
+
+    // Dot
+    ctx.beginPath();
+    ctx.arc(cx, cy, 6, 0, Math.PI * 2);
+    ctx.fillStyle = 'var(--accent)';
+    ctx.fillStyle = '#e8a838';
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  function updateXyPad(clientX: number, clientY: number) {
+    const rect = xyPad.getBoundingClientRect();
+    xyX = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    xyY = Math.max(0, Math.min(1, 1 - (clientY - rect.top) / rect.height)); // invert
+
+    // Update breathiness slider to match
+    liveBreathinessInput.value = xyY.toFixed(2);
+    liveBreathinessVal.textContent = xyY.toFixed(2);
+
+    // Compute weights and update readout
+    const weights = computeTimbreWeights(xyX);
+    const readoutParts: string[] = [];
+    for (const [name, w] of Object.entries(weights)) {
+      if (w > 0.01) readoutParts.push(`${name}: ${w.toFixed(2)}`);
+    }
+    xyReadout.textContent = readoutParts.join(' | ') || '--';
+
+    drawXyPad();
+
+    // Send to server (throttle to 30 Hz)
+    const now = performance.now();
+    if (now - xyLastSendTime > 33 && liveWs && liveConnected) {
+      xyLastSendTime = now;
+      liveWs.send(JSON.stringify({ type: 'timbre_morph', weights }));
+    }
+  }
+
+  xyPad.addEventListener('pointerdown', (e) => {
+    xyDragging = true;
+    xyPad.setPointerCapture(e.pointerId);
+    updateXyPad(e.clientX, e.clientY);
+  });
+  xyPad.addEventListener('pointermove', (e) => {
+    if (!xyDragging) return;
+    updateXyPad(e.clientX, e.clientY);
+  });
+  xyPad.addEventListener('pointerup', () => { xyDragging = false; });
+  xyPad.addEventListener('pointerleave', () => { xyDragging = false; });
+
+  // Initial draw
+  drawXyPad();
+
+  // ── Latency Calibration ────────────────────────────────────
+
+  function sendPingBurst(count: number) {
+    pingRtts = [];
+    pingPending = count;
+    for (let i = 0; i < count; i++) {
+      setTimeout(() => {
+        if (liveWs && liveConnected) {
+          liveWs.send(JSON.stringify({
+            type: 'ping',
+            clientTimestamp: performance.now(),
+          }));
+        }
+      }, i * 200);
+    }
+  }
+
+  function handlePong(msg: any) {
+    const rtt = performance.now() - msg.clientTimestamp;
+    pingRtts.push(rtt);
+    pingPending--;
+
+    if (pingPending <= 0) {
+      const avgRtt = pingRtts.reduce((a, b) => a + b, 0) / pingRtts.length;
+      latRtt.textContent = avgRtt.toFixed(1);
+
+      // Audio pipeline latency
+      let audioMs = 0;
+      if (liveAudioCtx) {
+        audioMs = (
+          (liveAudioCtx.baseLatency || 0) +
+          (liveAudioCtx.outputLatency || 0) +
+          (1024 / 48000) // one render block in worklet
+        ) * 1000;
+      }
+      latAudio.textContent = audioMs.toFixed(1);
+
+      // Total = one-way network + ~1ms server render + audio pipeline
+      const total = (avgRtt / 2) + 1 + audioMs;
+      latTotal.textContent = total.toFixed(1);
+    }
+  }
+
+  btnTapTest.addEventListener('click', () => {
+    if (!liveWs || !liveConnected) return;
+    sendPingBurst(5);
   });
 
   // ── Live connection ────────────────────────────────────────
@@ -1140,6 +1503,11 @@
     btnRecord.style.background = '';
     btnRecord.style.color = '';
 
+    // Stop metronome
+    stopMetronome();
+    metronomeOn = false;
+    metroToggle.checked = false;
+
     if (liveWs) { liveWs.close(); liveWs = null; }
     if (liveWorkletNode) { liveWorkletNode.disconnect(); liveWorkletNode = null; }
     if (liveAudioCtx) { liveAudioCtx.close(); liveAudioCtx = null; }
@@ -1150,6 +1518,7 @@
     liveStatus.textContent = 'Disconnected';
     liveStatus.className = 'live-badge off';
     liveTelemetry.style.display = 'none';
+    latencyBar.style.display = 'none';
     btnLiveToggle.textContent = 'Connect Live';
     setLiveButtonsEnabled(false);
   }
@@ -1167,8 +1536,14 @@
         liveStatus.textContent = `Live (${msg.presetId})`;
         liveStatus.className = 'live-badge on';
         liveTelemetry.style.display = 'grid';
+        latencyBar.style.display = 'flex';
         btnLiveToggle.textContent = 'Disconnect';
         setLiveButtonsEnabled(true);
+        // Store timbres for XY pad
+        xyTimbreNames = msg.timbres || [];
+        drawXyPad();
+        // Auto-measure latency
+        sendPingBurst(3);
         showToast(`Live connected: ${msg.timbres.join(', ')} @ ${msg.sampleRateHz}Hz`);
         break;
 
@@ -1208,6 +1583,10 @@
       case 'record_saved':
         showToast(`Saved: ${msg.name} (${msg.durationSec.toFixed(1)}s)`);
         loadBank(); // refresh render bank
+        break;
+
+      case 'pong':
+        handlePong(msg);
         break;
     }
   }
