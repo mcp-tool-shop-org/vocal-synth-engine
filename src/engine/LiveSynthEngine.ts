@@ -66,6 +66,14 @@ export class LiveSynthEngine {
   private currentSample: number = 0;
   private playing: boolean = false;
 
+  // Pre-allocated render buffers (reused every frame — zero GC pressure)
+  private outBuf: Float32Array;
+  private voiceOutBuf: Float32Array;
+  private paramF0: Float32Array;
+  private paramAmp: Float32Array;
+  private paramBreath: Float32Array;
+  private paramTimbreWeights: Record<string, Float32Array>;
+
   // Telemetry accumulators (reset on read)
   private peakSample: number = 0;
   private maxDelta: number = 0;
@@ -78,6 +86,18 @@ export class LiveSynthEngine {
     this.config = config;
     this.preset = preset;
     this.voices = Array.from({ length: config.maxPolyphony }, (_, i) => this.createVoice(i));
+
+    // Allocate render buffers once
+    const bs = config.blockSize;
+    this.outBuf = new Float32Array(bs);
+    this.voiceOutBuf = new Float32Array(bs);
+    this.paramF0 = new Float32Array(bs);
+    this.paramAmp = new Float32Array(bs);
+    this.paramBreath = new Float32Array(bs);
+    this.paramTimbreWeights = {};
+    for (const t of Object.keys(preset.timbres)) {
+      this.paramTimbreWeights[t] = new Float32Array(bs);
+    }
   }
 
   private createVoice(index: number): LiveVoice {
@@ -198,7 +218,8 @@ export class LiveSynthEngine {
   render(): Float32Array {
     const blockSize = this.config.blockSize;
     const sr = this.config.sampleRateHz;
-    const out = new Float32Array(blockSize);
+    const out = this.outBuf;
+    out.fill(0);
 
     if (!this.playing) {
       this.currentSample += blockSize;
@@ -208,22 +229,24 @@ export class LiveSynthEngine {
     const t0 = performance.now();
     const timbres = Object.keys(this.preset.timbres);
 
+    // Reuse pre-allocated param buffers
+    const pf0 = this.paramF0;
+    const pAmp = this.paramAmp;
+    const pBreath = this.paramBreath;
+    const pTW = this.paramTimbreWeights;
+    const voiceOut = this.voiceOutBuf;
+
     // Track active voices for telemetry
     let activeCount = 0;
 
     for (const voice of this.voices) {
       if (voice.noteId === null && voice.noteOffSample === -1) continue;
 
-      // Build RenderParams for this voice
-      const params: RenderParams = {
-        f0Hz: new Float32Array(blockSize),
-        amp: new Float32Array(blockSize),
-        timbreWeights: {},
-        breathiness: new Float32Array(blockSize),
-      };
-      for (const t of timbres) {
-        params.timbreWeights[t] = new Float32Array(blockSize);
-      }
+      // Zero the reusable param buffers
+      pf0.fill(0);
+      pAmp.fill(0);
+      pBreath.fill(0);
+      for (const t of timbres) pTW[t].fill(0);
 
       let voiceIsActive = false;
 
@@ -250,13 +273,7 @@ export class LiveSynthEngine {
           }
         }
 
-        if (env <= 0.0001) {
-          params.f0Hz[i] = 0;
-          params.amp[i] = 0;
-          params.breathiness[i] = 0;
-          for (const t of timbres) params.timbreWeights[t][i] = 0;
-          continue;
-        }
+        if (env <= 0.0001) continue;
 
         voiceIsActive = true;
 
@@ -273,8 +290,8 @@ export class LiveSynthEngine {
         // Vibrato
         if (voice.vibrato) {
           const vibCents = calculateVibrato(
-            noteAgeSec + voice.noteOnSample / sr, // absolute time
-            voice.noteOnSample / sr,               // note start
+            noteAgeSec + voice.noteOnSample / sr,
+            voice.noteOnSample / sr,
             voice.vibrato.rateHz,
             voice.vibrato.depthCents,
             voice.vibrato.onsetSec
@@ -282,21 +299,26 @@ export class LiveSynthEngine {
           f0 *= centsToRatio(vibCents);
         }
 
-        params.f0Hz[i] = f0;
-        params.amp[i] = env * voice.velocity;
-        params.breathiness[i] = voice.breathiness;
+        pf0[i] = f0;
+        pAmp[i] = env * voice.velocity;
+        pBreath[i] = voice.breathiness;
 
         // Timbre weights
         const activeTimbre = voice.timbre || this.config.defaultTimbre;
         for (const t of timbres) {
-          params.timbreWeights[t][i] = t === activeTimbre ? 1.0 : 0.0;
+          pTW[t][i] = t === activeTimbre ? 1.0 : 0.0;
         }
       }
 
       if (voiceIsActive) {
         activeCount++;
-        // Render into temp buffer and mix
-        const voiceOut = new Float32Array(blockSize);
+        // Render into reusable buffer and mix
+        const params: RenderParams = {
+          f0Hz: pf0,
+          amp: pAmp,
+          timbreWeights: pTW,
+          breathiness: pBreath,
+        };
         voice.renderer.renderBlock(params, voiceOut);
         for (let i = 0; i < blockSize; i++) {
           out[i] += voiceOut[i];

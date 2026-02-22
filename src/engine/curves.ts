@@ -1,5 +1,26 @@
 import { AutomationPoint } from '../types/score.js';
 
+// ── Sine lookup table (4096 entries, ~0.09° resolution, ~70 dB SNR) ──
+const SINE_TABLE_SIZE = 4096;
+const SINE_TABLE_MASK = SINE_TABLE_SIZE - 1;
+const SINE_TABLE = new Float32Array(SINE_TABLE_SIZE);
+for (let i = 0; i < SINE_TABLE_SIZE; i++) {
+  SINE_TABLE[i] = Math.sin(2 * Math.PI * i / SINE_TABLE_SIZE);
+}
+
+/** Fast sine from normalized phase [0..1). Uses 4096-entry LUT. */
+export function fastSin(phase01: number): number {
+  return SINE_TABLE[((phase01 * SINE_TABLE_SIZE) | 0) & SINE_TABLE_MASK];
+}
+
+// ── dB → linear conversion ──
+const LN10_OVER_20 = Math.LN10 / 20; // ≈ 0.11513
+
+/** Convert dB to linear amplitude. ~2-3× faster than Math.pow(10, db/20). */
+export function dbToLinear(db: number): number {
+  return Math.exp(db * LN10_OVER_20);
+}
+
 export function midiToHz(midi: number): number {
   return 440 * Math.pow(2, (midi - 69) / 12);
 }
