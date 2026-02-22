@@ -1,0 +1,12 @@
+{
+  "bpm": 120,
+  "lyrics": {
+    "text": "hello world",
+    "language": "en"
+  },
+  "notes": [
+    { "id": "n1", "startSec": 0.0, "durationSec": 0.8, "midi": 60 },
+    { "id": "n2", "startSec": 0.8, "durationSec": 0.8, "midi": 64 },
+    { "id": "n3", "startSec": 1.6, "durationSec": 1.0, "midi": 67 }
+  ]
+}

@@ -99,9 +99,26 @@
                 </div>
               </div>
 
-              <div class="piano-roll-container" id="pr-container">
-                <div class="piano-roll-content" id="pr-content">
-                  <!-- Grid and notes injected via JS -->
+              <!-- Lyric Editor -->
+              <div class="lyric-bar">
+                <label>Lyrics:
+                  <input type="text" id="inp-lyrics" placeholder="Type lyrics (e.g. hello world)" spellcheck="false">
+                </label>
+                <button id="btn-phonemize">Generate Phonemes</button>
+                <label class="toggle-label phoneme-toggle">
+                  <input type="checkbox" id="toggle-phonemes" checked> Show
+                </label>
+              </div>
+
+              <div class="piano-roll-wrapper">
+                <!-- Phoneme overlay (above piano roll, scrolls together) -->
+                <div class="phoneme-lane" id="phoneme-lane">
+                  <!-- Phoneme blocks injected via JS -->
+                </div>
+                <div class="piano-roll-container" id="pr-container">
+                  <div class="piano-roll-content" id="pr-content">
+                    <!-- Grid and notes injected via JS -->
+                  </div>
                 </div>
               </div>
 
@@ -613,6 +630,75 @@
     font-family: monospace;
   }
 
+  /* Lyric Bar */
+  .lyric-bar {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  .lyric-bar label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    color: #888;
+    flex: 1;
+  }
+  .lyric-bar input[type="text"] {
+    flex: 1;
+    background: #2a2a2a;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.4rem 0.6rem;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.85rem;
+  }
+  .lyric-bar .phoneme-toggle {
+    flex: none;
+    font-size: 0.8rem;
+    gap: 0.25rem;
+    cursor: pointer;
+  }
+
+  /* Piano Roll Wrapper (scroll-linked phoneme lane + roll) */
+  .piano-roll-wrapper {
+    position: relative;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: #111;
+  }
+
+  /* Phoneme Lane (above piano roll, scroll-linked) */
+  .phoneme-lane {
+    position: relative;
+    height: 28px;
+    background: #1a1a1a;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .ph-block {
+    position: absolute;
+    top: 2px;
+    height: 24px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-family: monospace;
+    font-weight: bold;
+    color: #fff;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3);
+  }
+  .ph-block.vowel { background: #2d7d46; }
+  .ph-block.consonant { background: #7d4b2d; }
+
   /* Piano Roll */
   .editor-header {
     display: flex;
@@ -622,13 +708,12 @@
   }
   .editor-header h2 { margin: 0; }
   .hint { font-size: 0.8rem; color: #666; }
-  
+
   .piano-roll-container {
     width: 100%;
     height: 350px;
     background: #111;
-    border: 1px solid var(--border);
-    border-radius: 4px;
+    border: none;
     overflow: auto;
     position: relative;
     cursor: crosshair;

@@ -6,6 +6,14 @@ export interface RenderParams {
   amp: Float32Array;        // per-sample amplitude
   timbreWeights: Record<string, Float32Array>; // per-sample weights
   breathiness: Float32Array;// per-sample 0..1
+
+  // ── Consonant synthesis (Phase 4.4) ──
+  /** Per-sample consonant noise amplitude [0..1]. Independent of amp. */
+  consonantAmp: Float32Array;
+  /** Per-sample HPF cutoff as fraction of sampleRate (0 = no filter). */
+  consonantHpfCutoff: Float32Array;
+  /** Per-sample harmonic suppression gain (1.0 = full, 0 = silent). */
+  harmonicGain: Float32Array;
 }
 
 export interface BlockRenderer {
@@ -24,11 +32,21 @@ export class MonophonicRenderer implements BlockRenderer {
   private invSampleRate: number;
   private preset: LoadedVoicePreset;
 
-  constructor(preset: LoadedVoicePreset, rngSeed: number = 123456789) {
+  /** Noise gate gain — ramps to 0 when amp drops below threshold */
+  private noiseGateGain: number = 1.0;
+  /** Noise amplitude exponent — higher = noise dies faster on release */
+  private noiseGamma: number;
+
+  /** One-pole HPF state for consonant noise shaping */
+  private hpfLastInput: number = 0;
+  private hpfLastOutput: number = 0;
+
+  constructor(preset: LoadedVoicePreset, rngSeed: number = 123456789, noiseGamma: number = 1.6) {
     this.preset = preset;
     this.sampleRate = preset.manifest.sampleRateHz;
     this.invSampleRate = 1.0 / this.sampleRate;
     this.rngState = { seed: rngSeed };
+    this.noiseGamma = noiseGamma;
 
     // Find max harmonics across all timbres to size the phase array
     let maxH = 0;
@@ -41,6 +59,9 @@ export class MonophonicRenderer implements BlockRenderer {
 
   public resetPhase(): void {
     this.phases.fill(0);
+    this.noiseGateGain = 1.0;
+    this.hpfLastInput = 0;
+    this.hpfLastOutput = 0;
   }
 
   /**
@@ -111,7 +132,7 @@ export class MonophonicRenderer implements BlockRenderer {
             s += harmonicGains[k] * fastSin(phases[k]);
           }
 
-          out[i] += s * weight * amp;
+          out[i] += s * weight * amp * params.harmonicGain[i];
         }
       } else {
         // Secondary timbres: read phases only (no advance)
@@ -126,16 +147,56 @@ export class MonophonicRenderer implements BlockRenderer {
             s += harmonicGains[k] * fastSin(phases[k]);
           }
 
-          out[i] += s * weight * amp;
+          out[i] += s * weight * amp * params.harmonicGain[i];
         }
       }
     }
 
     // ── Noise pass (separate to keep main loop branch-free) ──
+    // Steeper amplitude curve (amp^γ, default γ=1.6) so noise dies faster than
+    // harmonics during release, plus a gate that fades noise to zero over 20ms
+    // once amp drops below -40 dB. Prevents static tail on voiced→unvoiced boundary.
+    const gateThreshold = 0.01;        // -40 dB linear
+    const gateDecay = 1.0 / (this.sampleRate * 0.020); // 20ms release
+    const gamma = this.noiseGamma;
     for (let i = 0; i < numSamples; i++) {
+      const a = params.amp[i];
+
+      // Update noise gate: open when amp is above threshold, ramp closed otherwise
+      if (a > gateThreshold) {
+        this.noiseGateGain = 1.0;
+      } else {
+        this.noiseGateGain -= gateDecay;
+        if (this.noiseGateGain < 0) this.noiseGateGain = 0;
+      }
+
       const b = params.breathiness[i];
-      if (b > 0.001 && params.amp[i] > 0) {
-        out[i] += (xorshift32(this.rngState) * 2 - 1) * 0.01 * b * params.amp[i];
+      if (b > 0.001 && this.noiseGateGain > 0) {
+        const noiseAmp = Math.pow(a, gamma) * this.noiseGateGain;
+        out[i] += (xorshift32(this.rngState) * 2 - 1) * 0.01 * b * noiseAmp;
+      }
+    }
+
+    // ── Consonant noise pass (amplitude-independent, HPF-shaped) ──
+    for (let i = 0; i < numSamples; i++) {
+      const cAmp = params.consonantAmp[i];
+      if (cAmp <= 0.001) continue;
+
+      const raw = xorshift32(this.rngState) * 2 - 1;
+      const cutoff = params.consonantHpfCutoff[i];
+
+      if (cutoff > 0.001) {
+        // One-pole HPF: y[n] = α·(y[n-1] + x[n] - x[n-1])
+        // α = RC / (RC + T) where RC = 1/(2π·fc), T = 1/sr
+        const cutoffHz = cutoff * this.sampleRate;
+        const rc = 1.0 / (2 * Math.PI * cutoffHz);
+        const alpha = rc / (rc + invSr);
+        const filtered = alpha * (this.hpfLastOutput + raw - this.hpfLastInput);
+        this.hpfLastInput = raw;
+        this.hpfLastOutput = filtered;
+        out[i] += filtered * cAmp;
+      } else {
+        out[i] += raw * cAmp;
       }
     }
   }

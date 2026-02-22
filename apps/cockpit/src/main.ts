@@ -13,6 +13,7 @@
   let currentWavUrl: string | null = null;
   let currentDaemonCommit = '';
   let serverPresets: any[] = [];
+  let phonemeEvents: any[] = []; // PhonemeEvent[] from server
 
   // --- DOM Elements ---
   const statusBadge = document.getElementById('health-status')!;
@@ -40,6 +41,12 @@
   // Piano Roll
   const prContainer = document.getElementById('pr-container')!;
   const prContent = document.getElementById('pr-content')!;
+
+  // Lyrics & Phonemes
+  const inpLyrics = document.getElementById('inp-lyrics') as HTMLInputElement;
+  const btnPhonemize = document.getElementById('btn-phonemize') as HTMLButtonElement;
+  const togglePhonemes = document.getElementById('toggle-phonemes') as HTMLInputElement;
+  const phonemeLane = document.getElementById('phoneme-lane')!;
   
   // Inspector
   const noteInspector = document.getElementById('note-inspector')!;
@@ -123,19 +130,32 @@
 
   function updateUI() {
     renderPianoRoll();
+    renderPhonemes();
     updateInspector();
+    syncLyricsToScore();
     scoreInput.value = JSON.stringify(score, null, 2);
+  }
+
+  /** Sync lyrics input field from score state */
+  function syncLyricsToScore() {
+    if (score.lyrics?.text && !inpLyrics.value) {
+      inpLyrics.value = score.lyrics.text;
+    }
   }
 
   function renderPianoRoll() {
     prContent.innerHTML = '';
-    
+
     let maxSec = 10;
     score.notes.forEach(n => {
       if (n.startSec + n.durationSec > maxSec) maxSec = n.startSec + n.durationSec;
     });
-    prContent.style.width = `${(maxSec + 2) * timeScale}px`;
+    const totalWidth = (maxSec + 2) * timeScale;
+    prContent.style.width = `${totalWidth}px`;
     prContent.style.height = `${numKeys * pitchScale}px`;
+
+    // Sync phoneme lane width to piano roll content
+    phonemeLane.style.width = `${totalWidth}px`;
 
     for (let i = 0; i <= numKeys; i++) {
       const midi = maxMidi - i;
@@ -163,6 +183,78 @@
       prContent.appendChild(el);
     });
   }
+
+  // --- Phoneme Overlay ---
+  function renderPhonemes() {
+    phonemeLane.innerHTML = '';
+    if (!togglePhonemes.checked || phonemeEvents.length === 0) return;
+
+    for (const ev of phonemeEvents) {
+      const el = document.createElement('div');
+      el.className = `ph-block ${ev.kind}`;
+      el.style.left = `${ev.tSec * timeScale}px`;
+      el.style.width = `${Math.max(2, ev.durSec * timeScale)}px`;
+      el.textContent = ev.phoneme;
+      if (ev.timbreHint) el.title = `${ev.phoneme} [${ev.kind}] timbre=${ev.timbreHint}`;
+      else if (ev.strength !== undefined) el.title = `${ev.phoneme} [${ev.kind}] str=${ev.strength}`;
+      else el.title = `${ev.phoneme} [${ev.kind}]`;
+      phonemeLane.appendChild(el);
+    }
+  }
+
+  /** Call server to phonemize lyrics text against current notes */
+  async function doPhonemize() {
+    const text = inpLyrics.value.trim();
+    if (!text) {
+      phonemeEvents = [];
+      delete (score as any).lyrics;
+      renderPhonemes();
+      return;
+    }
+
+    btnPhonemize.disabled = true;
+    btnPhonemize.textContent = '...';
+
+    try {
+      const res = await fetch(`${DAEMON_URL}/api/phonemize`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, notes: score.notes }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Phonemize failed');
+      }
+
+      const data = await res.json();
+      phonemeEvents = data.events || [];
+      (score as any).lyrics = { text };
+
+      if (data.warnings?.length) {
+        for (const w of data.warnings) showToast(w);
+      }
+
+      renderPhonemes();
+      scoreInput.value = JSON.stringify(score, null, 2);
+    } catch (e: any) {
+      showToast(`Phonemize error: ${e.message}`);
+    } finally {
+      btnPhonemize.disabled = false;
+      btnPhonemize.textContent = 'Generate Phonemes';
+    }
+  }
+
+  btnPhonemize.addEventListener('click', doPhonemize);
+  togglePhonemes.addEventListener('change', renderPhonemes);
+  inpLyrics.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') doPhonemize();
+  });
+
+  // Scroll-sync: phoneme lane scrolls with piano roll
+  prContainer.addEventListener('scroll', () => {
+    phonemeLane.style.transform = `translateX(-${prContainer.scrollLeft}px)`;
+  });
 
   let dragState: any = null;
 

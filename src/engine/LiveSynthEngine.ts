@@ -78,6 +78,9 @@ export class LiveSynthEngine {
   private paramAmp: Float32Array;
   private paramBreath: Float32Array;
   private paramTimbreWeights: Record<string, Float32Array>;
+  private paramConsonantAmp: Float32Array;
+  private paramConsonantHpfCutoff: Float32Array;
+  private paramHarmonicGain: Float32Array;
 
   // Global timbre morph weights (null = use per-voice timbre string)
   private globalTimbreWeights: Record<string, number> | null = null;
@@ -109,6 +112,9 @@ export class LiveSynthEngine {
     for (const t of Object.keys(preset.timbres)) {
       this.paramTimbreWeights[t] = new Float32Array(bs);
     }
+    this.paramConsonantAmp = new Float32Array(bs);
+    this.paramConsonantHpfCutoff = new Float32Array(bs);
+    this.paramHarmonicGain = new Float32Array(bs);
   }
 
   private createVoice(index: number): LiveVoice {
@@ -285,6 +291,9 @@ export class LiveSynthEngine {
       pAmp.fill(0);
       pBreath.fill(0);
       for (const t of timbres) pTW[t].fill(0);
+      this.paramConsonantAmp.fill(0);
+      this.paramConsonantHpfCutoff.fill(0);
+      this.paramHarmonicGain.fill(1.0);
 
       let voiceIsActive = false;
 
@@ -362,6 +371,9 @@ export class LiveSynthEngine {
           amp: pAmp,
           timbreWeights: pTW,
           breathiness: pBreath,
+          consonantAmp: this.paramConsonantAmp,
+          consonantHpfCutoff: this.paramConsonantHpfCutoff,
+          harmonicGain: this.paramHarmonicGain,
         };
         voice.renderer.renderBlock(params, voiceOut);
 

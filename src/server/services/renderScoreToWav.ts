@@ -94,6 +94,14 @@ export function getPresetDirInfo() {
 }
 
 export async function renderScoreToWav({ score, config }: { score: any; config: any }) {
+  // Auto-phonemize lyrics if present and no manual phonemes provided
+  if (score.lyrics?.text && !score.phonemes) {
+    const { phonemizeLyrics } = await import('../../phonemize/index.js');
+    const g2pResult = phonemizeLyrics(score.lyrics.text, score.notes || []);
+    score.phonemes = g2pResult.events;
+    for (const w of g2pResult.warnings) console.warn(`[G2P] ${w}`);
+  }
+
   // Resolve preset — accept presetId or fall back to "default-voice"
   const presetId = config.presetId || 'default-voice';
   const preset = await getPreset(presetId);

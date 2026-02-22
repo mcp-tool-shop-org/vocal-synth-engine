@@ -36,6 +36,7 @@
     "zod": "^4.3.6"
   },
   "dependencies": {
+    "cmu-pronouncing-dictionary": "^3.0.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "wavefile": "^11.0.0",

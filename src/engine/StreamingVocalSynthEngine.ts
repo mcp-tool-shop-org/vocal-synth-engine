@@ -1,7 +1,9 @@
-import { VocalScore, VocalNote, TimbreId } from '../types/score.js';
+import { VocalScore, VocalNote, PhonemeEvent, TimbreId } from '../types/score.js';
 import { LoadedVoicePreset } from '../preset/schema.js';
 import { BlockRenderer, MonophonicRenderer, RenderParams } from './renderer.js';
 import { midiToHz, centsToRatio, calculateVibrato, calculateAdsr, interpAutomation } from './curves.js';
+import { getConsonantProfile, consonantEnvelope, ConsonantProfile } from './consonantProfiles.js';
+import { getVowelBlendWeights, TimbreBlendWeights } from '../phonemize/arpabet.js';
 
 export interface StreamingVocalSynthConfig {
   sampleRateHz: number;
@@ -28,6 +30,16 @@ export class StreamingVocalSynthEngine {
   
   private currentSample: number = 0;
   private smoothedTimbreWeights: Record<TimbreId, number> = {};
+  /** Sorted phoneme events for timbre-driven rendering */
+  private phonemes: PhonemeEvent[];
+  /** Cursor for O(1) amortized phoneme lookup */
+  private phonemeCursor: number = 0;
+  /** Last vowel timbre hint (consonants inherit surrounding vowel context) */
+  private lastVowelTimbre: string | null = null;
+  /** Last vowel blend weights (consonants/gaps hold these) */
+  private lastVowelBlend: TimbreBlendWeights | null = null;
+  /** Smoothed harmonic suppression gain (prevents clicks on consonant→vowel) */
+  private smoothedHarmonicGain: number = 1.0;
   
   constructor(config: StreamingVocalSynthConfig, preset: LoadedVoicePreset, score: VocalScore) {
     this.config = config;
@@ -44,6 +56,31 @@ export class StreamingVocalSynthEngine {
     for (const timbreId of Object.keys(this.preset.timbres)) {
       this.smoothedTimbreWeights[timbreId] = timbreId === config.defaultTimbre ? 1.0 : 0.0;
     }
+
+    // Phoneme events (sorted by tSec for cursor-based lookup)
+    this.phonemes = [...(score.phonemes || [])].sort((a, b) => a.tSec - b.tSec);
+  }
+
+  /** Find the active phoneme at a given time. O(1) amortized via forward cursor. */
+  private findActivePhoneme(tSec: number): PhonemeEvent | null {
+    if (this.phonemes.length === 0) return null;
+
+    // Reset cursor if time jumped backward (e.g., seek)
+    if (this.phonemeCursor > 0 && tSec < this.phonemes[this.phonemeCursor - 1].tSec) {
+      this.phonemeCursor = 0;
+    }
+
+    // Advance cursor past expired phonemes
+    while (this.phonemeCursor < this.phonemes.length) {
+      const p = this.phonemes[this.phonemeCursor];
+      if (tSec < p.tSec + p.durSec) break; // current or future
+      this.phonemeCursor++;
+    }
+
+    if (this.phonemeCursor >= this.phonemes.length) return null;
+    const p = this.phonemes[this.phonemeCursor];
+    if (tSec >= p.tSec && tSec < p.tSec + p.durSec) return p;
+    return null; // in a gap between phonemes
   }
   
   public render(numSamples: number): Float32Array {
@@ -57,8 +94,13 @@ export class StreamingVocalSynthEngine {
         f0Hz: new Float32Array(numSamples),
         amp: new Float32Array(numSamples),
         timbreWeights: {},
-        breathiness: new Float32Array(numSamples)
+        breathiness: new Float32Array(numSamples),
+        consonantAmp: new Float32Array(numSamples),
+        consonantHpfCutoff: new Float32Array(numSamples),
+        harmonicGain: new Float32Array(numSamples),
       };
+      // harmonicGain defaults to 1.0 (full harmonics)
+      p.harmonicGain.fill(1.0);
       for (const timbreId of Object.keys(this.preset.timbres)) {
         p.timbreWeights[timbreId] = new Float32Array(numSamples);
       }
@@ -102,11 +144,16 @@ export class StreamingVocalSynthEngine {
         }
       }
       
-      // 2. Calculate global timbre morphing (shared across voices for now)
+      // 2. Phoneme lookup (shared across timbre + consonant logic)
+      const activePhoneme = this.phonemes.length > 0 ? this.findActivePhoneme(tSec) : null;
+
+      // 3. Calculate global timbre weights
+      // Priority: lanes.timbreMorph > phoneme timbreHint > defaultTimbre
       const targetWeights: Record<TimbreId, number> = {};
       let sumWeights = 0;
-      
+
       if (this.score.lanes?.timbreMorph) {
+        // Manual automation lanes (highest priority)
         for (const id of Object.keys(this.preset.timbres)) {
           const lane = this.score.lanes.timbreMorph[id];
           let w = lane ? interpAutomation(lane, tSec) : 0.0;
@@ -114,7 +161,48 @@ export class StreamingVocalSynthEngine {
           targetWeights[id] = w;
           sumWeights += w;
         }
+      } else if (this.phonemes.length > 0) {
+        // Phoneme-driven timbre with vowel blend weights
+        let blend: TimbreBlendWeights | null = null;
+
+        if (activePhoneme) {
+          if (activePhoneme.kind === 'vowel') {
+            // Look up blend weights for this vowel phoneme
+            blend = getVowelBlendWeights(activePhoneme.phoneme);
+            if (blend) {
+              this.lastVowelBlend = blend;
+              this.lastVowelTimbre = activePhoneme.timbreHint ?? null;
+            } else {
+              // Unknown vowel — fall back to timbreHint hard switch
+              if (activePhoneme.timbreHint) {
+                this.lastVowelTimbre = activePhoneme.timbreHint;
+              }
+              blend = this.lastVowelBlend;
+            }
+          } else {
+            // Consonants inherit surrounding vowel blend
+            blend = this.lastVowelBlend;
+          }
+        } else {
+          // In gap between phonemes — hold last vowel blend
+          blend = this.lastVowelBlend;
+        }
+
+        if (blend) {
+          // Apply blend weights — map AH/EE/OO keys to preset timbre names
+          for (const id of Object.keys(this.preset.timbres)) {
+            targetWeights[id] = (blend as any)[id] ?? 0.0;
+            sumWeights += targetWeights[id];
+          }
+        } else {
+          // No blend available — use default timbre
+          for (const id of Object.keys(this.preset.timbres)) {
+            targetWeights[id] = id === this.config.defaultTimbre ? 1.0 : 0.0;
+          }
+          sumWeights = 1.0;
+        }
       } else {
+        // No phonemes, no lanes — use default timbre
         for (const id of Object.keys(this.preset.timbres)) {
           targetWeights[id] = id === this.config.defaultTimbre ? 1.0 : 0.0;
         }
@@ -195,7 +283,30 @@ export class StreamingVocalSynthEngine {
             currentBreathiness += defaultB * params.timbreWeights[id][i];
           }
           params.breathiness[i] = currentBreathiness;
-          
+
+          // Consonant synthesis — use cached activePhoneme from step 2
+          if (activePhoneme && activePhoneme.kind === 'consonant') {
+            const profile = getConsonantProfile(activePhoneme.phoneme);
+            if (profile) {
+              const tRel = Math.min(1, Math.max(0,
+                (tSec - activePhoneme.tSec) / activePhoneme.durSec));
+              const envGain = consonantEnvelope(tRel, profile.envelopeKind);
+              const strength = activePhoneme.strength ?? 1.0;
+              params.consonantAmp[i] = profile.noiseLevel * envGain * strength;
+              params.consonantHpfCutoff[i] = profile.hpfNorm;
+              this.smoothedHarmonicGain += alpha * (profile.harmonicGain - this.smoothedHarmonicGain);
+            } else {
+              params.consonantAmp[i] = 0;
+              params.consonantHpfCutoff[i] = 0;
+              this.smoothedHarmonicGain += alpha * (1.0 - this.smoothedHarmonicGain);
+            }
+          } else {
+            params.consonantAmp[i] = 0;
+            params.consonantHpfCutoff[i] = 0;
+            this.smoothedHarmonicGain += alpha * (1.0 - this.smoothedHarmonicGain);
+          }
+          params.harmonicGain[i] = this.smoothedHarmonicGain;
+
         } else {
           params.f0Hz[i] = 0;
           params.amp[i] = 0;
@@ -203,6 +314,11 @@ export class StreamingVocalSynthEngine {
             params.timbreWeights[id][i] = 0;
           }
           params.breathiness[i] = 0;
+          params.consonantAmp[i] = 0;
+          params.consonantHpfCutoff[i] = 0;
+          // Relax harmonicGain toward 1.0 during inactive voice
+          this.smoothedHarmonicGain += alpha * (1.0 - this.smoothedHarmonicGain);
+          params.harmonicGain[i] = this.smoothedHarmonicGain;
         }
       }
       
