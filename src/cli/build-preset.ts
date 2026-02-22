@@ -109,7 +109,10 @@ async function main() {
     if (args[i] === '--out' && args[i + 1]) {
       outDir = args[++i];
     } else if (args[i].includes(':')) {
-      const [wavPath, timbre] = args[i].split(':');
+      // Split on LAST colon to handle Windows drive letters (e.g. F:/path/AH.wav:AH)
+      const lastColon = args[i].lastIndexOf(':');
+      const wavPath = args[i].slice(0, lastColon);
+      const timbre = args[i].slice(lastColon + 1);
       inputs.push({ wavPath, timbre });
     }
   }
