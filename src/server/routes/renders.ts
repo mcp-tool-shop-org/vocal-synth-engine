@@ -36,6 +36,12 @@ rendersRouter.get("/:id/telemetry", (req, res) => {
   res.json(JSON.parse(fs.readFileSync(p, "utf8")));
 });
 
+rendersRouter.get("/:id/provenance", (req, res) => {
+  const p = path.join(getRenderDir(req.params.id), "provenance.json");
+  if (!fs.existsSync(p)) return res.status(404).end();
+  res.json(JSON.parse(fs.readFileSync(p, "utf8")));
+});
+
 rendersRouter.patch("/:id", (req, res) => {
   try {
     const { name, pinned } = req.body;
