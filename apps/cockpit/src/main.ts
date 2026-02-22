@@ -782,6 +782,7 @@
   const livePortamentoInput = document.getElementById('live-portamento') as HTMLInputElement;
   const livePortamentoVal = document.getElementById('live-portamento-val')!;
   const liveLatencySelect = document.getElementById('live-latency') as HTMLSelectElement;
+  const liveLimiterCheck = document.getElementById('live-limiter') as HTMLInputElement;
 
   // Action buttons
   const btnPanic = document.getElementById('btn-panic') as HTMLButtonElement;
@@ -867,6 +868,15 @@
         type: 'setTargetBuffer',
         samples: getLatencyTargetSamples(),
       });
+    }
+  });
+
+  liveLimiterCheck.addEventListener('change', () => {
+    if (liveWs && liveWs.readyState === WebSocket.OPEN) {
+      liveWs.send(JSON.stringify({
+        type: 'param_update',
+        limiter: liveLimiterCheck.checked,
+      }));
     }
   });
 

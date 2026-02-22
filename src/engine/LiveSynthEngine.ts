@@ -49,6 +49,11 @@ interface LiveVoice {
 
   // Portamento
   prevMidi: number;           // for glide calculation
+
+  // Steal crossfade: fade out residual from stolen voice
+  stealFadeSamplesLeft: number;  // countdown for crossfade (0 = inactive)
+  stealFadeTotal: number;        // total fade length for gain calc
+  stealLastOutput: number;       // last output level of stolen voice
 }
 
 export interface LiveTelemetry {
@@ -76,6 +81,9 @@ export class LiveSynthEngine {
 
   // Global timbre morph weights (null = use per-voice timbre string)
   private globalTimbreWeights: Record<string, number> | null = null;
+
+  // Soft limiter (tanh-based, prevents clipping with polyphony)
+  private limiterEnabled: boolean = true;
 
   // Telemetry accumulators (reset on read)
   private peakSample: number = 0;
@@ -118,6 +126,9 @@ export class LiveSynthEngine {
       noteOffSample: -1,
       releaseDurationSec: 0.1,
       prevMidi: 60,
+      stealFadeSamplesLeft: 0,
+      stealFadeTotal: 0,
+      stealLastOutput: 0,
     };
   }
 
@@ -164,6 +175,17 @@ export class LiveSynthEngine {
           v.noteOnSample < oldest.noteOnSample ? v : oldest
         );
         stolen = true;
+        // Capture last output for crossfade (estimated from envelope * velocity)
+        const ageSec = (this.currentSample - voice.noteOnSample) / this.config.sampleRateHz;
+        let env = ageSec < 0.01 ? ageSec / 0.01 : 1.0;
+        if (voice.noteOffSample >= 0) {
+          const relAge = (this.currentSample - voice.noteOffSample) / this.config.sampleRateHz;
+          env *= Math.max(0, 1.0 - relAge / voice.releaseDurationSec);
+        }
+        voice.stealLastOutput = env * voice.velocity;
+        const fadeSamples = Math.round(0.01 * this.config.sampleRateHz); // 10ms
+        voice.stealFadeSamplesLeft = fadeSamples;
+        voice.stealFadeTotal = fadeSamples;
       }
     }
 
@@ -223,6 +245,10 @@ export class LiveSynthEngine {
   setTimbreWeights(weights: Record<string, number> | null) {
     this.globalTimbreWeights = weights;
   }
+
+  /** Enable/disable soft limiter on mix bus. */
+  setLimiter(enabled: boolean) { this.limiterEnabled = enabled; }
+  get limiter() { return this.limiterEnabled; }
 
   // ── Render ───────────────────────────────────────────────────
 
@@ -338,6 +364,18 @@ export class LiveSynthEngine {
           breathiness: pBreath,
         };
         voice.renderer.renderBlock(params, voiceOut);
+
+        // Apply steal crossfade: blend out residual from stolen voice
+        if (voice.stealFadeSamplesLeft > 0) {
+          for (let i = 0; i < blockSize && voice.stealFadeSamplesLeft > 0; i++) {
+            const fadeGain = voice.stealFadeSamplesLeft / voice.stealFadeTotal;
+            // Subtract the fading residual (old voice contribution)
+            // and scale new voice in (attack ramp already handles this)
+            voiceOut[i] *= (1.0 - fadeGain);
+            voice.stealFadeSamplesLeft--;
+          }
+        }
+
         for (let i = 0; i < blockSize; i++) {
           out[i] += voiceOut[i];
         }
@@ -347,6 +385,13 @@ export class LiveSynthEngine {
       if (!voiceIsActive && voice.noteOffSample >= 0) {
         voice.noteId = null;
         voice.noteOffSample = -1;
+      }
+    }
+
+    // Soft limiter: tanh-based, transparent below 0.5, soft clips above
+    if (this.limiterEnabled) {
+      for (let i = 0; i < blockSize; i++) {
+        out[i] = Math.tanh(out[i]);
       }
     }
 

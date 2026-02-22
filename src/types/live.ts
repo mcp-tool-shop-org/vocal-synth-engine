@@ -48,6 +48,7 @@ export interface ParamUpdateMessage {
   defaultTimbre?: string;
   presetId?: string;
   blockSize?: number;
+  limiter?: boolean;
 }
 
 export interface RecordStartMessage {

@@ -324,6 +324,7 @@ export class LiveSession {
     defaultTimbre?: string;
     presetId?: string;
     blockSize?: number;
+    limiter?: boolean;
   }) {
     if (!this.engine) {
       this.sendError('NOT_INITIALIZED', 'Send hello first');
@@ -366,6 +367,10 @@ export class LiveSession {
       updates.defaultTimbre = msg.defaultTimbre;
     }
     this.engine.updateConfig(updates);
+
+    if (msg.limiter !== undefined) {
+      this.engine.setLimiter(msg.limiter);
+    }
   }
 
   // ── Recording ────────────────────────────────────────────────
