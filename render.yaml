@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: vocal-synth-cockpit
+    runtime: docker
+    region: ohio
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: RENDER_STORE_DIR
+        value: /data/renders
+      - key: APP_VERSION
+        value: "1.0.0"
+      - key: AUTH_TOKEN
+        sync: false
+      - key: PORT
+        value: "4321"
+    disk:
+      name: render-bank
+      mountPath: /data/renders
+      sizeGB: 1
