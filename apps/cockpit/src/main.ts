@@ -763,6 +763,11 @@
   const liveRtfEl = document.getElementById('live-rtf')!;
   const liveUnderrunsEl = document.getElementById('live-underruns')!;
   const liveClickDeltaEl = document.getElementById('live-click-delta')!;
+  const liveJitterEl = document.getElementById('live-jitter')!;
+  const liveAlerts = document.getElementById('live-alerts')!;
+  const alertClipping = document.getElementById('alert-clipping')!;
+  const alertClickRisk = document.getElementById('alert-click-risk')!;
+  const alertBufferStarved = document.getElementById('alert-buffer-starved')!;
 
   // Live controls
   const livePresetSelect = document.getElementById('live-preset') as HTMLSelectElement;
@@ -791,6 +796,8 @@
   let liveLastSeq = -1;
   let liveDroppedFrames = 0;
   let liveBlockSize = 512; // updated from hello_ack
+  let liveLastFrameTime = 0; // for WS jitter calc
+  let liveJitterSamples: number[] = []; // recent inter-arrival deltas
   let activeKeys = new Set<string>(); // noteIds currently held
   let holdActive = false;
   let heldNoteOffs: string[] = []; // queued note_off noteIds while Hold is active
@@ -1495,6 +1502,15 @@
         }
         liveLastSeq = seq;
 
+        // WS jitter: track inter-arrival time variance
+        const now = performance.now();
+        if (liveLastFrameTime > 0) {
+          const delta = now - liveLastFrameTime;
+          liveJitterSamples.push(delta);
+          if (liveJitterSamples.length > 100) liveJitterSamples.shift();
+        }
+        liveLastFrameTime = now;
+
         // Extract PCM payload after header
         const pcm = new Float32Array(e.data, HEADER);
         if (liveWorkletNode) {
@@ -1517,6 +1533,7 @@
       liveStatus.textContent = 'Disconnected';
       liveStatus.className = 'live-badge off';
       liveTelemetry.style.display = 'none';
+      liveAlerts.style.display = 'none';
       btnLiveToggle.textContent = 'Connect Live';
       setLiveButtonsEnabled(false);
     });
@@ -1554,9 +1571,12 @@
     liveUnderrunCount = 0;
     liveLastSeq = -1;
     liveDroppedFrames = 0;
+    liveLastFrameTime = 0;
+    liveJitterSamples = [];
     liveStatus.textContent = 'Disconnected';
     liveStatus.className = 'live-badge off';
     liveTelemetry.style.display = 'none';
+    liveAlerts.style.display = 'none';
     latencyBar.style.display = 'none';
     btnLiveToggle.textContent = 'Connect Live';
     setLiveButtonsEnabled(false);
@@ -1595,14 +1615,37 @@
         break;
 
       case 'telemetry': {
-        const peak = msg.peakDbfs === -Infinity || msg.peakDbfs === null
-          ? '--' : `${msg.peakDbfs.toFixed(1)}`;
+        const peakDb = msg.peakDbfs;
+        const peak = peakDb === -Infinity || peakDb === null
+          ? '--' : `${peakDb.toFixed(1)}`;
+        const clickDelta = msg.clickDeltaMaxRecent ?? 0;
+
         liveVoicesEl.textContent = `${msg.voicesActive}/${msg.voicesMax}`;
         livePeakEl.textContent = peak;
         liveRtfEl.textContent = msg.rtf?.toFixed(3) || '--';
-        if (msg.maxAbsDelta !== undefined) {
-          liveClickDeltaEl.textContent = msg.maxAbsDelta.toFixed(4);
+        liveClickDeltaEl.textContent = clickDelta > 0 ? clickDelta.toFixed(4) : '--';
+
+        // WS jitter: stddev of recent inter-arrival times
+        if (liveJitterSamples.length > 2) {
+          const mean = liveJitterSamples.reduce((a, b) => a + b, 0) / liveJitterSamples.length;
+          const variance = liveJitterSamples.reduce((s, v) => s + (v - mean) ** 2, 0) / liveJitterSamples.length;
+          liveJitterEl.textContent = `${Math.sqrt(variance).toFixed(1)}ms`;
         }
+
+        // ── Alert badges ──
+        liveAlerts.style.display = 'flex';
+
+        // CLIPPING: peak > -0.1 dBFS
+        const isClipping = typeof peakDb === 'number' && peakDb > -0.1;
+        alertClipping.style.display = isClipping ? '' : 'none';
+
+        // CLICK RISK: clickDelta > 0.3 (sample-to-sample jump threshold)
+        const isClickRisk = clickDelta > 0.3;
+        alertClickRisk.style.display = isClickRisk ? '' : 'none';
+
+        // BUFFER STARVED: any underruns since connect
+        alertBufferStarved.style.display = liveUnderrunCount > 0 ? '' : 'none';
+
         break;
       }
 

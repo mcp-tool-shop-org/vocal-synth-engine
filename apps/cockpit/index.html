@@ -250,6 +250,17 @@
                   <div class="lt-label">RTF</div>
                   <div class="lt-value" id="live-rtf">--</div>
                 </div>
+                <div class="live-tile" id="lt-jitter">
+                  <div class="lt-label">WS Jitter</div>
+                  <div class="lt-value" id="live-jitter">--</div>
+                </div>
+              </div>
+
+              <!-- Live Alert Badges -->
+              <div class="live-alerts" id="live-alerts" style="display:none;">
+                <span class="live-alert clipping" id="alert-clipping" style="display:none;">CLIPPING</span>
+                <span class="live-alert click-risk" id="alert-click-risk" style="display:none;">CLICK RISK</span>
+                <span class="live-alert buffer-starved" id="alert-buffer-starved" style="display:none;">BUFFER STARVED</span>
               </div>
 
               <!-- Latency Calibration -->
@@ -999,7 +1010,7 @@
   /* Live Telemetry Tiles */
   .live-tiles {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     gap: 0.75rem;
     margin-top: 1rem;
   }
@@ -1022,6 +1033,39 @@
     font-weight: bold;
     font-family: monospace;
     color: var(--text);
+  }
+
+  /* Live Alert Badges */
+  .live-alerts {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .live-alert {
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    animation: alert-pulse 1s ease-in-out infinite;
+  }
+  .live-alert.clipping {
+    background: #d32f2f;
+    color: #fff;
+  }
+  .live-alert.click-risk {
+    background: #f57c00;
+    color: #fff;
+  }
+  .live-alert.buffer-starved {
+    background: #e64a19;
+    color: #fff;
+  }
+  @keyframes alert-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
   }
 
   /* Toasts */
