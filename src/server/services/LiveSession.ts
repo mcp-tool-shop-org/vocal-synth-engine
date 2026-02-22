@@ -37,6 +37,20 @@ const DEFAULT_SESSION_CONFIG: LiveSessionConfig = {
   rngSeed: 123456789,
 };
 
+/**
+ * Binary audio frame layout (16-byte header + PCM payload):
+ *
+ *   Offset  Type     Field
+ *   ──────  ───────  ─────────────
+ *   0       uint32   seq            (frame sequence number, LE)
+ *   4       uint16   channels       (1 = mono)
+ *   6       uint16   (reserved)
+ *   8       uint32   sampleRate     (Hz, LE)
+ *   12      uint32   blockSize      (samples per channel, LE)
+ *   16..    float32  PCM samples    (blockSize × channels × 4 bytes)
+ */
+const AUDIO_HEADER_SIZE = 16;
+
 export class LiveSession {
   private ws: WebSocket;
   private engine: LiveSynthEngine | null = null;
@@ -45,6 +59,10 @@ export class LiveSession {
   private createdAt: number = Date.now();
   private telemetryInterval: ReturnType<typeof setInterval> | null = null;
   private renderLoopInterval: ReturnType<typeof setInterval> | null = null;
+
+  // Audio frame state
+  private audioSeq: number = 0;
+  private audioFrameBuf: Buffer | null = null;
 
   // Recording state
   private recording: boolean = false;
@@ -330,8 +348,19 @@ export class LiveSession {
     this.stopRenderLoop();
     if (!this.engine) return;
 
-    // blockSize=1024 / sr=48000 → ~21.33ms per block
-    const blockMs = (this.engine.blockSize / this.engine.sampleRateHz) * 1000;
+    const blockSize = this.engine.blockSize;
+    const sampleRate = this.engine.sampleRateHz;
+    const channels = 1; // mono
+    const blockMs = (blockSize / sampleRate) * 1000;
+
+    // Pre-allocate the binary frame buffer (header + PCM payload)
+    this.audioSeq = 0;
+    this.audioFrameBuf = Buffer.alloc(AUDIO_HEADER_SIZE + blockSize * 4);
+    // Write static header fields once
+    this.audioFrameBuf.writeUInt16LE(channels, 4);
+    this.audioFrameBuf.writeUInt16LE(0, 6);          // reserved
+    this.audioFrameBuf.writeUInt32LE(sampleRate, 8);
+    this.audioFrameBuf.writeUInt32LE(blockSize, 12);
 
     this.renderLoopInterval = setInterval(() => {
       if (!this.engine || !this.engine.isPlaying) return;
@@ -339,10 +368,13 @@ export class LiveSession {
       const block = this.engine.render();
       this.captureBlock(block);
 
-      // Send raw Float32 PCM as binary WS frame
       if (this.ws.readyState === 1 /* OPEN */) {
-        const buf = Buffer.from(block.buffer, block.byteOffset, block.byteLength);
-        this.ws.send(buf);
+        const frame = this.audioFrameBuf!;
+        // Update per-frame sequence number
+        frame.writeUInt32LE(this.audioSeq++, 0);
+        // Copy PCM payload after header
+        Buffer.from(block.buffer, block.byteOffset, block.byteLength).copy(frame, AUDIO_HEADER_SIZE);
+        this.ws.send(frame);
       }
     }, blockMs);
   }

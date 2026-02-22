@@ -754,6 +754,8 @@
   let liveWorkletNode: AudioWorkletNode | null = null;
   let liveConnected = false;
   let liveUnderrunCount = 0;
+  let liveLastSeq = -1;
+  let liveDroppedFrames = 0;
   let activeKeys = new Set<string>(); // noteIds currently held
 
   // QWERTY → MIDI mapping (2 octaves starting at C4=60)
@@ -879,7 +881,8 @@
     liveWorkletNode.port.onmessage = (e) => {
       if (e.data.type === 'underrun') {
         liveUnderrunCount = e.data.count;
-        liveUnderruns.textContent = `Underruns: ${liveUnderrunCount}`;
+        liveUnderruns.textContent = `Underruns: ${liveUnderrunCount}` +
+          (liveDroppedFrames > 0 ? ` | Dropped: ${liveDroppedFrames}` : '');
       }
     };
 
@@ -894,8 +897,25 @@
 
     liveWs.addEventListener('message', (e) => {
       if (e.data instanceof ArrayBuffer) {
-        // Binary = PCM audio block
-        const pcm = new Float32Array(e.data);
+        // Binary = framed audio (16-byte header + PCM payload)
+        const HEADER = 16;
+        if (e.data.byteLength <= HEADER) return; // malformed
+
+        const view = new DataView(e.data);
+        const seq = view.getUint32(0, true);
+        // channels (offset 4), sampleRate (offset 8), blockSize (offset 12)
+        // available if needed; session params already in hello_ack
+
+        // Gap detection
+        if (liveLastSeq >= 0 && seq !== liveLastSeq + 1) {
+          const gap = seq - liveLastSeq - 1;
+          liveDroppedFrames += gap;
+          console.warn(`[live] Dropped ${gap} frame(s) (seq ${liveLastSeq} → ${seq})`);
+        }
+        liveLastSeq = seq;
+
+        // Extract PCM payload after header
+        const pcm = new Float32Array(e.data, HEADER);
         if (liveWorkletNode) {
           liveWorkletNode.port.postMessage(pcm, [pcm.buffer]);
         }
@@ -947,6 +967,8 @@
     }
     liveConnected = false;
     liveUnderrunCount = 0;
+    liveLastSeq = -1;
+    liveDroppedFrames = 0;
     liveStatus.textContent = 'Disconnected';
     liveStatus.className = 'live-badge off';
     liveTelemetry.style.display = 'none';
