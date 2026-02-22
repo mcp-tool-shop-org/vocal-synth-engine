@@ -45,6 +45,24 @@ export async function loadVoicePreset(manifestPath: string): Promise<LoadedVoice
     };
   }
 
+  // Cross-timbre shape validation: all timbres must share freqHz length
+  const timbreNames = Object.keys(timbres);
+  if (timbreNames.length > 1) {
+    const refName = timbreNames[0];
+    const refLen = timbres[refName].freqHz.length;
+    for (let i = 1; i < timbreNames.length; i++) {
+      const t = timbres[timbreNames[i]];
+      if (t.freqHz.length !== refLen) {
+        const err: any = new Error(
+          `ASSET_SHAPE_MISMATCH: timbre '${t.name}' freqHz length (${t.freqHz.length}) ` +
+          `differs from '${refName}' (${refLen}). All timbres must share the same frequency axis.`
+        );
+        err.code = 'ASSET_SHAPE_MISMATCH';
+        throw err;
+      }
+    }
+  }
+
   return {
     manifest,
     timbres,
