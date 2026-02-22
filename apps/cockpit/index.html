@@ -164,6 +164,13 @@
                 <label>Polyphony:
                   <input type="number" id="live-polyphony" value="4" min="1" max="16">
                 </label>
+                <label>Latency:
+                  <select id="live-latency">
+                    <option value="low">Low (~60ms)</option>
+                    <option value="balanced" selected>Balanced (~100ms)</option>
+                    <option value="safe">Safe (~150ms)</option>
+                  </select>
+                </label>
                 <label>Velocity:
                   <input type="range" id="live-velocity" min="0" max="1" step="0.01" value="0.8">
                   <span class="slider-value" id="live-velocity-val">0.80</span>

@@ -40,7 +40,7 @@ export interface LiveSessionConfig {
 const DEFAULT_SESSION_CONFIG: LiveSessionConfig = {
   presetId: 'default-voice',
   maxPolyphony: 4,
-  blockSize: 1024,
+  blockSize: 512,
   rngSeed: 123456789,
 };
 

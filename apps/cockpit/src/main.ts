@@ -776,6 +776,7 @@
   const liveVibratoVal = document.getElementById('live-vibrato-val')!;
   const livePortamentoInput = document.getElementById('live-portamento') as HTMLInputElement;
   const livePortamentoVal = document.getElementById('live-portamento-val')!;
+  const liveLatencySelect = document.getElementById('live-latency') as HTMLSelectElement;
 
   // Action buttons
   const btnPanic = document.getElementById('btn-panic') as HTMLButtonElement;
@@ -789,6 +790,7 @@
   let liveUnderrunCount = 0;
   let liveLastSeq = -1;
   let liveDroppedFrames = 0;
+  let liveBlockSize = 512; // updated from hello_ack
   let activeKeys = new Set<string>(); // noteIds currently held
   let holdActive = false;
   let heldNoteOffs: string[] = []; // queued note_off noteIds while Hold is active
@@ -830,6 +832,36 @@
   const latTotal = document.getElementById('lat-total')!;
   let pingRtts: number[] = [];
   let pingPending = 0;
+
+  // ── Latency target ─────────────────────────────────────────
+
+  function getLatencyTargetSamples(): number {
+    // Target fill samples at 48kHz for the selected latency preset
+    switch (liveLatencySelect.value) {
+      case 'low': return 2880;       // ~60ms
+      case 'balanced': return 4800;  // ~100ms
+      case 'safe': return 7200;      // ~150ms
+      default: return 4800;
+    }
+  }
+
+  function getLatencyTargetMs(): number {
+    switch (liveLatencySelect.value) {
+      case 'low': return 60;
+      case 'balanced': return 100;
+      case 'safe': return 150;
+      default: return 100;
+    }
+  }
+
+  liveLatencySelect.addEventListener('change', () => {
+    if (liveWorkletNode) {
+      liveWorkletNode.port.postMessage({
+        type: 'setTargetBuffer',
+        samples: getLatencyTargetSamples(),
+      });
+    }
+  });
 
   // ── Slider value displays ──────────────────────────────────
 
@@ -1376,14 +1408,15 @@
       const avgRtt = pingRtts.reduce((a, b) => a + b, 0) / pingRtts.length;
       latRtt.textContent = avgRtt.toFixed(1);
 
-      // Audio pipeline latency
+      // Audio pipeline latency: device + OS buffer + server block + ring buffer target
       let audioMs = 0;
       if (liveAudioCtx) {
         audioMs = (
           (liveAudioCtx.baseLatency || 0) +
-          (liveAudioCtx.outputLatency || 0) +
-          (1024 / 48000) // one render block in worklet
-        ) * 1000;
+          (liveAudioCtx.outputLatency || 0)
+        ) * 1000
+        + (liveBlockSize / 48000) * 1000  // server render block
+        + getLatencyTargetMs();            // ring buffer fill target
       }
       latAudio.textContent = audioMs.toFixed(1);
 
@@ -1425,6 +1458,12 @@
       if (e.data.type === 'underrun') {
         liveUnderrunCount = e.data.count;
         liveUnderrunsEl.textContent = String(liveUnderrunCount);
+        // Flash underruns tile red briefly
+        const tile = document.getElementById('lt-underruns');
+        if (tile) {
+          tile.style.borderColor = '#f44';
+          setTimeout(() => { tile.style.borderColor = ''; }, 300);
+        }
       }
     };
 
@@ -1533,6 +1572,7 @@
     switch (msg.type) {
       case 'hello_ack':
         liveConnected = true;
+        liveBlockSize = msg.blockSize || 512;
         liveStatus.textContent = `Live (${msg.presetId})`;
         liveStatus.className = 'live-badge on';
         liveTelemetry.style.display = 'grid';
@@ -1542,9 +1582,16 @@
         // Store timbres for XY pad
         xyTimbreNames = msg.timbres || [];
         drawXyPad();
+        // Set ring buffer target from latency selector
+        if (liveWorkletNode) {
+          liveWorkletNode.port.postMessage({
+            type: 'setTargetBuffer',
+            samples: getLatencyTargetSamples(),
+          });
+        }
         // Auto-measure latency
         sendPingBurst(3);
-        showToast(`Live connected: ${msg.timbres.join(', ')} @ ${msg.sampleRateHz}Hz`);
+        showToast(`Live connected: ${msg.timbres.join(', ')} @ ${msg.sampleRateHz}Hz, block=${liveBlockSize}`);
         break;
 
       case 'telemetry': {
