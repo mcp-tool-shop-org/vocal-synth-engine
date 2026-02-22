@@ -87,6 +87,9 @@ export class LiveSession {
   private msgTimestamps: number[] = [];
   private rateLimitWarned: boolean = false;
 
+  // Stuck-note watchdog
+  private noteTimeoutInterval: ReturnType<typeof setInterval> | null = null;
+
   constructor(ws: WebSocket) {
     this.ws = ws;
     this.config = { ...DEFAULT_SESSION_CONFIG };
@@ -123,12 +126,27 @@ export class LiveSession {
 
     // Start telemetry ticker (15 Hz)
     this.startTelemetry();
+
+    // Start stuck-note watchdog (check every 5s, release notes held > 120s)
+    this.noteTimeoutInterval = setInterval(() => {
+      if (!this.engine) return;
+      const released = this.engine.releaseStuckNotes(120);
+      if (released > 0) {
+        console.warn(`[live] Watchdog: auto-released ${released} stuck note(s)`);
+      }
+    }, 5000);
   }
 
   /** Clean up timers and buffers on disconnect. */
   destroy() {
     this.stopRenderLoop();
     this.stopTelemetry();
+    if (this.noteTimeoutInterval) {
+      clearInterval(this.noteTimeoutInterval);
+      this.noteTimeoutInterval = null;
+    }
+    // Panic before nulling engine so voices get a clean release
+    if (this.engine) this.engine.panic();
     this.engine = null;
     this.preset = null;
     this.recordBuffer = [];

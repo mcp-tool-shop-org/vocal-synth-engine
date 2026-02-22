@@ -132,7 +132,7 @@ export class LiveSynthEngine {
   play() { this.playing = true; }
   stop() { this.playing = false; this.panic(); }
 
-  /** Stop all voices immediately with a fast release */
+  /** Stop all voices immediately with a fast release, reset all state */
   panic() {
     for (const v of this.voices) {
       if (v.noteId !== null) {
@@ -140,6 +140,10 @@ export class LiveSynthEngine {
         v.releaseDurationSec = 0.01; // 10ms fast release to avoid clicks
       }
     }
+    // Zero output buffer so next frame starts clean
+    this.outBuf.fill(0);
+    // Clear morph weights so we fall back to per-voice timbre
+    this.globalTimbreWeights = null;
   }
 
   // ── Note events ──────────────────────────────────────────────
@@ -402,6 +406,22 @@ export class LiveSynthEngine {
   /** Active voices count */
   get activeVoiceCount(): number {
     return this.voices.filter(v => v.noteId !== null).length;
+  }
+
+  /** Auto-release notes held longer than maxAgeSec. Returns count released. */
+  releaseStuckNotes(maxAgeSec: number): number {
+    let released = 0;
+    for (const v of this.voices) {
+      if (v.noteId !== null && v.noteOffSample === -1) {
+        const ageSec = (this.currentSample - v.noteOnSample) / this.config.sampleRateHz;
+        if (ageSec > maxAgeSec) {
+          v.noteOffSample = this.currentSample;
+          v.releaseDurationSec = 0.1;
+          released++;
+        }
+      }
+    }
+    return released;
   }
 
   // ── Helpers ──────────────────────────────────────────────────
