@@ -737,6 +737,20 @@
   });
 
   // ============================================================
+  // ── TAB SWITCHING ─────────────────────────────────────────
+  // ============================================================
+
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tabId = (btn as HTMLElement).dataset.tab!;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(`tab-${tabId}`)!.classList.add('active');
+    });
+  });
+
+  // ============================================================
   // ── LIVE MODE ──────────────────────────────────────────────
   // ============================================================
 
@@ -744,10 +758,29 @@
   const liveStatus = document.getElementById('live-status')!;
   const liveKeyboard = document.getElementById('live-keyboard')!;
   const liveTelemetry = document.getElementById('live-telemetry')!;
-  const liveVoices = document.getElementById('live-voices')!;
-  const livePeak = document.getElementById('live-peak')!;
-  const liveRtf = document.getElementById('live-rtf')!;
-  const liveUnderruns = document.getElementById('live-underruns')!;
+  const liveVoicesEl = document.getElementById('live-voices')!;
+  const livePeakEl = document.getElementById('live-peak')!;
+  const liveRtfEl = document.getElementById('live-rtf')!;
+  const liveUnderrunsEl = document.getElementById('live-underruns')!;
+  const liveClickDeltaEl = document.getElementById('live-click-delta')!;
+
+  // Live controls
+  const livePresetSelect = document.getElementById('live-preset') as HTMLSelectElement;
+  const liveTimbreSelect = document.getElementById('live-timbre') as HTMLSelectElement;
+  const livePolyphonyInput = document.getElementById('live-polyphony') as HTMLInputElement;
+  const liveVelocityInput = document.getElementById('live-velocity') as HTMLInputElement;
+  const liveVelocityVal = document.getElementById('live-velocity-val')!;
+  const liveBreathinessInput = document.getElementById('live-breathiness') as HTMLInputElement;
+  const liveBreathinessVal = document.getElementById('live-breathiness-val')!;
+  const liveVibratoInput = document.getElementById('live-vibrato') as HTMLInputElement;
+  const liveVibratoVal = document.getElementById('live-vibrato-val')!;
+  const livePortamentoInput = document.getElementById('live-portamento') as HTMLInputElement;
+  const livePortamentoVal = document.getElementById('live-portamento-val')!;
+
+  // Action buttons
+  const btnPanic = document.getElementById('btn-panic') as HTMLButtonElement;
+  const btnRecord = document.getElementById('btn-record') as HTMLButtonElement;
+  const btnHold = document.getElementById('btn-hold') as HTMLButtonElement;
 
   let liveWs: WebSocket | null = null;
   let liveAudioCtx: AudioContext | null = null;
@@ -757,12 +790,85 @@
   let liveLastSeq = -1;
   let liveDroppedFrames = 0;
   let activeKeys = new Set<string>(); // noteIds currently held
+  let holdActive = false;
+  let heldNoteOffs: string[] = []; // queued note_off noteIds while Hold is active
+  let isRecording = false;
 
-  // QWERTY → MIDI mapping (2 octaves starting at C4=60)
+  // ── Slider value displays ──────────────────────────────────
+
+  liveVelocityInput.addEventListener('input', () => {
+    liveVelocityVal.textContent = parseFloat(liveVelocityInput.value).toFixed(2);
+  });
+  liveBreathinessInput.addEventListener('input', () => {
+    liveBreathinessVal.textContent = parseFloat(liveBreathinessInput.value).toFixed(2);
+  });
+  liveVibratoInput.addEventListener('input', () => {
+    liveVibratoVal.textContent = `${liveVibratoInput.value} ct`;
+  });
+  livePortamentoInput.addEventListener('input', () => {
+    livePortamentoVal.textContent = `${livePortamentoInput.value} ms`;
+  });
+
+  // ── Live preset/timbre sync ────────────────────────────────
+
+  function populateLivePresets() {
+    livePresetSelect.innerHTML = '';
+    if (serverPresets.length === 0) {
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = '(none)';
+      livePresetSelect.appendChild(opt);
+      return;
+    }
+    serverPresets.forEach((p: any) => {
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = p.id;
+      livePresetSelect.appendChild(opt);
+    });
+    updateLiveTimbreDropdown(serverPresets[0]);
+  }
+
+  function updateLiveTimbreDropdown(preset: any) {
+    if (!preset?.timbres) return;
+    liveTimbreSelect.innerHTML = '';
+    preset.timbres.forEach((t: string) => {
+      const opt = document.createElement('option');
+      opt.value = t;
+      opt.textContent = t;
+      liveTimbreSelect.appendChild(opt);
+    });
+  }
+
+  livePresetSelect.addEventListener('change', () => {
+    const preset = serverPresets.find((p: any) => p.id === livePresetSelect.value);
+    if (preset) updateLiveTimbreDropdown(preset);
+    sendParamUpdate();
+  });
+  liveTimbreSelect.addEventListener('change', sendParamUpdate);
+  livePolyphonyInput.addEventListener('change', sendParamUpdate);
+
+  function sendParamUpdate() {
+    if (!liveWs || !liveConnected) return;
+    liveWs.send(JSON.stringify({
+      type: 'param_update',
+      presetId: livePresetSelect.value || undefined,
+      defaultTimbre: liveTimbreSelect.value || undefined,
+      maxPolyphony: parseInt(livePolyphonyInput.value, 10),
+    }));
+  }
+
+  // ── DAW Keyboard mapping (Z/X row = C4-B4, Q/W row = C5-B5) ──
+
+  // Bottom row: Z S X D C V G B H N J M  (C4 through B4, chromatic)
+  // Top row:    Q 2 W 3 E R 5 T 6 Y 7 U  (C5 through B5, chromatic)
   const KEY_MAP: Record<string, number> = {
-    'a': 60, 'w': 61, 's': 62, 'e': 63, 'd': 64, 'f': 65,
-    't': 66, 'g': 67, 'y': 68, 'h': 69, 'u': 70, 'j': 71,
-    'k': 72, 'o': 73, 'l': 74, 'p': 75, ';': 76, "'": 77,
+    // Lower octave (C4=60 to B4=71)
+    'z': 60, 's': 61, 'x': 62, 'd': 63, 'c': 64, 'v': 65,
+    'g': 66, 'b': 67, 'h': 68, 'n': 69, 'j': 70, 'm': 71,
+    // Upper octave (C5=72 to B5=83)
+    'q': 72, '2': 73, 'w': 74, '3': 75, 'e': 76, 'r': 77,
+    '5': 78, 't': 79, '6': 80, 'y': 81, '7': 82, 'u': 83,
   };
 
   // Note names for display
@@ -807,7 +913,6 @@
     if (activeKeys.has(noteId)) return;
     activeKeys.add(noteId);
 
-    // Visual feedback
     const el = liveKeyboard.querySelector(`[data-key="${key}"]`);
     if (el) el.classList.add('active');
 
@@ -816,8 +921,13 @@
         type: 'note_on',
         noteId,
         midi,
-        velocity: 0.8,
-        timbre: inpDefaultTimbre.value || undefined,
+        velocity: parseFloat(liveVelocityInput.value),
+        breathiness: parseFloat(liveBreathinessInput.value) || undefined,
+        vibrato: parseInt(liveVibratoInput.value, 10) > 0
+          ? { depthCents: parseInt(liveVibratoInput.value, 10), rateHz: 5.5, onsetSec: 0.15 }
+          : undefined,
+        portamentoMs: parseInt(livePortamentoInput.value, 10) || undefined,
+        timbre: liveTimbreSelect.value || undefined,
       }));
     }
   }
@@ -825,8 +935,13 @@
   function triggerNoteOff(key: string) {
     const noteId = `key-${key}`;
     if (!activeKeys.has(noteId)) return;
-    activeKeys.delete(noteId);
 
+    if (holdActive) {
+      heldNoteOffs.push(noteId);
+      return;
+    }
+
+    activeKeys.delete(noteId);
     const el = liveKeyboard.querySelector(`[data-key="${key}"]`);
     if (el) el.classList.remove('active');
 
@@ -835,10 +950,28 @@
     }
   }
 
+  function flushHeldNotes() {
+    for (const noteId of heldNoteOffs) {
+      activeKeys.delete(noteId);
+      const key = noteId.replace('key-', '');
+      const el = liveKeyboard.querySelector(`[data-key="${key}"]`);
+      if (el) el.classList.remove('active');
+      if (liveWs && liveConnected) {
+        liveWs.send(JSON.stringify({ type: 'note_off', noteId }));
+      }
+    }
+    heldNoteOffs = [];
+  }
+
   // Keyboard events (only when not in inputs)
+  function isLiveTabActive() {
+    return document.getElementById('tab-live')?.classList.contains('active') ?? false;
+  }
+
   window.addEventListener('keydown', (e) => {
     if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA' || document.activeElement?.tagName === 'SELECT') return;
     if (e.repeat) return;
+    if (!isLiveTabActive()) return;
 
     const midi = KEY_MAP[e.key.toLowerCase()];
     if (midi !== undefined && liveConnected) {
@@ -848,9 +981,53 @@
   });
 
   window.addEventListener('keyup', (e) => {
+    if (!isLiveTabActive()) return;
     const key = e.key.toLowerCase();
     if (KEY_MAP[key] !== undefined) {
       triggerNoteOff(key);
+    }
+  });
+
+  // ── Action buttons ─────────────────────────────────────────
+
+  btnPanic.addEventListener('click', () => {
+    if (!liveWs || !liveConnected) return;
+    liveWs.send(JSON.stringify({ type: 'transport', command: 'panic' }));
+    for (const noteId of activeKeys) {
+      const key = noteId.replace('key-', '');
+      const el = liveKeyboard.querySelector(`[data-key="${key}"]`);
+      if (el) el.classList.remove('active');
+    }
+    activeKeys.clear();
+    heldNoteOffs = [];
+    showToast('Panic sent — all notes off');
+  });
+
+  btnRecord.addEventListener('click', () => {
+    if (!liveWs || !liveConnected) return;
+    isRecording = !isRecording;
+    if (isRecording) {
+      liveWs.send(JSON.stringify({ type: 'record_start' }));
+      btnRecord.textContent = 'Stop Rec';
+      btnRecord.style.background = 'var(--error)';
+      btnRecord.style.color = '#fff';
+    } else {
+      liveWs.send(JSON.stringify({ type: 'record_stop' }));
+      btnRecord.textContent = 'Record';
+      btnRecord.style.background = '';
+      btnRecord.style.color = '';
+    }
+  });
+
+  btnHold.addEventListener('click', () => {
+    holdActive = !holdActive;
+    if (holdActive) {
+      btnHold.classList.add('held');
+      btnHold.textContent = 'Hold ON';
+    } else {
+      btnHold.classList.remove('held');
+      btnHold.textContent = 'Hold';
+      flushHeldNotes();
     }
   });
 
@@ -877,12 +1054,10 @@
     liveWorkletNode = new AudioWorkletNode(liveAudioCtx, 'pcm-worklet-processor');
     liveWorkletNode.connect(liveAudioCtx.destination);
 
-    // Listen for underrun reports from worklet
     liveWorkletNode.port.onmessage = (e) => {
       if (e.data.type === 'underrun') {
         liveUnderrunCount = e.data.count;
-        liveUnderruns.textContent = `Underruns: ${liveUnderrunCount}` +
-          (liveDroppedFrames > 0 ? ` | Dropped: ${liveDroppedFrames}` : '');
+        liveUnderrunsEl.textContent = String(liveUnderrunCount);
       }
     };
 
@@ -937,6 +1112,7 @@
       liveStatus.className = 'live-badge off';
       liveTelemetry.style.display = 'none';
       btnLiveToggle.textContent = 'Connect Live';
+      setLiveButtonsEnabled(false);
     });
 
     liveWs.addEventListener('error', () => {
@@ -945,26 +1121,24 @@
   }
 
   function disconnectLive() {
-    // Release all keys
     for (const noteId of activeKeys) {
       const key = noteId.replace('key-', '');
       const el = liveKeyboard.querySelector(`[data-key="${key}"]`);
       if (el) el.classList.remove('active');
     }
     activeKeys.clear();
+    heldNoteOffs = [];
+    holdActive = false;
+    btnHold.classList.remove('held');
+    btnHold.textContent = 'Hold';
+    isRecording = false;
+    btnRecord.textContent = 'Record';
+    btnRecord.style.background = '';
+    btnRecord.style.color = '';
 
-    if (liveWs) {
-      liveWs.close();
-      liveWs = null;
-    }
-    if (liveWorkletNode) {
-      liveWorkletNode.disconnect();
-      liveWorkletNode = null;
-    }
-    if (liveAudioCtx) {
-      liveAudioCtx.close();
-      liveAudioCtx = null;
-    }
+    if (liveWs) { liveWs.close(); liveWs = null; }
+    if (liveWorkletNode) { liveWorkletNode.disconnect(); liveWorkletNode = null; }
+    if (liveAudioCtx) { liveAudioCtx.close(); liveAudioCtx = null; }
     liveConnected = false;
     liveUnderrunCount = 0;
     liveLastSeq = -1;
@@ -973,6 +1147,13 @@
     liveStatus.className = 'live-badge off';
     liveTelemetry.style.display = 'none';
     btnLiveToggle.textContent = 'Connect Live';
+    setLiveButtonsEnabled(false);
+  }
+
+  function setLiveButtonsEnabled(on: boolean) {
+    btnPanic.disabled = !on;
+    btnRecord.disabled = !on;
+    btnHold.disabled = !on;
   }
 
   function handleLiveMessage(msg: any) {
@@ -981,17 +1162,21 @@
         liveConnected = true;
         liveStatus.textContent = `Live (${msg.presetId})`;
         liveStatus.className = 'live-badge on';
-        liveTelemetry.style.display = 'flex';
+        liveTelemetry.style.display = 'grid';
         btnLiveToggle.textContent = 'Disconnect';
+        setLiveButtonsEnabled(true);
         showToast(`Live connected: ${msg.timbres.join(', ')} @ ${msg.sampleRateHz}Hz`);
         break;
 
       case 'telemetry': {
         const peak = msg.peakDbfs === -Infinity || msg.peakDbfs === null
-          ? '--' : `${msg.peakDbfs.toFixed(1)} dB`;
-        liveVoices.textContent = `Voices: ${msg.voicesActive}/${msg.voicesMax}`;
-        livePeak.textContent = `Peak: ${peak}`;
-        liveRtf.textContent = `RTF: ${msg.rtf?.toFixed(3) || '--'}`;
+          ? '--' : `${msg.peakDbfs.toFixed(1)}`;
+        liveVoicesEl.textContent = `${msg.voicesActive}/${msg.voicesMax}`;
+        livePeakEl.textContent = peak;
+        liveRtfEl.textContent = msg.rtf?.toFixed(3) || '--';
+        if (msg.maxAbsDelta !== undefined) {
+          liveClickDeltaEl.textContent = msg.maxAbsDelta.toFixed(4);
+        }
         break;
       }
 
@@ -1018,5 +1203,5 @@
 
   // Init
   updateUI();
-  loadPresets();
+  loadPresets().then(() => populateLivePresets());
   loadBank();

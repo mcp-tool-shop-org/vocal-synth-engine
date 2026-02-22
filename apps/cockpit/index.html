@@ -83,70 +83,134 @@
             <div class="status-strip" id="status-strip">Ready</div>
           </section>
 
-          <!-- Live Mode -->
-          <section class="panel live-panel">
-            <div class="live-header">
-              <h2>Live Mode</h2>
-              <div class="live-controls">
-                <button id="btn-live-toggle">Connect Live</button>
-                <span id="live-status" class="live-badge off">Disconnected</span>
-              </div>
-            </div>
-            <div class="live-keyboard" id="live-keyboard">
-              <!-- Keyboard rendered via JS -->
-            </div>
-            <div class="live-telemetry" id="live-telemetry" style="display:none;">
-              <span id="live-voices">Voices: 0</span>
-              <span id="live-peak">Peak: --</span>
-              <span id="live-rtf">RTF: --</span>
-              <span id="live-underruns">Underruns: 0</span>
-            </div>
-          </section>
-
-          <!-- Piano Roll Editor -->
-          <section class="panel editor-panel">
-            <div class="editor-header">
-              <h2>Piano Roll</h2>
-              <div class="editor-tools">
-                <span class="hint">Click to add • Drag to move/resize • Del to remove</span>
-              </div>
-            </div>
-            
-            <div class="piano-roll-container" id="pr-container">
-              <div class="piano-roll-content" id="pr-content">
-                <!-- Grid and notes injected via JS -->
-              </div>
+          <!-- Tabbed Container: Score / Live -->
+          <section class="panel tabbed-panel">
+            <div class="tab-bar">
+              <button class="tab-btn active" data-tab="score">Score</button>
+              <button class="tab-btn" data-tab="live">Live</button>
             </div>
 
-            <!-- Note Inspector -->
-            <div class="note-inspector" id="note-inspector" style="display: none;">
-              <h3>Note Inspector</h3>
-              <div class="inspector-grid">
-                <label>Timbre: 
-                  <select id="insp-timbre">
-                    <option value="">(Default)</option>
-                    <option value="ah">ah</option>
-                    <option value="oo">oo</option>
-                    <option value="ee">ee</option>
-                  </select>
+            <!-- ── Score Tab ── -->
+            <div class="tab-content active" id="tab-score">
+              <div class="editor-header">
+                <h2>Piano Roll</h2>
+                <div class="editor-tools">
+                  <span class="hint">Click to add • Drag to move/resize • Del to remove</span>
+                </div>
+              </div>
+
+              <div class="piano-roll-container" id="pr-container">
+                <div class="piano-roll-content" id="pr-content">
+                  <!-- Grid and notes injected via JS -->
+                </div>
+              </div>
+
+              <!-- Note Inspector -->
+              <div class="note-inspector" id="note-inspector" style="display: none;">
+                <h3>Note Inspector</h3>
+                <div class="inspector-grid">
+                  <label>Timbre:
+                    <select id="insp-timbre">
+                      <option value="">(Default)</option>
+                      <option value="ah">ah</option>
+                      <option value="oo">oo</option>
+                      <option value="ee">ee</option>
+                    </select>
+                  </label>
+                  <label>Velocity: <input type="range" id="insp-vel" min="0" max="1" step="0.01"></label>
+                  <label>Portamento (s): <input type="range" id="insp-porta" min="0" max="0.5" step="0.01" value="0"></label>
+                  <label>Breathiness: <input type="range" id="insp-breath" min="0" max="1" step="0.01" value="0"></label>
+
+                  <div class="vib-group">
+                    <label class="toggle-label"><input type="checkbox" id="insp-vib-toggle"> Vibrato</label>
+                    <label>Rate (Hz): <input type="range" id="insp-vib-rate" min="1" max="10" step="0.1"></label>
+                    <label>Depth (ct): <input type="range" id="insp-vib-depth" min="0" max="100" step="1"></label>
+                    <label>Onset (s): <input type="range" id="insp-vib-onset" min="0" max="1" step="0.05"></label>
+                  </div>
+                </div>
+              </div>
+
+              <details class="advanced-json">
+                <summary>Advanced (Score JSON)</summary>
+                <textarea id="score-input" rows="10" spellcheck="false"></textarea>
+              </details>
+            </div>
+
+            <!-- ── Live Tab ── -->
+            <div class="tab-content" id="tab-live">
+              <!-- Connection -->
+              <div class="live-header">
+                <div class="live-controls">
+                  <button id="btn-live-toggle">Connect Live</button>
+                  <span id="live-status" class="live-badge off">Disconnected</span>
+                </div>
+              </div>
+
+              <!-- Live Controls -->
+              <div class="live-controls-grid">
+                <label>Preset:
+                  <select id="live-preset"></select>
                 </label>
-                <label>Velocity: <input type="range" id="insp-vel" min="0" max="1" step="0.01"></label>
-                <label>Portamento (s): <input type="range" id="insp-porta" min="0" max="0.5" step="0.01" value="0"></label>
-                <label>Breathiness: <input type="range" id="insp-breath" min="0" max="1" step="0.01" value="0"></label>
-                
-                <div class="vib-group">
-                  <label class="toggle-label"><input type="checkbox" id="insp-vib-toggle"> Vibrato</label>
-                  <label>Rate (Hz): <input type="range" id="insp-vib-rate" min="1" max="10" step="0.1"></label>
-                  <label>Depth (ct): <input type="range" id="insp-vib-depth" min="0" max="100" step="1"></label>
-                  <label>Onset (s): <input type="range" id="insp-vib-onset" min="0" max="1" step="0.05"></label>
+                <label>Timbre:
+                  <select id="live-timbre"></select>
+                </label>
+                <label>Polyphony:
+                  <input type="number" id="live-polyphony" value="4" min="1" max="16">
+                </label>
+                <label>Velocity:
+                  <input type="range" id="live-velocity" min="0" max="1" step="0.01" value="0.8">
+                  <span class="slider-value" id="live-velocity-val">0.80</span>
+                </label>
+                <label>Breathiness:
+                  <input type="range" id="live-breathiness" min="0" max="1" step="0.01" value="0">
+                  <span class="slider-value" id="live-breathiness-val">0.00</span>
+                </label>
+                <label>Vibrato:
+                  <input type="range" id="live-vibrato" min="0" max="100" step="1" value="0">
+                  <span class="slider-value" id="live-vibrato-val">0 ct</span>
+                </label>
+                <label>Portamento:
+                  <input type="range" id="live-portamento" min="0" max="500" step="10" value="0">
+                  <span class="slider-value" id="live-portamento-val">0 ms</span>
+                </label>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="live-actions">
+                <button id="btn-panic" class="btn-panic" disabled>Panic</button>
+                <button id="btn-record" disabled>Record</button>
+                <button id="btn-hold" disabled>Hold</button>
+              </div>
+
+              <!-- Keyboard -->
+              <div class="live-keyboard" id="live-keyboard">
+                <!-- Keyboard rendered via JS -->
+              </div>
+
+              <!-- Live Telemetry Tiles -->
+              <div class="live-tiles" id="live-telemetry" style="display:none;">
+                <div class="live-tile" id="lt-voices">
+                  <div class="lt-label">Voices</div>
+                  <div class="lt-value" id="live-voices">0</div>
+                </div>
+                <div class="live-tile" id="lt-peak">
+                  <div class="lt-label">Peak dBFS</div>
+                  <div class="lt-value" id="live-peak">--</div>
+                </div>
+                <div class="live-tile" id="lt-underruns">
+                  <div class="lt-label">Underruns</div>
+                  <div class="lt-value" id="live-underruns">0</div>
+                </div>
+                <div class="live-tile" id="lt-click-delta">
+                  <div class="lt-label">Click &Delta;</div>
+                  <div class="lt-value" id="live-click-delta">--</div>
+                </div>
+                <div class="live-tile" id="lt-rtf">
+                  <div class="lt-label">RTF</div>
+                  <div class="lt-value" id="live-rtf">--</div>
                 </div>
               </div>
             </div>
-
-            <details class="advanced-json">
-              <summary>Advanced (Score JSON)</summary>
-              <textarea id="score-input" rows="10" spellcheck="false"></textarea>
-            </details>
           </section>
         </div>
 
@@ -731,13 +795,107 @@
   .key.white:hover { background: #ccc; }
   .key.black:hover { background: #444; }
 
-  .live-telemetry {
+  /* Tabs */
+  .tab-bar {
     display: flex;
-    gap: 1.5rem;
-    margin-top: 0.75rem;
-    font-size: 0.75rem;
-    font-family: monospace;
+    gap: 0;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+  .tab-btn {
+    padding: 0.5rem 1.5rem;
+    background: transparent;
+    border: none;
     color: #888;
+    font-weight: bold;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Live Controls Grid */
+  .live-controls-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .live-controls-grid label {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.85rem;
+    color: #888;
+    gap: 0.25rem;
+  }
+  .live-controls-grid input,
+  .live-controls-grid select {
+    background: #2a2a2a;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.4rem;
+    border-radius: 4px;
+    font-family: monospace;
+  }
+  .slider-value {
+    font-family: monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    text-align: right;
+  }
+
+  /* Live Action Buttons */
+  .live-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .btn-panic {
+    background: var(--error) !important;
+    color: #fff !important;
+  }
+  .btn-panic:hover:not(:disabled) {
+    background: #c0392b !important;
+  }
+  #btn-hold.held {
+    background: var(--warn) !important;
+    color: #000 !important;
+  }
+
+  /* Live Telemetry Tiles */
+  .live-tiles {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+  .live-tile {
+    background: #2a2a2a;
+    padding: 0.75rem;
+    border-radius: 6px;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+  .lt-label {
+    font-size: 0.65rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.3rem;
+  }
+  .lt-value {
+    font-size: 1rem;
+    font-weight: bold;
+    font-family: monospace;
+    color: var(--text);
   }
 
   /* Toasts */
