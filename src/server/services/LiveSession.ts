@@ -82,6 +82,7 @@ export class LiveSession {
   private recording: boolean = false;
   private recordBuffer: Float32Array[] = [];
   private recordStartSample: number = 0;
+  private eventLog: Array<{ t: number; type: string; [k: string]: any }> = [];
 
   // Rate limiter (sliding window)
   private msgTimestamps: number[] = [];
@@ -287,6 +288,16 @@ export class LiveSession {
       portamentoMs: msg.portamentoMs,
     });
 
+    // Log event for provenance (if recording)
+    if (this.recording) {
+      this.eventLog.push({
+        t: Date.now(), type: 'note_on',
+        noteId: msg.noteId, midi: msg.midi, velocity: msg.velocity,
+        timbre: msg.timbre, breathiness: msg.breathiness,
+        vibrato: msg.vibrato, portamentoMs: msg.portamentoMs,
+      });
+    }
+
     const ack: NoteAckMessage = {
       type: 'note_ack',
       noteId: msg.noteId,
@@ -299,6 +310,10 @@ export class LiveSession {
   private handleNoteOff(noteId: string, releaseMs?: number) {
     if (!this.engine) return;
     this.engine.noteOff(noteId, releaseMs);
+
+    if (this.recording) {
+      this.eventLog.push({ t: Date.now(), type: 'note_off', noteId, releaseMs });
+    }
   }
 
   // ── Param updates ────────────────────────────────────────────
@@ -362,6 +377,7 @@ export class LiveSession {
     }
     this.recording = true;
     this.recordBuffer = [];
+    this.eventLog = [];
     this.recordStartSample = 0; // will be set on first render
     this.send({
       type: 'record_status',
@@ -431,15 +447,19 @@ export class LiveSession {
       mode: 'live',
     };
 
-    const scoreHash = createHash('sha256').update(JSON.stringify({ live: true })).digest('hex');
+    // Hash the event log (canonical JSON for determinism)
+    const eventLogJson = JSON.stringify(this.eventLog);
+    const eventLogHash = createHash('sha256').update(eventLogJson).digest('hex');
     const wavHash = createHash('sha256').update(wavBuffer).digest('hex');
 
     const provenance = {
       commit,
-      scoreHash,
+      scoreHash: eventLogHash,
       wavHash,
       config,
       presetId: this.config.presetId,
+      eventLogHash,
+      eventCount: this.eventLog.length,
     };
 
     const telemetry = {
@@ -455,7 +475,7 @@ export class LiveSession {
     try {
       const meta = saveRender({
         name: finalName,
-        score: { live: true, durationSec },
+        score: { live: true, durationSec, eventLog: this.eventLog },
         config,
         telemetry,
         provenance,
@@ -477,6 +497,7 @@ export class LiveSession {
     }
 
     this.recordBuffer = [];
+    this.eventLog = [];
   }
 
   /** Called by the render loop to capture audio if recording. */
