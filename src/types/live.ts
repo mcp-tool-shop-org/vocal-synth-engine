@@ -104,6 +104,13 @@ export interface RecordStatusMessage {
   samplesRecorded: number;
 }
 
+export interface RecordSavedMessage {
+  type: 'record_saved';
+  renderId: string;
+  name: string;
+  durationSec: number;
+}
+
 export interface TransportAckMessage {
   type: 'transport_ack';
   state: 'playing' | 'stopped';
@@ -121,6 +128,7 @@ export type ServerMessage =
   | ErrorMessage
   | TelemetryMessage
   | RecordStatusMessage
+  | RecordSavedMessage
   | TransportAckMessage
   | NoteAckMessage;
 

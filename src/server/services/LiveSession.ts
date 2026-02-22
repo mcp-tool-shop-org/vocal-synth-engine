@@ -20,7 +20,13 @@ import {
   type TransportAckMessage,
   type NoteAckMessage,
   type RecordStatusMessage,
+  type RecordSavedMessage,
 } from '../../types/live.js';
+import { saveRender } from '../storage/renderStore.js';
+import { createHash } from 'node:crypto';
+import { execSync } from 'node:child_process';
+import wavefile from 'wavefile';
+const { WaveFile } = wavefile;
 
 export interface LiveSessionConfig {
   presetId: string;
@@ -50,6 +56,11 @@ const DEFAULT_SESSION_CONFIG: LiveSessionConfig = {
  *   16..    float32  PCM samples    (blockSize × channels × 4 bytes)
  */
 const AUDIO_HEADER_SIZE = 16;
+const MAX_RECORD_SEC = 60; // cap recording at 60 seconds
+
+function getGitCommit(): string {
+  try { return execSync('git rev-parse HEAD').toString().trim(); } catch { return 'unknown'; }
+}
 
 export class LiveSession {
   private ws: WebSocket;
@@ -307,7 +318,8 @@ export class LiveSession {
     this.recording = false;
 
     const totalSamples = this.recordBuffer.reduce((sum, b) => sum + b.length, 0);
-    const durationSec = this.engine ? totalSamples / this.engine.sampleRateHz : 0;
+    const sampleRate = this.engine?.sampleRateHz ?? 48000;
+    const durationSec = totalSamples / sampleRate;
 
     this.send({
       type: 'record_status',
@@ -316,16 +328,112 @@ export class LiveSession {
       samplesRecorded: totalSamples,
     } as RecordStatusMessage);
 
-    // TODO (Phase 4): save recording to render bank
-    // For now, just log it
-    console.log(`[live] Recording stopped: ${totalSamples} samples (${durationSec.toFixed(2)}s)`);
+    // Save recording to render bank
+    const audio = this.getRecordedAudio();
+    if (!audio || audio.length === 0) {
+      console.log('[live] Recording stopped with no audio');
+      this.recordBuffer = [];
+      return;
+    }
+
+    // Normalize to peak = 1.0
+    let peak = 0;
+    for (let i = 0; i < audio.length; i++) {
+      const abs = Math.abs(audio[i]);
+      if (abs > peak) peak = abs;
+    }
+    if (peak > 0 && peak < 1) {
+      const gain = 1 / peak;
+      for (let i = 0; i < audio.length; i++) audio[i] *= gain;
+    }
+
+    // Compute click delta
+    let maxAbsDelta = 0;
+    for (let i = 1; i < audio.length; i++) {
+      const d = Math.abs(audio[i] - audio[i - 1]);
+      if (d > maxAbsDelta) maxAbsDelta = d;
+    }
+
+    const peakDbfs = peak > 0 ? 20 * Math.log10(peak) : -Infinity;
+
+    // Encode WAV
+    const wav = new WaveFile();
+    wav.fromScratch(1, sampleRate, '32f', audio);
+    const wavBuffer = Buffer.from(wav.toBuffer());
+
+    const commit = getGitCommit();
+    const finalName = name?.trim() || `Live Take ${new Date().toLocaleTimeString('en-US', { hour12: false })}`;
+
+    const config = {
+      presetId: this.config.presetId,
+      maxPolyphony: this.config.maxPolyphony,
+      blockSize: this.config.blockSize,
+      rngSeed: this.config.rngSeed,
+      sampleRateHz: sampleRate,
+      mode: 'live',
+    };
+
+    const scoreHash = createHash('sha256').update(JSON.stringify({ live: true })).digest('hex');
+    const wavHash = createHash('sha256').update(wavBuffer).digest('hex');
+
+    const provenance = {
+      commit,
+      scoreHash,
+      wavHash,
+      config,
+      presetId: this.config.presetId,
+    };
+
+    const telemetry = {
+      maxAbsDelta,
+      peakDbfs,
+      durationSec,
+      renderTimeMs: 0,
+      rtf: 0,
+      voicesMax: this.config.maxPolyphony,
+      mode: 'live',
+    };
+
+    try {
+      const meta = saveRender({
+        name: finalName,
+        score: { live: true, durationSec },
+        config,
+        telemetry,
+        provenance,
+        wavBytes: wavBuffer,
+        durationSec,
+      });
+
+      console.log(`[live] Recording saved: "${meta.name}" (${durationSec.toFixed(2)}s) → ${meta.id}`);
+
+      this.send({
+        type: 'record_saved',
+        renderId: meta.id,
+        name: meta.name,
+        durationSec,
+      } as RecordSavedMessage);
+    } catch (err: any) {
+      console.error('[live] Failed to save recording:', err);
+      this.sendError('RECORD_SAVE_FAILED', err.message);
+    }
+
+    this.recordBuffer = [];
   }
 
   /** Called by the render loop to capture audio if recording. */
   captureBlock(block: Float32Array) {
-    if (this.recording) {
-      this.recordBuffer.push(new Float32Array(block)); // copy
+    if (!this.recording) return;
+
+    const sampleRate = this.engine?.sampleRateHz ?? 48000;
+    const currentSamples = this.recordBuffer.reduce((sum, b) => sum + b.length, 0);
+    if (currentSamples / sampleRate >= MAX_RECORD_SEC) {
+      // Auto-stop at cap
+      this.handleRecordStop();
+      return;
     }
+
+    this.recordBuffer.push(new Float32Array(block)); // copy
   }
 
   /** Get recorded audio as a single contiguous buffer. */

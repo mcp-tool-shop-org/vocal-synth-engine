@@ -1012,7 +1012,11 @@
       btnRecord.style.background = 'var(--error)';
       btnRecord.style.color = '#fff';
     } else {
-      liveWs.send(JSON.stringify({ type: 'record_stop' }));
+      const name = prompt('Name this take (or leave blank for auto-name):');
+      liveWs.send(JSON.stringify({
+        type: 'record_stop',
+        name: name?.trim() || undefined,
+      }));
       btnRecord.textContent = 'Record';
       btnRecord.style.background = '';
       btnRecord.style.color = '';
@@ -1189,6 +1193,21 @@
         if (msg.stolen) {
           showToast(`Voice stolen for ${msg.noteId}`);
         }
+        break;
+
+      case 'record_status':
+        if (!msg.recording && isRecording) {
+          // Server auto-stopped recording (e.g. hit 60s cap)
+          isRecording = false;
+          btnRecord.textContent = 'Record';
+          btnRecord.style.background = '';
+          btnRecord.style.color = '';
+        }
+        break;
+
+      case 'record_saved':
+        showToast(`Saved: ${msg.name} (${msg.durationSec.toFixed(1)}s)`);
+        loadBank(); // refresh render bank
         break;
     }
   }
