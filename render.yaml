@@ -3,7 +3,7 @@ services:
     name: vocal-synth-cockpit
     runtime: docker
     region: ohio
-    plan: free
+    plan: starter
     envVars:
       - key: NODE_ENV
         value: production
