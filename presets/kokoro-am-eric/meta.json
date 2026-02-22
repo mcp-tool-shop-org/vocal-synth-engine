@@ -1,0 +1,7 @@
+{
+  "id": "kokoro-am-eric",
+  "name": "Eric",
+  "description": "Friendly male voice.",
+  "tags": ["kokoro", "male", "american"],
+  "defaultTimbre": "AH"
+}

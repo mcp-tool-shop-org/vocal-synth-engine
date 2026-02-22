@@ -1,0 +1,82 @@
+{
+  "schema": "mcp-voice-engine.voicepreset",
+  "version": "0.2.0",
+  "id": "vp_multi_timbre",
+  "sampleRateHz": 48000,
+  "analysis": {
+    "frameMs": 42.666666666666664,
+    "hopMs": 10,
+    "f0Method": "yin",
+    "maxHarmonics": 80,
+    "envelope": {
+      "method": "moving_average"
+    },
+    "noise": {
+      "method": "residual_approx",
+      "fftSize": 2048
+    }
+  },
+  "timbres": [
+    {
+      "name": "AH",
+      "kind": "vowel",
+      "assets": {
+        "harmonicsMag": "assets/AH_harmonics_mag.f32",
+        "envelopeDb": "assets/AH_envelope_db.f32",
+        "noiseDb": "assets/AH_noise_db.f32",
+        "freqHz": "assets/freq_axis_hz.f32"
+      },
+      "defaults": {
+        "hnrDb": 18,
+        "breathiness": 0.12,
+        "vibrato": {
+          "rateHz": 5.8,
+          "depthCents": 35,
+          "onsetMs": 220
+        }
+      }
+    },
+    {
+      "name": "EE",
+      "kind": "vowel",
+      "assets": {
+        "harmonicsMag": "assets/EE_harmonics_mag.f32",
+        "envelopeDb": "assets/EE_envelope_db.f32",
+        "noiseDb": "assets/EE_noise_db.f32",
+        "freqHz": "assets/freq_axis_hz.f32"
+      },
+      "defaults": {
+        "hnrDb": 18,
+        "breathiness": 0.12,
+        "vibrato": {
+          "rateHz": 5.8,
+          "depthCents": 35,
+          "onsetMs": 220
+        }
+      }
+    },
+    {
+      "name": "OO",
+      "kind": "vowel",
+      "assets": {
+        "harmonicsMag": "assets/OO_harmonics_mag.f32",
+        "envelopeDb": "assets/OO_envelope_db.f32",
+        "noiseDb": "assets/OO_noise_db.f32",
+        "freqHz": "assets/freq_axis_hz.f32"
+      },
+      "defaults": {
+        "hnrDb": 18,
+        "breathiness": 0.12,
+        "vibrato": {
+          "rateHz": 5.8,
+          "depthCents": 35,
+          "onsetMs": 220
+        }
+      }
+    }
+  ],
+  "integrity": {
+    "assetsHash": "sha256:pending",
+    "analysisHash": "sha256:pending"
+  }
+}

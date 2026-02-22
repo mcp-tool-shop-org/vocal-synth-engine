@@ -1,0 +1,7 @@
+{
+  "id": "kokoro-bf-alice",
+  "name": "Alice",
+  "description": "Gentle British female voice.",
+  "tags": ["kokoro", "female", "british"],
+  "defaultTimbre": "AH"
+}
