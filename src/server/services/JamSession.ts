@@ -10,11 +10,14 @@ import { LiveSynthEngine } from '../../engine/LiveSynthEngine.js';
 import type { LiveEngineConfig } from '../../engine/LiveSynthEngine.js';
 import { loadVoicePreset } from '../../preset/loader.js';
 import { resolvePresetPath } from './renderScoreToWav.js';
+import { saveRender } from '../storage/renderStore.js';
+import { exportEventTapeToWav } from './jamExport.js';
 import type {
   TrackState, Participant, TransportState, JamSessionSnapshot,
   TrackAddMessage, TrackUpdateMessage, TrackNoteOnMessage, TrackNoteOffMessage,
   JamTransportSetMessage, TransportTickMessage, JamTelemetryMessage,
   JamServerMessage,
+  QuantizeGrid, EventTapeEntry, EventTape,
 } from '../../types/jam.js';
 
 const AUDIO_HEADER_SIZE = 16;
@@ -66,6 +69,14 @@ export class JamSession {
 
   // Pre-allocated master mix buffer
   private masterMixBuf: Float32Array;
+
+  // Phase 5B: Quantization + Recording + Metronome
+  private quantizeGrid: QuantizeGrid = 'none';
+  private recording: boolean = false;
+  private eventTape: EventTapeEntry[] = [];
+  private recordStartSample: number = 0;
+  private metronomeEnabled: boolean = false;
+  private lastMetronomeBeat: number = -1;
 
   constructor(config: JamSessionConfig) {
     this.sessionId = config.sessionId;
@@ -175,6 +186,16 @@ export class JamSession {
   }
 
   setTransportParams(msg: JamTransportSetMessage): void {
+    // Record BPM change if recording
+    if (msg.bpm !== undefined && msg.bpm !== this.transport.bpm && this.recording) {
+      this.eventTape.push({
+        tSample: this.transport.currentSample - this.recordStartSample,
+        trackId: '',
+        event: 'transport_bpm',
+        payload: { bpm: msg.bpm },
+      });
+    }
+
     if (msg.bpm !== undefined) this.transport.bpm = msg.bpm;
     if (msg.timeSig !== undefined) this.transport.timeSig = msg.timeSig;
     if (msg.loopEnabled !== undefined) this.transport.loopEnabled = msg.loopEnabled;
@@ -182,6 +203,133 @@ export class JamSession {
     if (msg.loopEndSec !== undefined) this.transport.loopEndSec = msg.loopEndSec;
 
     this.broadcast({ type: 'transport_ack', transport: { ...this.transport } });
+  }
+
+  // ── Quantization (Phase 5B) ─────────────────────────────────────
+
+  setQuantize(grid: QuantizeGrid): void {
+    this.quantizeGrid = grid;
+    this.broadcast({ type: 'quantize_ack', grid });
+  }
+
+  /**
+   * Snap a sample position to the nearest grid line.
+   * Grid divisions: '1/4' = quarter note, '1/8' = eighth, etc.
+   */
+  private quantizeSample(sample: number): number {
+    if (this.quantizeGrid === 'none') return sample;
+
+    const divisor = parseInt(this.quantizeGrid.split('/')[1]);
+    const samplesPerBeat = (this.config.sampleRateHz * 60) / this.transport.bpm;
+    const gridSamples = samplesPerBeat / (divisor / 4);  // quarter = 1, eighth = 2, etc.
+
+    return Math.round(sample / gridSamples) * gridSamples;
+  }
+
+  // ── Recording (Phase 5B) ──────────────────────────────────────
+
+  startRecording(): void {
+    this.recording = true;
+    this.eventTape = [];
+    this.recordStartSample = this.transport.currentSample;
+    this.broadcast({
+      type: 'record_status',
+      recording: true,
+      durationSec: 0,
+      eventCount: 0,
+    });
+  }
+
+  stopRecording(): void {
+    this.recording = false;
+    const durationSec = (this.transport.currentSample - this.recordStartSample) / this.config.sampleRateHz;
+    this.broadcast({
+      type: 'record_status',
+      recording: false,
+      durationSec,
+      eventCount: this.eventTape.length,
+    });
+  }
+
+  async exportRecording(name?: string): Promise<void> {
+    if (this.eventTape.length === 0) {
+      this.broadcast({
+        type: 'jam_error',
+        code: 'NO_RECORDING',
+        message: 'No events recorded. Start and stop recording first.',
+      });
+      return;
+    }
+
+    const tape: EventTape = {
+      sampleRateHz: this.config.sampleRateHz,
+      blockSize: this.config.blockSize,
+      bpm: this.transport.bpm,
+      timeSig: { ...this.transport.timeSig },
+      seed: this.config.seed,
+      tracks: Array.from(this.tracks.values()).map(e => ({
+        trackId: e.state.trackId,
+        presetId: e.state.presetId,
+        name: e.state.name,
+        gain: e.state.gain,
+      })),
+      events: this.eventTape,
+    };
+
+    try {
+      const result = await exportEventTapeToWav(tape);
+
+      const renderMeta = saveRender({
+        name,
+        score: { jam: true, eventTape: tape },
+        config: {
+          sampleRateHz: tape.sampleRateHz,
+          blockSize: tape.blockSize,
+          bpm: tape.bpm,
+          seed: tape.seed,
+        },
+        telemetry: result.telemetry,
+        provenance: result.provenance,
+        wavBytes: result.wavBytes,
+        durationSec: result.durationSec,
+      });
+
+      this.broadcast({
+        type: 'record_exported',
+        renderId: renderMeta.id,
+        durationSec: result.durationSec,
+        wavHash: result.provenance.wavHash,
+      });
+    } catch (err: any) {
+      this.broadcast({
+        type: 'jam_error',
+        code: 'EXPORT_FAILED',
+        message: `Export failed: ${err.message}`,
+      });
+    }
+  }
+
+  // ── Metronome (Phase 5B) ──────────────────────────────────────
+
+  toggleMetronome(): void {
+    this.metronomeEnabled = !this.metronomeEnabled;
+    this.lastMetronomeBeat = -1;
+    this.broadcast({ type: 'metronome_ack', enabled: this.metronomeEnabled });
+  }
+
+  /**
+   * Generate metronome click into buffer at a beat boundary.
+   * 880 Hz for downbeat, 440 Hz for other beats.
+   * ~10ms sine burst.
+   */
+  private generateClick(buffer: Float32Array, downbeat: boolean): void {
+    const freq = downbeat ? 880 : 440;
+    const clickSamples = Math.min(Math.floor(0.01 * this.config.sampleRateHz), buffer.length);
+    for (let i = 0; i < clickSamples; i++) {
+      const t = i / this.config.sampleRateHz;
+      const envelope = 1 - (i / clickSamples);  // linear decay
+      buffer[i] += 0.3 * envelope * Math.sin(2 * Math.PI * freq * t);
+    }
   }
 
   // ── Track Management ────────────────────────────────────────────
@@ -277,6 +425,25 @@ export class JamSession {
       this.play();
     }
 
+    // Quantize + record
+    const quantizedSample = this.quantizeSample(this.transport.currentSample);
+    if (this.recording) {
+      this.eventTape.push({
+        tSample: quantizedSample - this.recordStartSample,
+        trackId: msg.trackId,
+        event: 'note_on',
+        payload: {
+          noteId: msg.noteId,
+          midi: msg.midi,
+          velocity: msg.velocity,
+          timbre: msg.timbre,
+          breathiness: msg.breathiness,
+          vibrato: msg.vibrato,
+          portamentoMs: msg.portamentoMs,
+        },
+      });
+    }
+
     return entry.engine.noteOn({
       noteId: msg.noteId,
       midi: msg.midi,
@@ -291,6 +458,20 @@ export class JamSession {
   noteOff(msg: TrackNoteOffMessage): void {
     const entry = this.tracks.get(msg.trackId);
     if (!entry) return;
+
+    // Record note-off
+    if (this.recording) {
+      this.eventTape.push({
+        tSample: this.transport.currentSample - this.recordStartSample,
+        trackId: msg.trackId,
+        event: 'note_off',
+        payload: {
+          noteId: msg.noteId,
+          releaseMs: msg.releaseMs,
+        },
+      });
+    }
+
     entry.engine.noteOff(msg.noteId, msg.releaseMs);
   }
 
@@ -345,6 +526,11 @@ export class JamSession {
       }
     }
 
+    // Metronome: mix click AFTER recording capture (clean recordings)
+    if (this.metronomeEnabled) {
+      this.processMetronome(mix);
+    }
+
     // Transport tick
     this.blocksSinceLastTick++;
     if (this.blocksSinceLastTick >= TRANSPORT_TICK_INTERVAL_BLOCKS) {
@@ -358,6 +544,35 @@ export class JamSession {
       const pcmBytes = Buffer.from(mix.buffer, mix.byteOffset, mix.byteLength);
       pcmBytes.copy(this.audioFrameBuf, AUDIO_HEADER_SIZE);
       this.broadcastBinary(this.audioFrameBuf);
+    }
+  }
+
+  /**
+   * Check if a new beat boundary falls within the current block.
+   * If so, generate a click and broadcast a metronome_tick message.
+   */
+  private processMetronome(mix: Float32Array): void {
+    const sampleRate = this.config.sampleRateHz;
+    const beatsPerSec = this.transport.bpm / 60;
+    const currentSec = this.transport.currentSample / sampleRate;
+    const totalBeats = currentSec * beatsPerSec;
+    const currentBeatInt = Math.floor(totalBeats);
+
+    if (currentBeatInt > this.lastMetronomeBeat) {
+      this.lastMetronomeBeat = currentBeatInt;
+
+      const beatsPerMeasure = this.transport.timeSig.num;
+      const beatInMeasure = currentBeatInt % beatsPerMeasure;
+      const downbeat = beatInMeasure === 0;
+
+      this.generateClick(mix, downbeat);
+
+      this.broadcast({
+        type: 'metronome_tick',
+        beat: beatInMeasure,
+        measure: Math.floor(currentBeatInt / beatsPerMeasure),
+        downbeat,
+      });
     }
   }
 

@@ -1,10 +1,32 @@
-// ── Phase 5A: Jam Session Types ──────────────────────────────────
+// ── Phase 5A/5B: Jam Session Types ───────────────────────────────
 
 export const JAM_PROTOCOL_VERSION = 1;
 
 // ── Core Models ──────────────────────────────────────────────────
 
 export type TrackInputMode = 'live' | 'score' | 'agent';
+export type QuantizeGrid = 'none' | '1/4' | '1/8' | '1/16' | '1/32';
+
+// ── EventTape (Phase 5B) ─────────────────────────────────────────
+
+export type EventTapeEventType = 'note_on' | 'note_off' | 'transport_bpm' | 'transport_stop';
+
+export interface EventTapeEntry {
+  tSample: number;         // sample offset from recording start
+  trackId: string;
+  event: EventTapeEventType;
+  payload: Record<string, any>;  // midi, velocity, timbre, etc.
+}
+
+export interface EventTape {
+  sampleRateHz: number;
+  blockSize: number;
+  bpm: number;
+  timeSig: { num: number; den: number };
+  seed: number;
+  tracks: Array<{ trackId: string; presetId: string; name: string; gain: number }>;
+  events: EventTapeEntry[];
+}
 
 export interface TrackState {
   trackId: string;
@@ -145,6 +167,30 @@ export interface JamPingMessage {
   clientTimestamp: number;
 }
 
+// ── Phase 5B Client Messages ─────────────────────────────────────
+
+export interface SessionSetQuantizeMessage {
+  type: 'session_set_quantize';
+  grid: QuantizeGrid;
+}
+
+export interface RecordStartMessage {
+  type: 'record_start';
+}
+
+export interface RecordStopMessage {
+  type: 'record_stop';
+}
+
+export interface RecordExportMessage {
+  type: 'record_export';
+  name?: string;
+}
+
+export interface MetronomeToggleMessage {
+  type: 'metronome_toggle';
+}
+
 export type JamClientMessage =
   | JamHelloMessage
   | SessionCreateMessage
@@ -159,7 +205,12 @@ export type JamClientMessage =
   | TrackUpdateMessage
   | TrackNoteOnMessage
   | TrackNoteOffMessage
-  | JamPingMessage;
+  | JamPingMessage
+  | SessionSetQuantizeMessage
+  | RecordStartMessage
+  | RecordStopMessage
+  | RecordExportMessage
+  | MetronomeToggleMessage;
 
 // ── Server → Client Messages ─────────────────────────────────────
 
@@ -255,6 +306,39 @@ export interface JamPongMessage {
   serverTimestamp: number;
 }
 
+// ── Phase 5B Server Messages ─────────────────────────────────────
+
+export interface QuantizeAckMessage {
+  type: 'quantize_ack';
+  grid: QuantizeGrid;
+}
+
+export interface RecordStatusMessage {
+  type: 'record_status';
+  recording: boolean;
+  durationSec: number;
+  eventCount: number;
+}
+
+export interface RecordExportedMessage {
+  type: 'record_exported';
+  renderId: string;
+  durationSec: number;
+  wavHash: string;
+}
+
+export interface MetronomeTickMessage {
+  type: 'metronome_tick';
+  beat: number;
+  measure: number;
+  downbeat: boolean;
+}
+
+export interface MetronomeAckMessage {
+  type: 'metronome_ack';
+  enabled: boolean;
+}
+
 export type JamServerMessage =
   | JamHelloAckMessage
   | SessionCreatedMessage
@@ -270,4 +354,9 @@ export type JamServerMessage =
   | TrackNoteAckMessage
   | JamTelemetryMessage
   | JamErrorMessage
-  | JamPongMessage;
+  | JamPongMessage
+  | QuantizeAckMessage
+  | RecordStatusMessage
+  | RecordExportedMessage
+  | MetronomeTickMessage
+  | MetronomeAckMessage;

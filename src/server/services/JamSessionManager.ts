@@ -135,6 +135,52 @@ export class JamSessionManager {
         break;
       }
 
+      // Phase 5B: Quantization + Recording + Metronome
+      case 'session_set_quantize': {
+        if (!conn.session) {
+          this.sendError(ws, 'NOT_IN_SESSION', 'Join a session first');
+          return;
+        }
+        conn.session.setQuantize(msg.grid);
+        break;
+      }
+
+      case 'record_start': {
+        if (!conn.session) {
+          this.sendError(ws, 'NOT_IN_SESSION', 'Join a session first');
+          return;
+        }
+        conn.session.startRecording();
+        break;
+      }
+
+      case 'record_stop': {
+        if (!conn.session) {
+          this.sendError(ws, 'NOT_IN_SESSION', 'Join a session first');
+          return;
+        }
+        conn.session.stopRecording();
+        break;
+      }
+
+      case 'record_export': {
+        if (!conn.session) {
+          this.sendError(ws, 'NOT_IN_SESSION', 'Join a session first');
+          return;
+        }
+        await conn.session.exportRecording(msg.name);
+        break;
+      }
+
+      case 'metronome_toggle': {
+        if (!conn.session) {
+          this.sendError(ws, 'NOT_IN_SESSION', 'Join a session first');
+          return;
+        }
+        conn.session.toggleMetronome();
+        break;
+      }
+
       case 'jam_ping':
         this.sendTo(ws, {
           type: 'jam_pong',
