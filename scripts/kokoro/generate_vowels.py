@@ -241,27 +241,40 @@ def generate_vowel(sess: rt.InferenceSession, tokenizer: Tokenizer,
     # The build-preset pipeline takes an FFT frame from the file center,
     # so we must ensure voiced audio at every position.
     target_samples = int(TARGET_DURATION * TARGET_SR)
-    audio_48k = np.zeros(target_samples, dtype=np.float32)
 
     if len(region_48k) >= target_samples:
         # Trim from center
         trim_start = (len(region_48k) - target_samples) // 2
-        audio_48k[:] = region_48k[trim_start:trim_start + target_samples]
+        audio_48k = region_48k[trim_start:trim_start + target_samples].copy()
     else:
-        # Loop/tile the region to fill the buffer (cross-fade at seams)
-        xfade = min(int(0.005 * TARGET_SR), len(region_48k) // 4)  # 5ms cross-fade
-        pos = 0
-        while pos < target_samples:
-            chunk_len = min(len(region_48k), target_samples - pos)
-            audio_48k[pos:pos + chunk_len] += region_48k[:chunk_len]
-            # Cross-fade at loop boundary to avoid clicks
-            if pos > 0 and xfade > 0:
-                fade = np.linspace(0, 1, xfade, dtype=np.float32)
-                audio_48k[pos:pos + xfade] *= fade
-                end_prev = pos
-                start_prev = max(0, end_prev - xfade)
-                audio_48k[start_prev:end_prev] *= np.linspace(1, 0, end_prev - start_prev, dtype=np.float32)
-            pos += len(region_48k) - xfade  # overlap by xfade
+        # Loop with proper overlap-add cross-fade at seams.
+        # Strategy: tile enough copies, then cross-fade at each boundary.
+        xfade = min(int(0.010 * TARGET_SR), len(region_48k) // 4)  # 10ms cross-fade
+        stride = len(region_48k) - xfade  # effective advance per tile
+        n_tiles = (target_samples // stride) + 2  # enough to overshoot
+
+        # Build cross-fadeable region: fade out last xfade samples,
+        # fade in first xfade samples
+        fade_in = np.linspace(0, 1, xfade, dtype=np.float32)
+        fade_out = np.linspace(1, 0, xfade, dtype=np.float32)
+
+        total_len = stride * n_tiles + xfade
+        audio_48k = np.zeros(total_len, dtype=np.float32)
+
+        for t in range(n_tiles):
+            pos = t * stride
+            end = pos + len(region_48k)
+            if end > total_len:
+                break
+            chunk = region_48k.copy()
+            if t > 0:
+                # Fade in the start of this tile
+                chunk[:xfade] *= fade_in
+            if t < n_tiles - 1:
+                # Fade out the end of this tile
+                chunk[-xfade:] *= fade_out
+            audio_48k[pos:end] += chunk
+
         audio_48k = audio_48k[:target_samples]
 
     # Normalize to peak dBFS
