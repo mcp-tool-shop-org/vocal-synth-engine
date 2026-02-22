@@ -1,4 +1,6 @@
-// ── Phase 5A/5B: Jam Session Types ───────────────────────────────
+// ── Phase 5A/5B/5C: Jam Session Types ────────────────────────────
+
+import type { VocalScore } from './score.js';
 
 export const JAM_PROTOCOL_VERSION = 1;
 
@@ -6,6 +8,7 @@ export const JAM_PROTOCOL_VERSION = 1;
 
 export type TrackInputMode = 'live' | 'score' | 'agent';
 export type QuantizeGrid = 'none' | '1/4' | '1/8' | '1/16' | '1/32';
+export type ParticipantRole = 'host' | 'guest';
 
 // ── EventTape (Phase 5B) ─────────────────────────────────────────
 
@@ -16,6 +19,7 @@ export interface EventTapeEntry {
   trackId: string;
   event: EventTapeEventType;
   payload: Record<string, any>;  // midi, velocity, timbre, etc.
+  participantId?: string;  // who triggered this event ('_score' for score-scheduled)
 }
 
 export interface EventTape {
@@ -39,12 +43,14 @@ export interface TrackState {
   mute: boolean;
   solo: boolean;
   inputMode: TrackInputMode;
+  ownerId: string;
 }
 
 export interface Participant {
   participantId: string;
   displayName: string;
   joinedAt: number;
+  role: ParticipantRole;
 }
 
 export interface TransportState {
@@ -60,6 +66,7 @@ export interface TransportState {
 export interface JamSessionSnapshot {
   sessionId: string;
   createdAt: number;
+  hostId: string;
   sampleRateHz: number;
   blockSize: number;
   seed: number;
@@ -191,6 +198,14 @@ export interface MetronomeToggleMessage {
   type: 'metronome_toggle';
 }
 
+// ── Phase 5C Client Messages ─────────────────────────────────────
+
+export interface TrackSetScoreMessage {
+  type: 'track_set_score';
+  trackId: string;
+  score: VocalScore;
+}
+
 export type JamClientMessage =
   | JamHelloMessage
   | SessionCreateMessage
@@ -210,7 +225,8 @@ export type JamClientMessage =
   | RecordStartMessage
   | RecordStopMessage
   | RecordExportMessage
-  | MetronomeToggleMessage;
+  | MetronomeToggleMessage
+  | TrackSetScoreMessage;
 
 // ── Server → Client Messages ─────────────────────────────────────
 
@@ -339,6 +355,16 @@ export interface MetronomeAckMessage {
   enabled: boolean;
 }
 
+// ── Phase 5C Server Messages ─────────────────────────────────────
+
+export interface ScoreStatusMessage {
+  type: 'score_status';
+  trackId: string;
+  noteCount: number;
+  durationSec: number;
+  playing: boolean;
+}
+
 export type JamServerMessage =
   | JamHelloAckMessage
   | SessionCreatedMessage
@@ -359,4 +385,5 @@ export type JamServerMessage =
   | RecordStatusMessage
   | RecordExportedMessage
   | MetronomeTickMessage
-  | MetronomeAckMessage;
+  | MetronomeAckMessage
+  | ScoreStatusMessage;

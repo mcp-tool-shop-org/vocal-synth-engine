@@ -22,6 +22,8 @@ import {
   type TrackNoteOffMessage,
   type JamTransportSetMessage,
   type JamTransportSeekMessage,
+  type TrackSetScoreMessage,
+  type ParticipantRole,
 } from '../../types/jam.js';
 
 const MAX_SESSIONS = Number(process.env.MAX_JAM_SESSIONS) || 8;
@@ -31,6 +33,7 @@ const DEFAULT_SAMPLE_RATE = 48000;
 interface ConnectionState {
   participantId: string;
   displayName: string;
+  role: ParticipantRole;
   session: JamSession | null;
   authenticated: boolean;  // has sent jam_hello
 }
@@ -45,6 +48,7 @@ export class JamSessionManager {
     this.connections.set(ws, {
       participantId: randomUUID().slice(0, 12),
       displayName: `Player ${this.connections.size + 1}`,
+      role: 'guest',
       session: null,
       authenticated: false,
     });
@@ -99,7 +103,7 @@ export class JamSessionManager {
         this.handleSessionLeave(ws, conn);
         break;
 
-      // Transport
+      // Transport (host-only)
       case 'transport_play':
       case 'transport_stop':
       case 'transport_seek':
@@ -108,39 +112,52 @@ export class JamSessionManager {
           this.sendError(ws, 'NOT_IN_SESSION', 'Join a session first');
           return;
         }
+        if (!this.requireHost(ws, conn, 'control transport')) return;
         this.handleTransport(conn.session, msg);
         break;
       }
 
-      // Track management
-      case 'track_add':
+      // Track add (host-only), remove/update (owner-or-host)
+      case 'track_add': {
+        if (!conn.session) {
+          this.sendError(ws, 'NOT_IN_SESSION', 'Join a session first');
+          return;
+        }
+        if (!this.requireHost(ws, conn, 'add tracks')) return;
+        await this.handleTrack(ws, conn, conn.session, msg);
+        break;
+      }
+
       case 'track_remove':
       case 'track_update': {
         if (!conn.session) {
           this.sendError(ws, 'NOT_IN_SESSION', 'Join a session first');
           return;
         }
-        await this.handleTrack(ws, conn.session, msg);
+        const trackIdForAuth = (msg as any).trackId;
+        if (!this.canModifyTrack(ws, conn, trackIdForAuth, msg.type === 'track_remove' ? 'remove tracks' : 'update tracks')) return;
+        await this.handleTrack(ws, conn, conn.session, msg);
         break;
       }
 
-      // Note events
+      // Note events (all participants)
       case 'track_note_on':
       case 'track_note_off': {
         if (!conn.session) {
           this.sendError(ws, 'NOT_IN_SESSION', 'Join a session first');
           return;
         }
-        this.handleNote(ws, conn.session, msg);
+        this.handleNote(ws, conn, conn.session, msg);
         break;
       }
 
-      // Phase 5B: Quantization + Recording + Metronome
+      // Phase 5B: Quantization + Recording (host-only) + Metronome (all)
       case 'session_set_quantize': {
         if (!conn.session) {
           this.sendError(ws, 'NOT_IN_SESSION', 'Join a session first');
           return;
         }
+        if (!this.requireHost(ws, conn, 'set quantize')) return;
         conn.session.setQuantize(msg.grid);
         break;
       }
@@ -150,6 +167,7 @@ export class JamSessionManager {
           this.sendError(ws, 'NOT_IN_SESSION', 'Join a session first');
           return;
         }
+        if (!this.requireHost(ws, conn, 'start recording')) return;
         conn.session.startRecording();
         break;
       }
@@ -159,6 +177,7 @@ export class JamSessionManager {
           this.sendError(ws, 'NOT_IN_SESSION', 'Join a session first');
           return;
         }
+        if (!this.requireHost(ws, conn, 'stop recording')) return;
         conn.session.stopRecording();
         break;
       }
@@ -168,6 +187,7 @@ export class JamSessionManager {
           this.sendError(ws, 'NOT_IN_SESSION', 'Join a session first');
           return;
         }
+        if (!this.requireHost(ws, conn, 'export recording')) return;
         await conn.session.exportRecording(msg.name);
         break;
       }
@@ -178,6 +198,20 @@ export class JamSessionManager {
           return;
         }
         conn.session.toggleMetronome();
+        break;
+      }
+
+      // Phase 5C: Score input
+      case 'track_set_score': {
+        if (!conn.session) {
+          this.sendError(ws, 'NOT_IN_SESSION', 'Join a session first');
+          return;
+        }
+        if (!this.canModifyTrack(ws, conn, msg.trackId, 'set score')) return;
+        const scoreSet = conn.session.setTrackScore(msg.trackId, msg.score);
+        if (!scoreSet) {
+          this.sendError(ws, 'TRACK_NOT_FOUND', `Track '${msg.trackId}' not found`);
+        }
         break;
       }
 
@@ -192,6 +226,24 @@ export class JamSessionManager {
       default:
         this.sendError(ws, 'UNKNOWN_MESSAGE', `Unknown message type: ${(msg as any).type}`);
     }
+  }
+
+  // ── Role Checks (Phase 5C) ─────────────────────────────────────
+
+  private requireHost(ws: WebSocket, conn: ConnectionState, action: string): boolean {
+    if (conn.role !== 'host') {
+      this.sendError(ws, 'NOT_HOST', `Only the host can ${action}`);
+      return false;
+    }
+    return true;
+  }
+
+  private canModifyTrack(ws: WebSocket, conn: ConnectionState, trackId: string, action: string): boolean {
+    if (conn.role === 'host') return true;
+    const ownerId = conn.session!.getTrackOwnerId(trackId);
+    if (ownerId === conn.participantId) return true;
+    this.sendError(ws, 'NOT_AUTHORIZED', `Only the track owner or host can ${action}`);
+    return false;
   }
 
   // ── Handlers ────────────────────────────────────────────────────
@@ -242,8 +294,10 @@ export class JamSessionManager {
     const session = new JamSession(config);
     this.sessions.set(sessionId, session);
 
-    // Creator auto-joins
-    session.addParticipant(ws, conn.participantId, conn.displayName);
+    // Creator auto-joins as host
+    conn.role = 'host';
+    session.setHost(conn.participantId);
+    session.addParticipant(ws, conn.participantId, conn.displayName, 'host');
     conn.session = session;
 
     this.sendTo(ws, {
@@ -273,7 +327,8 @@ export class JamSessionManager {
       return;
     }
 
-    session.addParticipant(ws, conn.participantId, conn.displayName);
+    conn.role = 'guest';
+    session.addParticipant(ws, conn.participantId, conn.displayName, 'guest');
     conn.session = session;
 
     this.sendTo(ws, {
@@ -327,13 +382,13 @@ export class JamSessionManager {
   }
 
   private async handleTrack(
-    ws: WebSocket, session: JamSession,
+    ws: WebSocket, conn: ConnectionState, session: JamSession,
     msg: TrackAddMessage | { type: 'track_remove'; trackId: string } | TrackUpdateMessage
   ): Promise<void> {
     switch (msg.type) {
       case 'track_add': {
         try {
-          await session.addTrack(msg as TrackAddMessage);
+          await session.addTrack(msg as TrackAddMessage, conn.participantId);
         } catch (err: any) {
           this.sendError(ws, err.code || 'TRACK_ADD_FAILED', err.message);
         }
@@ -357,11 +412,11 @@ export class JamSessionManager {
   }
 
   private handleNote(
-    ws: WebSocket, session: JamSession,
+    ws: WebSocket, conn: ConnectionState, session: JamSession,
     msg: TrackNoteOnMessage | TrackNoteOffMessage
   ): void {
     if (msg.type === 'track_note_on') {
-      const result = session.noteOn(msg);
+      const result = session.noteOn(msg, conn.participantId);
       if (result) {
         session.sendTo(ws, {
           type: 'track_note_ack',
@@ -374,7 +429,7 @@ export class JamSessionManager {
         this.sendError(ws, 'TRACK_NOT_FOUND', `Track '${msg.trackId}' not found`);
       }
     } else {
-      session.noteOff(msg);
+      session.noteOff(msg, conn.participantId);
     }
   }
 

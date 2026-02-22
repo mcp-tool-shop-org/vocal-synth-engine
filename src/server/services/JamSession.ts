@@ -16,9 +16,10 @@ import type {
   TrackState, Participant, TransportState, JamSessionSnapshot,
   TrackAddMessage, TrackUpdateMessage, TrackNoteOnMessage, TrackNoteOffMessage,
   JamTransportSetMessage, TransportTickMessage, JamTelemetryMessage,
-  JamServerMessage,
+  JamServerMessage, ParticipantRole,
   QuantizeGrid, EventTapeEntry, EventTape,
 } from '../../types/jam.js';
+import type { VocalScore, VocalNote } from '../../types/score.js';
 
 const AUDIO_HEADER_SIZE = 16;
 const MAX_SEND_QUEUE_BYTES = 4 * 1024 * 1024;
@@ -35,9 +36,22 @@ export interface JamSessionConfig {
   seed: number;
 }
 
+interface ScoreEvent {
+  sampleOffset: number;
+  type: 'on' | 'off';
+  noteId: string;
+  midi: number;
+  velocity: number;
+  timbre?: string;
+  vibrato?: { rateHz: number; depthCents: number; onsetSec: number };
+  releaseMs?: number;
+}
+
 interface TrackEntry {
   state: TrackState;
   engine: LiveSynthEngine;
+  scoreEvents?: ScoreEvent[];
+  scoreCursor?: number;
 }
 
 export class JamSession {
@@ -70,6 +84,9 @@ export class JamSession {
   // Pre-allocated master mix buffer
   private masterMixBuf: Float32Array;
 
+  // Phase 5C: Host + Score
+  private hostParticipantId: string = '';
+
   // Phase 5B: Quantization + Recording + Metronome
   private quantizeGrid: QuantizeGrid = 'none';
   private recording: boolean = false;
@@ -98,11 +115,16 @@ export class JamSession {
 
   // ── Participant Management ──────────────────────────────────────
 
-  addParticipant(ws: WebSocket, participantId: string, displayName: string): Participant {
+  setHost(participantId: string): void {
+    this.hostParticipantId = participantId;
+  }
+
+  addParticipant(ws: WebSocket, participantId: string, displayName: string, role: ParticipantRole = 'guest'): Participant {
     const participant: Participant = {
       participantId,
       displayName,
       joinedAt: Date.now(),
+      role,
     };
     this.participants.set(ws, participant);
 
@@ -177,9 +199,13 @@ export class JamSession {
     const sample = Math.max(0, Math.round(positionSec * this.config.sampleRateHz));
     this.transport.currentSample = sample;
 
-    // Panic all tracks to release active notes
+    // Panic all tracks to release active notes + reset score cursors
     for (const [, entry] of this.tracks) {
       entry.engine.panic();
+      if (entry.scoreEvents) {
+        entry.scoreCursor = entry.scoreEvents.findIndex(e => e.sampleOffset >= sample);
+        if (entry.scoreCursor === -1) entry.scoreCursor = entry.scoreEvents.length;
+      }
     }
 
     this.broadcast({ type: 'transport_ack', transport: { ...this.transport } });
@@ -332,9 +358,131 @@ export class JamSession {
     }
   }
 
+  // ── Score Scheduler (Phase 5C) ──────────────────────────────────
+
+  /**
+   * Compile a VocalScore into sorted ScoreEvents with sample offsets.
+   */
+  private compileScore(score: VocalScore): ScoreEvent[] {
+    const events: ScoreEvent[] = [];
+    for (const note of score.notes) {
+      events.push({
+        sampleOffset: Math.round(note.startSec * this.config.sampleRateHz),
+        type: 'on',
+        noteId: note.id,
+        midi: note.midi,
+        velocity: note.velocity ?? 0.8,
+        timbre: note.timbre,
+        vibrato: note.vibrato,
+      });
+      events.push({
+        sampleOffset: Math.round((note.startSec + note.durationSec) * this.config.sampleRateHz),
+        type: 'off',
+        noteId: note.id,
+        midi: note.midi,
+        velocity: 0,
+      });
+    }
+    events.sort((a, b) => a.sampleOffset - b.sampleOffset);
+    return events;
+  }
+
+  /**
+   * Set a VocalScore on a track. Compiles to ScoreEvents and broadcasts status.
+   */
+  setTrackScore(trackId: string, score: VocalScore): boolean {
+    const entry = this.tracks.get(trackId);
+    if (!entry) return false;
+
+    entry.state.inputMode = 'score';
+    entry.scoreEvents = this.compileScore(score);
+    entry.scoreCursor = 0;
+
+    const lastEvent = entry.scoreEvents[entry.scoreEvents.length - 1];
+    const durationSec = lastEvent ? lastEvent.sampleOffset / this.config.sampleRateHz : 0;
+
+    this.broadcast({
+      type: 'score_status',
+      trackId,
+      noteCount: score.notes.length,
+      durationSec,
+      playing: this.transport.playing,
+    });
+
+    // Broadcast updated track state
+    this.broadcast({ type: 'track_updated', track: { ...entry.state } });
+
+    return true;
+  }
+
+  /**
+   * Process score events for the current block across all score-mode tracks.
+   * Called in renderAndBroadcast() before mixTracks().
+   */
+  private processScoreEvents(): void {
+    const blockStart = this.transport.currentSample;
+    const blockEnd = blockStart + this.config.blockSize;
+
+    for (const [, entry] of this.tracks) {
+      if (entry.state.inputMode !== 'score' || !entry.scoreEvents) continue;
+
+      const events = entry.scoreEvents;
+      let cursor = entry.scoreCursor ?? 0;
+
+      while (cursor < events.length && events[cursor].sampleOffset < blockEnd) {
+        const evt = events[cursor];
+
+        if (evt.type === 'on') {
+          entry.engine.noteOn({
+            noteId: evt.noteId,
+            midi: evt.midi,
+            velocity: evt.velocity,
+            timbre: evt.timbre,
+            vibrato: evt.vibrato,
+          });
+
+          if (this.recording) {
+            this.eventTape.push({
+              tSample: evt.sampleOffset - this.recordStartSample,
+              trackId: entry.state.trackId,
+              event: 'note_on',
+              payload: {
+                noteId: evt.noteId,
+                midi: evt.midi,
+                velocity: evt.velocity,
+                timbre: evt.timbre,
+                vibrato: evt.vibrato,
+              },
+              participantId: '_score',
+            });
+          }
+        } else {
+          entry.engine.noteOff(evt.noteId, evt.releaseMs);
+
+          if (this.recording) {
+            this.eventTape.push({
+              tSample: evt.sampleOffset - this.recordStartSample,
+              trackId: entry.state.trackId,
+              event: 'note_off',
+              payload: {
+                noteId: evt.noteId,
+                releaseMs: evt.releaseMs,
+              },
+              participantId: '_score',
+            });
+          }
+        }
+
+        cursor++;
+      }
+
+      entry.scoreCursor = cursor;
+    }
+  }
+
   // ── Track Management ────────────────────────────────────────────
 
-  async addTrack(msg: TrackAddMessage): Promise<TrackState> {
+  async addTrack(msg: TrackAddMessage, ownerId: string): Promise<TrackState> {
     const trackId = `track-${this.nextTrackNum++}`;
 
     const manifestPath = resolvePresetPath(msg.presetId);
@@ -371,6 +519,7 @@ export class JamSession {
       mute: false,
       solo: false,
       inputMode: msg.inputMode || 'live',
+      ownerId,
     };
 
     this.tracks.set(trackId, { state, engine });
@@ -414,9 +563,14 @@ export class JamSession {
     return s;
   }
 
+  getTrackOwnerId(trackId: string): string | null {
+    const entry = this.tracks.get(trackId);
+    return entry ? entry.state.ownerId : null;
+  }
+
   // ── Note Events (track-scoped) ──────────────────────────────────
 
-  noteOn(msg: TrackNoteOnMessage): { voiceIndex: number; stolen: boolean } | null {
+  noteOn(msg: TrackNoteOnMessage, participantId?: string): { voiceIndex: number; stolen: boolean } | null {
     const entry = this.tracks.get(msg.trackId);
     if (!entry) return null;
 
@@ -441,6 +595,7 @@ export class JamSession {
           vibrato: msg.vibrato,
           portamentoMs: msg.portamentoMs,
         },
+        participantId,
       });
     }
 
@@ -455,7 +610,7 @@ export class JamSession {
     });
   }
 
-  noteOff(msg: TrackNoteOffMessage): void {
+  noteOff(msg: TrackNoteOffMessage, participantId?: string): void {
     const entry = this.tracks.get(msg.trackId);
     if (!entry) return;
 
@@ -469,6 +624,7 @@ export class JamSession {
           noteId: msg.noteId,
           releaseMs: msg.releaseMs,
         },
+        participantId,
       });
     }
 
@@ -508,6 +664,10 @@ export class JamSession {
 
   private renderAndBroadcast(): void {
     const blockSize = this.config.blockSize;
+
+    // Fire score events before rendering
+    this.processScoreEvents();
+
     const mix = this.mixTracks();
 
     // Advance transport clock
@@ -717,6 +877,7 @@ export class JamSession {
     return {
       sessionId: this.sessionId,
       createdAt: this.createdAt,
+      hostId: this.hostParticipantId,
       sampleRateHz: this.config.sampleRateHz,
       blockSize: this.config.blockSize,
       seed: this.config.seed,
