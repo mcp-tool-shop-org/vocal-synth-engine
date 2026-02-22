@@ -1,10 +1,12 @@
 import { createServer } from 'node:http';
-import { WebSocketServer } from 'ws';
+import { WebSocketServer, WebSocket } from 'ws';
 import { resolve } from 'node:path';
 import { createApp } from './app.js';
 import { createServer as createViteServer } from 'vite';
 import { requireWsAuth } from './middleware/auth.js';
 import { getPresetDirInfo } from './services/renderScoreToWav.js';
+import { LiveSession } from './services/LiveSession.js';
+import type { ClientMessage } from '../types/live.js';
 
 async function startDevServer() {
   const app = createApp();
@@ -29,8 +31,10 @@ async function startDevServer() {
   // Use vite's connect instance as middleware
   app.use(vite.middlewares);
 
-  // WebSocket setup (stubbed for future)
+  // ── WebSocket: Live Mode ───────────────────────────────────
   const wss = new WebSocketServer({ server, path: "/ws" });
+  const activeSessions = new Map<WebSocket, LiveSession>();
+
   wss.on('connection', (ws, req) => {
     const url = new URL(req.url || '/', `http://${req.headers.host}`);
     const token = url.searchParams.get('token') ?? undefined;
@@ -38,13 +42,34 @@ async function startDevServer() {
       ws.close(4001, 'Unauthorized');
       return;
     }
-    ws.send(JSON.stringify({ type: "hello", msg: "ws connected" }));
-    console.log('Client connected via WebSocket');
-    ws.on('message', (message) => {
-      console.log('Received:', message.toString());
+
+    const session = new LiveSession(ws);
+    activeSessions.set(ws, session);
+    console.log(`[live] Client connected (${activeSessions.size} active sessions)`);
+
+    ws.on('message', async (raw) => {
+      try {
+        const msg: ClientMessage = JSON.parse(raw.toString());
+        await session.handleMessage(msg);
+      } catch (err: any) {
+        ws.send(JSON.stringify({
+          type: 'error',
+          code: 'PARSE_ERROR',
+          message: `Invalid message: ${err.message}`,
+        }));
+      }
     });
+
     ws.on('close', () => {
-      console.log('Client disconnected');
+      session.destroy();
+      activeSessions.delete(ws);
+      console.log(`[live] Client disconnected (${activeSessions.size} active sessions)`);
+    });
+
+    ws.on('error', (err) => {
+      console.error('[live] WebSocket error:', err.message);
+      session.destroy();
+      activeSessions.delete(ws);
     });
   });
 

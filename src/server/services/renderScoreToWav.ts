@@ -15,7 +15,7 @@ const presetCache: Map<string, any> = new Map();
  * Resolve a preset ID to its manifest path.
  * Looks for <PRESET_DIR>/<presetId>/voicepreset.json
  */
-function resolvePresetPath(presetId: string): string {
+export function resolvePresetPath(presetId: string): string {
   const manifestPath = join(PRESET_DIR, presetId, 'voicepreset.json');
   if (!existsSync(manifestPath)) {
     const available = listPresetIds();
