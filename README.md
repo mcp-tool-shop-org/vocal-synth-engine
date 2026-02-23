@@ -1,4 +1,6 @@
-# Vocal Synth Engine
+<p align="center">
+  <img src="assets/logo.png" alt="Vocal Synth Engine" width="280" />
+</p>
 
 A deterministic vocal instrument engine built in TypeScript. Renders singing voices from score data using additive synthesis, voice presets, and real-time WebSocket streaming. Play live via keyboard/MIDI, collaborate in multi-user jam sessions, or render scores to WAV.
 
