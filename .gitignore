@@ -4,3 +4,4 @@ test-preset/
 .vscockpit/
 calib/
 models/
+site/.astro/
