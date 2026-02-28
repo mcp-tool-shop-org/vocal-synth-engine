@@ -1,8 +1,8 @@
 {
-  "name": "vocal-synth-engine",
-  "version": "1.0.1",
+  "name": "@mcptoolshop/vocal-synth-engine",
+  "version": "1.0.2",
   "type": "module",
-  "description": "",
+  "description": "Deterministic vocal instrument engine — additive synthesis with formant control",
   "main": "index.js",
   "scripts": {
     "dev:cockpit": "npm --prefix apps/cockpit run dev",
