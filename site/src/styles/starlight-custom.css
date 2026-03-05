@@ -1,0 +1,28 @@
+/* Emerald dark palette for Starlight */
+:root {
+  --sl-color-accent-low: #052e16;
+  --sl-color-accent: #34d399;
+  --sl-color-accent-high: #d1fae5;
+  --sl-color-white: #f0fdf4;
+  --sl-color-gray-1: #d1d5db;
+  --sl-color-gray-2: #9ca3af;
+  --sl-color-gray-3: #6b7280;
+  --sl-color-gray-4: #374151;
+  --sl-color-gray-5: #1f2937;
+  --sl-color-gray-6: #111827;
+  --sl-color-black: #030712;
+}
+
+[data-theme='light'] {
+  --sl-color-accent-low: #d1fae5;
+  --sl-color-accent: #059669;
+  --sl-color-accent-high: #052e16;
+  --sl-color-white: #030712;
+  --sl-color-gray-1: #1f2937;
+  --sl-color-gray-2: #374151;
+  --sl-color-gray-3: #6b7280;
+  --sl-color-gray-4: #9ca3af;
+  --sl-color-gray-5: #d1d5db;
+  --sl-color-gray-6: #f0fdf4;
+  --sl-color-black: #f0fdf4;
+}

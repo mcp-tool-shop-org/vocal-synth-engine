@@ -14,7 +14,7 @@ export const config: SiteConfig = {
     headlineAccent: 'Sing with code.',
     description: 'A deterministic vocal instrument engine. Render singing voices from score data using additive synthesis, 15 voice presets, and real-time WebSocket streaming. Play live, jam with others, or render to WAV.',
     primaryCta: { href: '#quick-start', label: 'Get started' },
-    secondaryCta: { href: '#features', label: 'Explore features' },
+    secondaryCta: { href: 'handbook/', label: 'Handbook' },
     previews: [
       { label: 'Clone', code: 'git clone https://github.com/mcp-tool-shop-org/vocal-synth-engine.git' },
       { label: 'Run', code: 'npm ci && npm run dev' },
