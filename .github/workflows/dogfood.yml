@@ -31,7 +31,9 @@ jobs:
 
       - name: Run scenario
         id: scenario
+        shell: bash --noprofile --norc {0}
         run: |
+          set +e
           # Start the server in background
           node dist/server/index.prod.js &
           SERVER_PID=$!
