@@ -41,7 +41,7 @@ jobs:
           # Wait for server to be ready
           START_OK=fail
           for i in $(seq 1 20); do
-            if curl -sf http://localhost:4321/ > /dev/null 2>&1; then
+            if curl -sf http://localhost:4321/api/health > /dev/null 2>&1; then
               START_OK=pass
               break
             fi
@@ -52,7 +52,7 @@ jobs:
           # Health check
           HEALTH_OK=fail
           if [ "$START_OK" = "pass" ]; then
-            curl -sf http://localhost:4321/ | tee /tmp/health.json
+            curl -sf http://localhost:4321/api/health | tee /tmp/health.json
             if jq -e '.ok == true' /tmp/health.json > /dev/null 2>&1; then
               HEALTH_OK=pass
             fi
@@ -62,7 +62,7 @@ jobs:
           # Presets check
           PRESETS_OK=fail
           if [ "$START_OK" = "pass" ]; then
-            curl -sf http://localhost:4321/presets 2>&1 | tee /tmp/presets.json
+            curl -sf http://localhost:4321/api/presets 2>&1 | tee /tmp/presets.json
             if [ -s /tmp/presets.json ]; then
               PRESETS_OK=pass
             fi
