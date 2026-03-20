@@ -27,68 +27,65 @@ jobs:
 
       # --- Scenario: health-and-presets-roundtrip ---
       # Exercise the real product: start server, hit health + presets endpoints
+      # All steps in one shell because background server must persist across checks
 
-      - name: "Step: start-server"
-        id: start_server
+      - name: Run scenario
+        id: scenario
         run: |
           # Start the server in background
           node dist/server/index.prod.js &
           SERVER_PID=$!
-          echo "pid=$SERVER_PID" >> "$GITHUB_OUTPUT"
 
           # Wait for server to be ready
-          for i in $(seq 1 15); do
+          START_OK=fail
+          for i in $(seq 1 20); do
             if curl -sf http://localhost:4321/ > /dev/null 2>&1; then
-              echo "status=pass" >> "$GITHUB_OUTPUT"
-              exit 0
+              START_OK=pass
+              break
             fi
             sleep 1
           done
-          echo "status=fail" >> "$GITHUB_OUTPUT"
+          echo "start_status=$START_OK" >> "$GITHUB_OUTPUT"
 
-      - name: "Step: health-check"
-        id: health
-        run: |
-          curl -sf http://localhost:4321/ | tee /tmp/health.json
-          if jq -e '.ok == true' /tmp/health.json > /dev/null 2>&1; then
-            echo "status=pass" >> "$GITHUB_OUTPUT"
-          else
-            echo "status=fail" >> "$GITHUB_OUTPUT"
+          # Health check
+          HEALTH_OK=fail
+          if [ "$START_OK" = "pass" ]; then
+            curl -sf http://localhost:4321/ | tee /tmp/health.json
+            if jq -e '.ok == true' /tmp/health.json > /dev/null 2>&1; then
+              HEALTH_OK=pass
+            fi
           fi
+          echo "health_status=$HEALTH_OK" >> "$GITHUB_OUTPUT"
 
-      - name: "Step: presets-check"
-        id: presets
-        run: |
-          curl -sf http://localhost:4321/presets 2>&1 | tee /tmp/presets.json
-          if [ -s /tmp/presets.json ]; then
-            echo "status=pass" >> "$GITHUB_OUTPUT"
-          else
-            echo "status=fail" >> "$GITHUB_OUTPUT"
+          # Presets check
+          PRESETS_OK=fail
+          if [ "$START_OK" = "pass" ]; then
+            curl -sf http://localhost:4321/presets 2>&1 | tee /tmp/presets.json
+            if [ -s /tmp/presets.json ]; then
+              PRESETS_OK=pass
+            fi
           fi
+          echo "presets_status=$PRESETS_OK" >> "$GITHUB_OUTPUT"
 
-      - name: "Step: verify-output"
-        id: verify_output
-        run: |
-          # Confirm health responded with version and presets info
-          if jq -e '.ok and .node' /tmp/health.json > /dev/null 2>&1; then
-            echo "status=pass" >> "$GITHUB_OUTPUT"
-          else
-            echo "status=fail" >> "$GITHUB_OUTPUT"
+          # Verify output
+          VERIFY_OK=fail
+          if [ "$HEALTH_OK" = "pass" ] && jq -e '.ok and .node' /tmp/health.json > /dev/null 2>&1; then
+            VERIFY_OK=pass
           fi
+          echo "verify_status=$VERIFY_OK" >> "$GITHUB_OUTPUT"
 
-      - name: Stop server
-        if: always()
-        run: kill ${{ steps.start_server.outputs.pid }} 2>/dev/null || true
+          # Stop server
+          kill $SERVER_PID 2>/dev/null || true
 
       # --- Verdict ---
 
       - name: Determine overall verdict
         id: verdict
         run: |
-          S="${{ steps.start_server.outputs.status }}"
-          H="${{ steps.health.outputs.status }}"
-          P="${{ steps.presets.outputs.status }}"
-          V="${{ steps.verify_output.outputs.status }}"
+          S="${{ steps.scenario.outputs.start_status }}"
+          H="${{ steps.scenario.outputs.health_status }}"
+          P="${{ steps.scenario.outputs.presets_status }}"
+          V="${{ steps.scenario.outputs.verify_status }}"
           if [ "$S" = "pass" ] && [ "$H" = "pass" ] && [ "$P" = "pass" ] && [ "$V" = "pass" ]; then
             echo "verdict=pass" >> "$GITHUB_OUTPUT"
           else
@@ -163,10 +160,10 @@ jobs:
           sed -i "s|FINISHED_PLACEHOLDER|${FINISHED_AT}|g" /tmp/submission.json
           sed -i "s|vocal-synth-engine-RUN_ID-ATTEMPT|vocal-synth-engine-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}|g" /tmp/submission.json
           sed -i "s|VERDICT_PLACEHOLDER|${{ steps.verdict.outputs.verdict }}|g" /tmp/submission.json
-          sed -i "s|START_STATUS|${{ steps.start_server.outputs.status }}|g" /tmp/submission.json
-          sed -i "s|HEALTH_STATUS|${{ steps.health.outputs.status }}|g" /tmp/submission.json
-          sed -i "s|PRESETS_STATUS|${{ steps.presets.outputs.status }}|g" /tmp/submission.json
-          sed -i "s|VERIFY_STATUS|${{ steps.verify_output.outputs.status }}|g" /tmp/submission.json
+          sed -i "s|START_STATUS|${{ steps.scenario.outputs.start_status }}|g" /tmp/submission.json
+          sed -i "s|HEALTH_STATUS|${{ steps.scenario.outputs.health_status }}|g" /tmp/submission.json
+          sed -i "s|PRESETS_STATUS|${{ steps.scenario.outputs.presets_status }}|g" /tmp/submission.json
+          sed -i "s|VERIFY_STATUS|${{ steps.scenario.outputs.verify_status }}|g" /tmp/submission.json
 
           jq empty /tmp/submission.json
           echo "Submission built:"
