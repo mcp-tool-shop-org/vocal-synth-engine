@@ -38,7 +38,7 @@ jobs:
 
           # Wait for server to be ready
           for i in $(seq 1 15); do
-            if curl -sf http://localhost:3000/ > /dev/null 2>&1; then
+            if curl -sf http://localhost:4321/ > /dev/null 2>&1; then
               echo "status=pass" >> "$GITHUB_OUTPUT"
               exit 0
             fi
@@ -49,7 +49,7 @@ jobs:
       - name: "Step: health-check"
         id: health
         run: |
-          curl -sf http://localhost:3000/ | tee /tmp/health.json
+          curl -sf http://localhost:4321/ | tee /tmp/health.json
           if jq -e '.ok == true' /tmp/health.json > /dev/null 2>&1; then
             echo "status=pass" >> "$GITHUB_OUTPUT"
           else
@@ -59,7 +59,7 @@ jobs:
       - name: "Step: presets-check"
         id: presets
         run: |
-          curl -sf http://localhost:3000/presets 2>&1 | tee /tmp/presets.json
+          curl -sf http://localhost:4321/presets 2>&1 | tee /tmp/presets.json
           if [ -s /tmp/presets.json ]; then
             echo "status=pass" >> "$GITHUB_OUTPUT"
           else
