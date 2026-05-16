@@ -3,7 +3,7 @@
 # pin to an immutable digest (`@sha256:<digest>`) — current setting is
 # defense-in-depth without that strict guarantee. See SCORECARD.md
 # "Open Items" for the digest-pin upgrade path.
-FROM node:20.18-slim AS builder
+FROM node:26.1-slim AS builder
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -16,7 +16,7 @@ COPY apps/ apps/
 
 RUN npm run build
 
-FROM node:20.18-slim
+FROM node:26.1-slim
 RUN groupadd -r vsynth && useradd -r -g vsynth vsynth
 
 WORKDIR /app
