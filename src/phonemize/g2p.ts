@@ -3,11 +3,25 @@
 import { dictionary } from 'cmu-pronouncing-dictionary';
 import { ParsedPhoneme, parsePronunciation } from './arpabet.js';
 
-/** Tokenize lyrics text into pronounceable words. */
+/**
+ * Tokenize lyrics text into pronounceable words.
+ *
+ * TB-006: switched from `/[^\w\s'-]/g` to a Unicode-aware `\p{L}\p{N}` class
+ * with the `/u` flag. The old non-Unicode `\w` only matched [A-Za-z0-9_],
+ * so:
+ *   - 'café' silently became 'caf' (drop é)
+ *   - 'こんにちは world' silently became ['world'] with zero warning
+ *
+ * The dictionary at lookupWord is still English-only (CMU dict, ASCII keys),
+ * so non-ASCII tokens generally fall through to fallbackG2P — but at least
+ * they're now visible in the token list instead of silently disappearing.
+ * For supported-language enforcement see phonemizeLyrics in
+ * src/phonemize/index.ts.
+ */
 export function tokenizeLyrics(text: string): string[] {
   return text
     .toLowerCase()
-    .replace(/[^\w\s'-]/g, '')
+    .replace(/[^\p{L}\p{N}\s'\-]/gu, '')
     .split(/\s+/)
     .filter(w => w.length > 0);
 }

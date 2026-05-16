@@ -1,7 +1,7 @@
 /**
  * Analyze a single WAV file into a single-timbre voice preset.
  *
- * Usage: npx tsx src/cli/analyze.ts <input.wav> <out-dir> <timbre-name>
+ * Usage: npx tsx src/cli/analyze.ts <input.wav> <out-dir> <timbre-name> [--json]
  *        npx tsx src/cli/analyze.ts --help
  *
  * For multi-timbre presets, use build-preset.ts instead.
@@ -13,8 +13,9 @@ import { join, resolve } from 'node:path';
 import { fft, applyHannWindow } from '../dsp/fft.js';
 import { findPitchYin } from '../dsp/pitch.js';
 import { computeAssetsHash } from '../preset/loader.js';
+import { runCli, parseCommonFlags, CliError } from './_runner.js';
 
-const USAGE = `Usage: npx tsx src/cli/analyze.ts <input.wav> <out-dir> <timbre-name>
+const USAGE = `Usage: npx tsx src/cli/analyze.ts <input.wav> <out-dir> <timbre-name> [--json]
 
 Analyzes a WAV at 48kHz mono and emits a single-timbre voice preset:
   <out-dir>/voicepreset.json
@@ -23,23 +24,32 @@ Analyzes a WAV at 48kHz mono and emits a single-timbre voice preset:
   <out-dir>/assets/<timbre>_noise_db.f32
   <out-dir>/assets/freq_axis_hz.f32
 
+Example:
+  npx tsx src/cli/analyze.ts calib/AH.wav presets/my-voice AH
+
 Options:
+  --json        Emit a single JSON object to stdout in lieu of human banners.
+                Schema: { wavPath, outDir, timbreName, f0Hz, harmonics,
+                          freqBins, assetsHash, presetDir }
   -h, --help    Show this message and exit.
 
 For multi-timbre presets see build-preset.ts.`;
 
 async function main() {
-  const args = process.argv.slice(2);
-  if (args[0] === '-h' || args[0] === '--help') {
+  const { help, json, positionals } = parseCommonFlags(process.argv.slice(2));
+  if (help) {
     console.log(USAGE);
     process.exit(0);
   }
-  if (args.length < 3) {
-    console.error(USAGE);
-    process.exit(1);
+  if (positionals.length < 3) {
+    const err: CliError = new Error(
+      `expected 3 positional args (<input.wav> <out-dir> <timbre-name>), got ${positionals.length}`
+    );
+    err.hint = `run with --help for the full usage block`;
+    throw err;
   }
 
-  const [wavPath, outDir, timbreName] = args;
+  const [wavPath, outDir, timbreName] = positionals;
   const wavBuffer = await readFile(resolve(wavPath));
   const wav = new WaveFile(wavBuffer);
   
@@ -62,19 +72,20 @@ async function main() {
   // either garbage or an empty slice. Pitch + envelope estimates downstream
   // ran on that garbage with no error. Throw clearly instead.
   if (mono.length < fftSize) {
-    console.error(
-      `Input WAV too short: ${mono.length} samples at 48 kHz = ${(mono.length / sampleRate).toFixed(3)}s. ` +
-      `Need at least ${fftSize} samples (~${(fftSize / sampleRate).toFixed(3)}s).`
+    const err: CliError = new Error(
+      `input WAV too short: ${mono.length} samples at 48 kHz = ${(mono.length / sampleRate).toFixed(3)}s ` +
+      `(need at least ${fftSize} samples ~${(fftSize / sampleRate).toFixed(3)}s)`
     );
-    process.exit(1);
+    err.hint = `record a longer take, or pad with silence — analyze needs one full FFT frame`;
+    throw err;
   }
 
   const startIdx = Math.floor(mono.length / 2) - Math.floor(fftSize / 2);
   const frame = new Float32Array(fftSize);
   frame.set(mono.subarray(startIdx, startIdx + fftSize));
-  
+
   const f0 = findPitchYin(frame, sampleRate);
-  console.log(`Detected F0: ${f0.toFixed(2)} Hz`);
+  if (!json) console.log(`Analyzing ${wavPath}... F0 = ${f0.toFixed(2)} Hz`);
   
   applyHannWindow(frame);
   const real = new Float32Array(frame);
@@ -193,8 +204,23 @@ async function main() {
 
   await writeFile(join(presetDir, 'voicepreset.json'), JSON.stringify(manifest, null, 2));
 
-  console.log(`Preset saved to ${presetDir}`);
-  console.log(`Integrity: ${assetsHash}`);
+  if (json) {
+    // Stable schema — document in CHANGELOG when fields change.
+    const out = {
+      wavPath: resolve(wavPath),
+      outDir: presetDir,
+      timbreName,
+      f0Hz: Number(f0.toFixed(2)),
+      harmonics: maxHarmonics,
+      freqBins: halfFft,
+      assetsHash,
+      presetDir,
+    };
+    process.stdout.write(JSON.stringify(out) + '\n');
+  } else {
+    console.log(`Preset saved to ${presetDir}`);
+    console.log(`Integrity: ${assetsHash}`);
+  }
 }
 
-main().catch(console.error);
+runCli('analyze', main);

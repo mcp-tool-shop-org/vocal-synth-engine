@@ -40,7 +40,14 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
   // leak through access logs, referers, and browser history.  Use the
   // Authorization header instead.  For <audio>/<video> playback, fetch via
   // XHR with the header and create a blob URL.
-  res.status(401).json({ error: 'Unauthorized' });
+  res.status(401).json({
+    ok: false,
+    code: 'UNAUTHORIZED',
+    error: 'Unauthorized', // legacy field for older clients
+    message: 'Missing or invalid Authorization header',
+    hint: 'Send Authorization: Bearer <AUTH_TOKEN>',
+    requestId: (req as any).requestId,
+  });
 }
 
 export function requireWsAuth(token: string | undefined): boolean {

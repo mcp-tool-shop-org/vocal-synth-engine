@@ -67,7 +67,8 @@ A deterministic vocal instrument engine built in TypeScript. Renders singing voi
 | `src/preset/` | VoicePreset schema, loader, and resolver |
 | `src/server/` | Express + WebSocket API server, jam session manager |
 | `src/types/` | Shared types — scores, jam protocol, presets |
-| `src/cli/` | CLI tools + integration test suites |
+| `src/cli/` | User-facing CLI tools (analyze, build-preset, compare, inspect, play-score, resynth, gen-vowel-wav, realtime-demo) |
+| `scripts/` | Build/test regression scripts (not shipped, not part of `npm test`) |
 | `apps/cockpit/` | Browser cockpit UI (Vite + vanilla TS) |
 | `presets/` | 15 bundled voice presets with binary timbre data |
 
@@ -183,23 +184,31 @@ npm run inspect      # CLI preset inspector
 
 ## Tests
 
-Integration tests run against a live dev server:
+The primary test surface is vitest:
 
 ```bash
-# Start the server first
-npm run dev
-
-# Then in another terminal:
-npx tsx src/cli/test-jam-session.ts        # Jam session lifecycle (12 tests)
-npx tsx src/cli/test-jam-recording.ts      # Recording & export (10 tests)
-npx tsx src/cli/test-jam-collaboration.ts  # Collaboration & score input (12 tests)
-npx tsx src/cli/test-score-render.ts       # Score rendering pipeline
-npx tsx src/cli/test-consonants.ts         # Consonant phonemes
-npx tsx src/cli/test-g2p.ts               # Grapheme-to-phoneme
-npx tsx src/cli/test-lyrics-golden.ts      # Lyrics golden tests
-npx tsx src/cli/test-multi-timbre.ts       # Multi-timbre rendering
-npx tsx src/cli/test-noise-tail.ts         # Tail silence/noise
+npm test                # Run all unit + integration tests once
+npm run test:watch      # Watch mode
+npm run test:coverage   # Coverage report
 ```
+
+Additional regression scripts under `scripts/` (require a running dev server
+for the jam tests; the others are standalone):
+
+```bash
+npx tsx scripts/test-jam-session.ts        # Jam session lifecycle
+npx tsx scripts/test-jam-recording.ts      # Recording & export
+npx tsx scripts/test-jam-collaboration.ts  # Collaboration & score input
+npx tsx scripts/test-score-render.ts       # Score rendering pipeline
+npx tsx scripts/test-consonants.ts         # Consonant phonemes
+npx tsx scripts/test-g2p.ts                # Grapheme-to-phoneme
+npx tsx scripts/test-lyrics-golden.ts      # Lyrics golden tests
+npx tsx scripts/test-multi-timbre.ts       # Multi-timbre rendering
+npx tsx scripts/test-noise-tail.ts         # Tail silence/noise
+```
+
+These are slated to migrate to `tests/integration/` under vitest in a future
+wave so they pick up `npm test` coverage automatically.
 
 ## Security & Data Scope
 

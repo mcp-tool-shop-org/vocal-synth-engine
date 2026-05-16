@@ -19,17 +19,12 @@
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';
-import { fileURLToPath } from 'node:url';
-import { dirname, resolve } from 'node:path';
 import { consonantEnvelope, type ConsonantEnvelopeKind } from '../src/engine/consonantProfiles.js';
 import { findPitchYin, FIND_PITCH_YIN_MAX_LENGTH } from '../src/dsp/pitch.js';
 import { LiveSynthEngine } from '../src/engine/LiveSynthEngine.js';
 import { loadVoicePreset } from '../src/preset/loader.js';
 import type { LoadedVoicePreset } from '../src/preset/schema.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const PRESET_PATH = resolve(__dirname, '..', 'presets', 'default-voice', 'voicepreset.json');
+import { PRESET_PATH } from './helpers/index.js';
 
 describe('consonantEnvelope default case (E-016)', () => {
   // E-016: a JSON-deserialized profile (or a future-added phoneme kind that

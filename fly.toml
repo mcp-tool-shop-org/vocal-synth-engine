@@ -16,6 +16,16 @@ primary_region = "iad"
   auto_start_machines = true
   min_machines_running = 0
 
+# Edge-level health probe. /api/health returns {ok, version, uptimeSec}
+# (S-018 split — full details live behind requireAuth at /api/health/detailed).
+# grace_period covers cold-start latency from auto_stop_machines = "stop".
+[[http_service.checks]]
+  interval = "15s"
+  timeout = "2s"
+  grace_period = "10s"
+  method = "GET"
+  path = "/api/health"
+
 [[mounts]]
   source = "render_bank"
   destination = "/data/renders"

@@ -314,6 +314,8 @@ export interface JamErrorMessage {
   type: 'jam_error';
   code: string;
   message: string;
+  // SB-009: optional human-readable hint the cockpit can show the user.
+  hint?: string;
 }
 
 export interface JamPongMessage {

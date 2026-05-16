@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
+import { getLogger } from "../util/logger.js";
 
 export type RenderMeta = {
   id: string;
@@ -156,6 +157,19 @@ export function saveRender(args: {
 }): RenderMeta {
   ensureRoot();
 
+  // SB-002 — disk-budget pre-check.  Throws RenderBudgetError (status 413,
+  // code RENDER_TOO_LARGE | RENDER_STORE_FULL) BEFORE writing any bytes so
+  // we never leave a half-written render on a full disk.  Approximate
+  // incoming bytes from wav + JSON payloads.
+  const approxIncoming =
+    args.wavBytes.byteLength +
+    JSON.stringify(args.score).length +
+    JSON.stringify(args.config).length +
+    JSON.stringify(args.telemetry).length +
+    JSON.stringify(args.provenance).length +
+    2_048; // meta.json + filesystem overhead
+  assertRenderBudget(approxIncoming);
+
   // S-016 — id := ISO timestamp + 8-char UUID slug so two writers in the
   // same millisecond never collide on the directory name.  Retry up to 5
   // times against the (astronomically unlikely) slug collision.
@@ -213,6 +227,10 @@ export function saveRender(args: {
   fs.writeFileSync(path.join(dir, "provenance.json"), JSON.stringify(args.provenance, null, 2));
   fs.writeFileSync(path.join(dir, "audio.wav"), args.wavBytes);
 
+  // SB-002: post-save heads-up if we crossed the warning threshold so the
+  // operator sees pressure BEFORE the next save 413s at the budget ceiling.
+  logBudgetIfNotable();
+
   return meta;
 }
 
@@ -246,6 +264,20 @@ export function saveLastRender(args: {
   ensureRoot();
   const id = "last";
   const finalDir = getRenderDir(id);
+
+  // SB-002 — disk-budget pre-check.  Same envelope as saveRender; for the
+  // `last/` slot we conservatively bill the NEW render's bytes against the
+  // store even though the swap will delete the previous `last/` first.  An
+  // operator hovering near the budget ceiling gets the 413 with a hint
+  // BEFORE we stage anything.
+  const approxIncoming =
+    args.wavBytes.byteLength +
+    JSON.stringify(args.score).length +
+    JSON.stringify(args.config).length +
+    JSON.stringify(args.telemetry).length +
+    JSON.stringify(args.provenance).length +
+    2_048;
+  assertRenderBudget(approxIncoming);
 
   // Staging/trash dirs use names that DO NOT match the render-id allowlist
   // (`/^[A-Za-z0-9_-]{1,64}$/`) because they contain dots — so an API
@@ -345,5 +377,136 @@ export function deleteRender(id: string) {
   const dir = safeRenderDir(id);
   if (fs.existsSync(dir)) {
     fs.rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+/**
+ * SB-002 — Disk-budget bookkeeping for the render store.
+ *
+ * BEFORE: unlimited renders accumulated under .vscockpit/renders/ until the
+ * disk filled, then EVERY save failed silently with ENOSPC and the user got
+ * a generic 500.
+ *
+ * AFTER:
+ *   - per-render hard cap (RENDER_PER_BUDGET_MB, default 256 MB) — rejected
+ *     BEFORE we open the file
+ *   - aggregate store cap (RENDER_STORE_BUDGET_MB, default 4096 MB) —
+ *     enforced precheck on save with an actionable error code
+ *
+ * Both limits surface as 413 RENDER_STORE_FULL / RENDER_TOO_LARGE with a
+ * hint that names the env var the operator would raise.  No more
+ * "everything is broken" — operators get a one-line action.
+ */
+const RENDER_PER_BUDGET_MB = Number(process.env.RENDER_PER_BUDGET_MB || 256);
+const RENDER_STORE_BUDGET_MB = Number(process.env.RENDER_STORE_BUDGET_MB || 4096);
+const MB = 1024 * 1024;
+
+export class RenderBudgetError extends Error {
+  status: number;
+  code: string;
+  hint: string;
+  details: Record<string, unknown>;
+
+  constructor(
+    code: 'RENDER_TOO_LARGE' | 'RENDER_STORE_FULL',
+    message: string,
+    details: Record<string, unknown>,
+    hint: string,
+  ) {
+    super(message);
+    this.name = 'RenderBudgetError';
+    this.status = 413;
+    this.code = code;
+    this.hint = hint;
+    this.details = details;
+  }
+}
+
+/**
+ * Compute the current on-disk size of the render store.  Walks meta.json +
+ * audio.wav per render — fast enough for thousands of renders.
+ */
+export function getRenderStoreSizeBytes(): number {
+  ensureRoot();
+  let total = 0;
+  for (const d of fs.readdirSync(root)) {
+    const renderDir = path.join(root, d);
+    try {
+      const stat = fs.statSync(renderDir);
+      if (!stat.isDirectory()) continue;
+      for (const f of fs.readdirSync(renderDir)) {
+        try {
+          total += fs.statSync(path.join(renderDir, f)).size;
+        } catch {}
+      }
+    } catch {}
+  }
+  return total;
+}
+
+export interface RenderBudgetSnapshot {
+  perRenderBudgetBytes: number;
+  storeBudgetBytes: number;
+  usedBytes: number;
+  freeBytes: number;
+  utilizationFraction: number;
+}
+
+export function getRenderBudgetSnapshot(): RenderBudgetSnapshot {
+  const usedBytes = getRenderStoreSizeBytes();
+  const storeBudgetBytes = RENDER_STORE_BUDGET_MB * MB;
+  return {
+    perRenderBudgetBytes: RENDER_PER_BUDGET_MB * MB,
+    storeBudgetBytes,
+    usedBytes,
+    freeBytes: Math.max(0, storeBudgetBytes - usedBytes),
+    utilizationFraction: storeBudgetBytes > 0 ? usedBytes / storeBudgetBytes : 0,
+  };
+}
+
+/**
+ * Throw a humanized RenderBudgetError if `incomingBytes` would exceed
+ * either budget.  Call BEFORE writing any of the staged files.
+ */
+export function assertRenderBudget(incomingBytes: number): void {
+  const perBudget = RENDER_PER_BUDGET_MB * MB;
+  if (incomingBytes > perBudget) {
+    throw new RenderBudgetError(
+      'RENDER_TOO_LARGE',
+      `Render is ${(incomingBytes / MB).toFixed(1)} MB — exceeds RENDER_PER_BUDGET_MB (${RENDER_PER_BUDGET_MB} MB)`,
+      { renderBytes: incomingBytes, perRenderBudgetBytes: perBudget },
+      'Reduce the render duration or raise RENDER_PER_BUDGET_MB',
+    );
+  }
+  const snap = getRenderBudgetSnapshot();
+  if (snap.usedBytes + incomingBytes > snap.storeBudgetBytes) {
+    throw new RenderBudgetError(
+      'RENDER_STORE_FULL',
+      `Render store full: ${(snap.usedBytes / MB).toFixed(1)} / ${(snap.storeBudgetBytes / MB).toFixed(1)} MB used, incoming ${(incomingBytes / MB).toFixed(1)} MB`,
+      {
+        usedBytes: snap.usedBytes,
+        storeBudgetBytes: snap.storeBudgetBytes,
+        incomingBytes,
+      },
+      'Delete old renders via DELETE /api/renders/:id or raise RENDER_STORE_BUDGET_MB',
+    );
+  }
+}
+
+/**
+ * Emit a warning log line if utilization crosses well-known thresholds.
+ * Operators see a heads-up at 80% before the next request 413s at 100%.
+ */
+export function logBudgetIfNotable(): void {
+  const snap = getRenderBudgetSnapshot();
+  if (snap.utilizationFraction >= 0.8) {
+    getLogger().warn(
+      {
+        usedMb: Math.round(snap.usedBytes / MB),
+        budgetMb: Math.round(snap.storeBudgetBytes / MB),
+        utilization: Math.round(snap.utilizationFraction * 100),
+      },
+      'render_store_high_utilization',
+    );
   }
 }

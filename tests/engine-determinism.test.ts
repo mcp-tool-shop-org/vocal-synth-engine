@@ -9,25 +9,12 @@
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';
-import { fileURLToPath } from 'node:url';
-import { dirname, resolve } from 'node:path';
 import { loadVoicePreset } from '../src/preset/loader.js';
 import { StreamingVocalSynthEngine } from '../src/engine/StreamingVocalSynthEngine.js';
 import { LiveSynthEngine } from '../src/engine/LiveSynthEngine.js';
 import type { LoadedVoicePreset } from '../src/preset/schema.js';
 import type { VocalScore } from '../src/types/score.js';
-import { createHash } from 'node:crypto';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const PRESET_PATH = resolve(__dirname, '..', 'presets', 'default-voice', 'voicepreset.json');
-
-function hashFloat32(buf: Float32Array): string {
-  const h = createHash('sha256');
-  // Hash the underlying bytes (host-LE; consistent across runs on same arch).
-  h.update(new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength));
-  return h.digest('hex');
-}
+import { PRESET_PATH, hashFloat32 } from './helpers/index.js';
 
 function makeScore(): VocalScore {
   return {

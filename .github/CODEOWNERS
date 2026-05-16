@@ -1,0 +1,19 @@
+# CODEOWNERS — auto-request reviewer on every PR.
+#
+# Pairs with branch-protection rule `required_pull_request_reviews.require_code_owner_reviews = true`
+# (configured by Phase 10 Full Treatment). Without CODEOWNERS, the required-review
+# gate would be self-satisfied by the publisher — defeating the gate.
+#
+# Order matters: later patterns override earlier ones.
+
+# Default owner — anything not otherwise matched.
+*  @mcp-tool-shop
+
+# Security-sensitive surfaces — explicit ownership.
+/.github/workflows/  @mcp-tool-shop
+/.github/dependabot.yml  @mcp-tool-shop
+/Dockerfile  @mcp-tool-shop
+/fly.toml  @mcp-tool-shop
+/render.yaml  @mcp-tool-shop
+/SECURITY.md  @mcp-tool-shop
+/SHIP_GATE.md  @mcp-tool-shop

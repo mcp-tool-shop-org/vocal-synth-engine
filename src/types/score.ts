@@ -27,6 +27,14 @@ export interface AutomationPoint {
 }
 
 export interface VocalScore {
+  /**
+   * Score format version (TB-010). Optional in the runtime schema for
+   * backward-compat (missing → '1.0.0' default). Engine refuses any value
+   * not in `SUPPORTED_SCORE_VERSIONS` (src/types/scoreSchema.ts) with
+   * `UNSUPPORTED_SCORE_VERSION` so a v2 score on a v1 engine fails loud
+   * instead of silently dropping new required fields.
+   */
+  formatVersion?: string;
   bpm: number;
   notes: VocalNote[];
   lyrics?: {
@@ -44,5 +52,5 @@ export interface VocalScore {
 // Runtime Zod validation lives in ./scoreSchema. Re-export it from here so
 // new callers can pull both the type and the validator from a single import.
 // (Closes T-009: parse + validate before JSON.parse-and-pray.)
-export { VocalScoreSchema, parseVocalScore } from './scoreSchema.js';
+export { VocalScoreSchema, parseVocalScore, SUPPORTED_SCORE_VERSIONS } from './scoreSchema.js';
 export type { VocalScoreParsed } from './scoreSchema.js';

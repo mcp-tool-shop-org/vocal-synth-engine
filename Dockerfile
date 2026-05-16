@@ -39,4 +39,10 @@ ENV PORT=4321
 USER vsynth
 EXPOSE 4321
 
+# Container-level health probe. node:20.18-slim ships wget; we use --spider
+# (HEAD-style) so no body is downloaded. fly/render also probe /api/health
+# at their respective edges (fly.toml, render.yaml).
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget --quiet --tries=1 --spider http://localhost:4321/api/health || exit 1
+
 CMD ["node", "dist/server/index.prod.js"]

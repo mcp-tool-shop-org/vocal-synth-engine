@@ -131,7 +131,7 @@ METAEOF
   # Step 4: Quality gate — run multi-timbre test
   echo ""
   echo "[4/4] Running quality gate..."
-  if npx tsx "$ROOT/src/cli/test-multi-timbre.ts" "$preset_id" 2>&1; then
+  if npx tsx "$ROOT/scripts/test-multi-timbre.ts" "$preset_id" 2>&1; then
     echo ""
     echo "VOICE $voice_id → $preset_id: BUILD SUCCESS"
   else

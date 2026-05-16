@@ -1,8 +1,9 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { renderScoreToWav } from '../services/renderScoreToWav.js';
-import { saveLastRender } from '../storage/renderStore.js';
+import { getRenderQueue, type RenderJobEvent } from '../services/renderQueue.js';
+import { saveLastRender, RenderBudgetError } from '../storage/renderStore.js';
 import { validateBody } from '../middleware/validate.js';
+import { HttpError } from '../middleware/errorHandler.js';
 
 export const renderRouter = Router();
 
@@ -107,7 +108,7 @@ export const renderBodySchema = z
   })
   .passthrough();
 
-renderRouter.post('/', validateBody(renderBodySchema), async (req, res) => {
+renderRouter.post('/', validateBody(renderBodySchema), async (req, res, next) => {
   try {
     const { score, config } = req.body as z.infer<typeof renderBodySchema>;
 
@@ -119,10 +120,39 @@ renderRouter.post('/', validateBody(renderBodySchema), async (req, res) => {
       if (end > maxEndSec) maxEndSec = end;
     }
     if (maxEndSec > MAX_RENDER_DURATION_SEC) {
-      throw new Error(`Score duration ${maxEndSec.toFixed(1)}s exceeds max ${MAX_RENDER_DURATION_SEC}s`);
+      throw new HttpError(
+        400,
+        'RENDER_TOO_LONG',
+        `Score duration ${maxEndSec.toFixed(1)}s exceeds max ${MAX_RENDER_DURATION_SEC}s`,
+        {
+          hint: `Trim the score or raise MAX_RENDER_DURATION_SEC (currently ${MAX_RENDER_DURATION_SEC})`,
+          details: { scoreDurationSec: maxEndSec, maxRenderDurationSec: MAX_RENDER_DURATION_SEC },
+        },
+      );
     }
 
-    const result = await renderScoreToWav({ score, config });
+    // SB-001 — submit to the render queue; the worker yields to the event
+    // loop every block so other API/WS callers stay responsive.  The
+    // `X-Render-Job-Id` header lets clients subscribe to progress via
+    // GET /api/renders/events?jobId=… (SSE).
+    const queue = getRenderQueue();
+    let queued;
+    try {
+      queued = queue.submit({ score, config, requestId: req.requestId });
+    } catch (err: any) {
+      if (err?.code === 'RENDER_QUEUE_FULL') {
+        throw new HttpError(503, err.code, err.message, {
+          hint: err.hint,
+          details: { queueDepth: queue.depth },
+        });
+      }
+      if (err?.code === 'RENDER_QUEUE_CLOSED') {
+        throw new HttpError(503, err.code, err.message, { hint: err.hint });
+      }
+      throw err;
+    }
+    res.setHeader('X-Render-Job-Id', queued.jobId);
+    const result = await queued.promise;
 
     // Auto-save to the "last" slot
     saveLastRender({
@@ -137,6 +167,7 @@ renderRouter.post('/', validateBody(renderBodySchema), async (req, res) => {
     // Return the URL to the last render instead of base64
     res.json({
       ok: true,
+      jobId: queued.jobId,
       durationSec: result.durationSec,
       telemetry: result.telemetry,
       provenance: result.provenance,
@@ -145,28 +176,86 @@ renderRouter.post('/', validateBody(renderBodySchema), async (req, res) => {
   } catch (err: any) {
     // Phase 5: human-readable preset errors
     if (err?.code === 'PRESET_NOT_FOUND') {
-      res.status(404).json({
-        ok: false,
-        code: 'PRESET_NOT_FOUND',
-        message: err.message,
-        presetId: err.presetId,
-        presetDir: err.presetDir,
-        available: err.available,
-      });
-      return;
+      return next(
+        new HttpError(404, 'PRESET_NOT_FOUND', err.message, {
+          hint: `Use one of: ${err.available?.join(', ') || '(none — deploy presets)'}`,
+          details: {
+            presetId: err.presetId,
+            presetDir: err.presetDir,
+            available: err.available,
+          },
+        }),
+      );
     }
-
-    // ENOENT from file system (missing asset files, etc.)
+    if (err?.code === 'INVALID_PRESET_ID') {
+      return next(
+        new HttpError(400, 'INVALID_PRESET_ID', err.message, {
+          hint: 'presetId must match /^[A-Za-z0-9_-]{1,64}$/',
+        }),
+      );
+    }
+    if (err instanceof RenderBudgetError) {
+      return next(new HttpError(err.status, err.code, err.message, { hint: err.hint, details: err.details }));
+    }
+    if (err?.code === 'CANCELLED') {
+      return next(new HttpError(499, 'RENDER_CANCELLED', 'Render was cancelled', {
+        hint: 'Resubmit the render',
+      }));
+    }
     if (err?.code === 'ENOENT') {
-      res.status(500).json({
-        ok: false,
-        code: 'ASSET_NOT_FOUND',
-        message: `File not found: ${err.path}. The preset assets may be missing from the deployment.`,
-        error: err.message,
-      });
-      return;
+      return next(
+        new HttpError(500, 'ASSET_NOT_FOUND', `File not found: ${err.path}. The preset assets may be missing from the deployment.`, {
+          hint: 'Verify all preset files are present in PRESET_DIR',
+          details: { missingPath: err.path },
+        }),
+      );
     }
-
-    res.status(400).json({ ok: false, error: err?.message ?? String(err) });
+    next(err);
   }
+});
+
+/**
+ * SB-001 humanization — Server-Sent Events stream so clients can render a
+ * progress bar instead of staring at a spinner.  The stream lives until the
+ * client disconnects or the job emits `done`/`failed`/`cancelled`.
+ *
+ * Why SSE not WS here?  This endpoint is HTTP-native (the cockpit can hit
+ * it from a plain EventSource), composes with the existing auth+rate-limit
+ * middleware, and doesn't need bidirectional traffic.  The existing /ws
+ * channel stays focused on Live Mode audio.
+ */
+renderRouter.get('/events', (req, res) => {
+  const jobId = typeof req.query.jobId === 'string' ? req.query.jobId : undefined;
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache, no-transform');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no'); // disable nginx response buffering
+  res.flushHeaders?.();
+
+  const queue = getRenderQueue();
+  // Send an initial comment so the client knows the stream is live.
+  res.write(`: connected to render queue (depth=${queue.depth})\n\n`);
+
+  const onEvent = (ev: RenderJobEvent) => {
+    if (jobId && ev.jobId !== jobId) return;
+    res.write(`event: ${ev.type}\n`);
+    res.write(`data: ${JSON.stringify(ev)}\n\n`);
+    if (jobId && (ev.type === 'done' || ev.type === 'failed' || ev.type === 'cancelled')) {
+      cleanup();
+      res.end();
+    }
+  };
+
+  // SB-004 echo: 15s heartbeat so proxies don't reap an idle SSE stream.
+  const heartbeat = setInterval(() => {
+    res.write(`: heartbeat ${Date.now()}\n\n`);
+  }, 15_000);
+
+  const cleanup = () => {
+    clearInterval(heartbeat);
+    queue.off('event', onEvent);
+  };
+
+  queue.on('event', onEvent);
+  req.on('close', cleanup);
 });

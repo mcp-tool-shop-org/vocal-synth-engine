@@ -51,7 +51,24 @@ export function rateLimit(req: Request, res: Response, next: NextFunction) {
   entry.count++;
 
   if (entry.count > maxPerWindow) {
-    res.status(429).json({ error: 'Too many requests. Try again later.' });
+    // SB-007 humanization — clients (and humans tail-ing logs) need to know
+    // exactly when they can retry, NOT a vague "try later".  Set
+    // `Retry-After` per RFC 7231 and emit the same JSON envelope shape every
+    // other error uses so the cockpit can switch on `code`.
+    const retryAfterSec = Math.max(1, Math.ceil((entry.resetAt - now) / 1000));
+    res.setHeader('Retry-After', String(retryAfterSec));
+    res.status(429).json({
+      ok: false,
+      code: 'RATE_LIMITED',
+      message: `Too many requests — rate limit is ${maxPerWindow} per minute`,
+      hint: `Wait ${retryAfterSec}s then retry, or raise RATE_LIMIT_RPM`,
+      requestId: (req as any).requestId,
+      details: {
+        retryAfterSec,
+        limitPerMinute: maxPerWindow,
+        resetAt: new Date(entry.resetAt).toISOString(),
+      },
+    });
     return;
   }
 

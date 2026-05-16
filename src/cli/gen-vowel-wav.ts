@@ -11,12 +11,18 @@ import wavefile from 'wavefile';
 const { WaveFile } = wavefile;
 import { writeFile, mkdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
+import { runCli } from './_runner.js';
 
-const USAGE = `Usage: npx tsx src/cli/gen-vowel-wav.ts <out-dir>
+const DEFAULT_OUT = 'calib/default-voice';
+
+const USAGE = `Usage: npx tsx src/cli/gen-vowel-wav.ts [<out-dir>]
 
 Generates AH.wav, EE.wav, OO.wav calibration files (3s each, 48kHz mono,
 A3=220Hz, peak -3 dBFS, 10ms fade in/out). Default <out-dir> is
-'calib/default-voice'.
+'${DEFAULT_OUT}'.
+
+Example:
+  npx tsx src/cli/gen-vowel-wav.ts calib/my-voice
 
 Options:
   -h, --help    Show this message and exit.`;
@@ -71,7 +77,16 @@ async function main() {
     console.log(USAGE);
     process.exit(0);
   }
-  const outDir = resolve(arg0 || 'calib/default-voice');
+  // TB-005 (3): announce when the default fallback fires so a script that
+  // forgot its <out-dir> arg is distinguishable from one that meant to use
+  // the default.
+  let outDir: string;
+  if (!arg0) {
+    outDir = resolve(DEFAULT_OUT);
+    console.log(`(using default <out-dir> '${DEFAULT_OUT}' — pass an arg to override)`);
+  } else {
+    outDir = resolve(arg0);
+  }
   await mkdir(outDir, { recursive: true });
 
   for (const [vowel, formants] of Object.entries(VOWEL_FORMANTS)) {
@@ -132,4 +147,4 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+runCli('gen-vowel-wav', main);

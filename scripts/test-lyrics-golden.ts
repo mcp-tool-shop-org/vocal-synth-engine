@@ -11,11 +11,13 @@
  * 5. No click regressions (max per-sample delta < threshold)
  * 6. Lyrics auto-phonemization actually fires (phonemes populated from lyrics.text)
  *
- * Usage: npx tsx src/cli/test-lyrics-golden.ts [presetId]
+ * Usage: npx tsx scripts/test-lyrics-golden.ts [presetId]
+ *
+ * TB-002 relocation: moved from src/cli/ to scripts/.
  */
 import { createHash } from 'node:crypto';
-import { renderScoreToWav } from '../server/services/renderScoreToWav.js';
-import { phonemizeLyrics } from '../phonemize/index.js';
+import { renderScoreToWav } from '../src/server/services/renderScoreToWav.js';
+import { phonemizeLyrics } from '../src/phonemize/index.js';
 import wavefile from 'wavefile';
 const { WaveFile } = wavefile;
 

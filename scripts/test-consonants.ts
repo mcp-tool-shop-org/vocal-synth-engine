@@ -7,10 +7,14 @@
  * 3. Nasal (M): harmonics reduced but no noise burst
  * 4. Determinism: same seed → identical hash
  *
- * Usage: npx tsx src/cli/test-consonants.ts [presetId]
+ * Usage: npx tsx scripts/test-consonants.ts [presetId]
+ *
+ * TB-002 relocation: moved from src/cli/ to scripts/ so this regression
+ * script no longer ships in dist/ and is no longer advertised as a user
+ * CLI. A vitest equivalent under tests/integration/ is planned.
  */
 import { createHash } from 'node:crypto';
-import { renderScoreToWav } from '../server/services/renderScoreToWav.js';
+import { renderScoreToWav } from '../src/server/services/renderScoreToWav.js';
 import wavefile from 'wavefile';
 const { WaveFile } = wavefile;
 

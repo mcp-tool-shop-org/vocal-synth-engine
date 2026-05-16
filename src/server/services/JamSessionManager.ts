@@ -277,7 +277,11 @@ export class JamSessionManager {
     }
 
     if (this.sessions.size >= MAX_SESSIONS) {
-      this.sendError(ws, 'MAX_SESSIONS', `Server limit: ${MAX_SESSIONS} concurrent sessions`);
+      this.sendError(
+        ws,
+        'MAX_SESSIONS',
+        `Server is at capacity (${this.sessions.size}/${MAX_SESSIONS} sessions)`,
+      );
       return;
     }
 
@@ -323,7 +327,11 @@ export class JamSessionManager {
     }
 
     if (session.participantCount >= MAX_PARTICIPANTS_PER_SESSION) {
-      this.sendError(ws, 'SESSION_FULL', `Session is full (${MAX_PARTICIPANTS_PER_SESSION} max)`);
+      this.sendError(
+        ws,
+        'SESSION_FULL',
+        `Session is at capacity (${session.participantCount}/${MAX_PARTICIPANTS_PER_SESSION} participants)`,
+      );
       return;
     }
 
@@ -441,8 +449,14 @@ export class JamSessionManager {
     }
   }
 
-  private sendError(ws: WebSocket, code: string, message: string): void {
-    this.sendTo(ws, { type: 'jam_error', code, message });
+  private sendError(ws: WebSocket, code: string, message: string, hint?: string): void {
+    // SB-009 — humanized jam error frames; same shape as live errors so
+    // cockpit code can treat both the same way.
+    const errorHint = hint ?? jamHintForCode(code);
+    const msg = errorHint
+      ? { type: 'jam_error' as const, code, message, hint: errorHint }
+      : { type: 'jam_error' as const, code, message };
+    this.sendTo(ws, msg);
   }
 
   // ── Accessors ───────────────────────────────────────────────────
@@ -463,5 +477,40 @@ export class JamSessionManager {
     }
     this.sessions.clear();
     this.connections.clear();
+  }
+}
+
+function jamHintForCode(code: string): string | undefined {
+  switch (code) {
+    case 'NOT_AUTHENTICATED':
+      return 'Send a `jam_hello` frame with your protocol version first';
+    case 'PROTOCOL_MISMATCH':
+      return 'Update your client; the server runs a different jam protocol version';
+    case 'NOT_IN_SESSION':
+      return 'Create a session with `session_create` or join with `session_join` first';
+    case 'ALREADY_IN_SESSION':
+      return 'Send `session_leave` before joining or creating a different session';
+    case 'NOT_HOST':
+      return 'Ask the session host to run this action, or take host via a host_handoff';
+    case 'NOT_AUTHORIZED':
+      return 'Only the track owner or the session host can change this track';
+    case 'MAX_SESSIONS':
+      return 'Wait for an existing session to end, or raise MAX_JAM_SESSIONS';
+    case 'SESSION_NOT_FOUND':
+      return 'Re-check the session id; it may have ended and been garbage collected';
+    case 'SESSION_FULL':
+      return 'Ask the host for another session, or raise MAX_JAM_PARTICIPANTS';
+    case 'TRACK_NOT_FOUND':
+      return 'List session tracks before referencing a trackId';
+    case 'TRACK_ADD_FAILED':
+      return 'Verify the requested presetId exists; check the server logs for detail';
+    case 'INVALID_MESSAGE':
+      return 'The message did not match the jam protocol schema; check field types';
+    case 'PARSE_ERROR':
+      return 'The frame was not valid JSON; verify the encoder';
+    case 'UNKNOWN_MESSAGE':
+      return 'Check the message `type` against the jam protocol schema';
+    default:
+      return undefined;
   }
 }

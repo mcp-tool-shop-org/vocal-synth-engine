@@ -7,9 +7,20 @@ import { presetsRouter } from './routes/presets.js';
 import { phonemizeRouter } from './routes/phonemize.js';
 import { requireAuth } from './middleware/auth.js';
 import { rateLimit } from './middleware/rateLimit.js';
+import { requestIdMiddleware } from './middleware/requestId.js';
+import { structuredLog } from './middleware/structuredLog.js';
+import { errorHandler, apiNotFoundHandler } from './middleware/errorHandler.js';
 
 export function createApp() {
   const app = express();
+
+  // SB-006: requestId FIRST so every downstream middleware (logger, error
+  // handler, rate limiter, validators) can attach it to whatever they emit.
+  app.use(requestIdMiddleware);
+
+  // SB-006: one structured line per request so operators can correlate the
+  // user-reported requestId with the full request lifecycle.
+  app.use(structuredLog);
 
   // S-006: Tell express to honour the leftmost X-Forwarded-For entry.
   // Default to 'loopback' which is safe everywhere; operators behind a real
@@ -26,11 +37,14 @@ export function createApp() {
 
   // S-003: lock CORS down to a single configured origin.  Default to the
   // cockpit's dev port on localhost; operators can override via env.
+  // SB-007 humanization: expose X-Request-Id so a browser fetch caller can
+  // read the correlation id from its own response headers.
   const allowedOrigin = process.env.ALLOWED_ORIGIN || 'http://localhost:4321';
   app.use(
     cors({
       origin: allowedOrigin,
       credentials: false,
+      exposedHeaders: ['X-Request-Id', 'X-Render-Job-Id'],
     })
   );
 
@@ -49,6 +63,14 @@ export function createApp() {
   // guards every read/delete/patch path on the renders resource.
   app.use('/api/renders', requireAuth, rateLimit, rendersRouter);
   app.use('/api/phonemize', requireAuth, rateLimit, phonemizeRouter);
+
+  // SB-005: 404 catch-all for /api/* so clients get JSON envelopes for
+  // unknown routes (instead of express's default HTML).
+  app.use(apiNotFoundHandler);
+
+  // SB-005: JSON error envelope MUST be the last `.use()` so it sees every
+  // throw from every route + middleware above.
+  app.use(errorHandler);
 
   return app;
 }

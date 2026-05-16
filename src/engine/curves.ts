@@ -21,18 +21,52 @@ export function dbToLinear(db: number): number {
   return Math.exp(db * LN10_OVER_20);
 }
 
+/**
+ * Convert MIDI note number to frequency in Hz (A4=440 Hz at MIDI 69).
+ *
+ * **Domain:** any finite `midi` value (negative and >127 are valid in theory,
+ * though MIDI spec is [0,127]). Returns `NaN` for non-finite input (NaN/Infinity
+ * propagate). EB-010: callers in the live-render path MUST validate at the API
+ * boundary — `noteOn()` and similar — to keep NaN out of the audio mix-bus.
+ *
+ * @returns frequency in Hz, or `NaN` if `midi` is non-finite.
+ */
 export function midiToHz(midi: number): number {
   return 440 * Math.pow(2, (midi - 69) / 12);
 }
 
+/**
+ * Convert frequency in Hz to MIDI note number (inverse of {@link midiToHz}).
+ *
+ * **Domain:** `hz` must be strictly positive and finite. Returns `-Infinity`
+ * for `hz === 0` and `NaN` for negative or non-finite `hz` (log2 of non-positive
+ * is undefined). EB-010: pitch-tracker output should be guarded before calling.
+ *
+ * @returns MIDI note number, or `-Infinity`/`NaN` outside the positive domain.
+ */
 export function hzToMidi(hz: number): number {
   return 69 + 12 * Math.log2(hz / 440);
 }
 
+/**
+ * Convert a pitch offset in cents to a frequency ratio (100 cents = 1 semitone).
+ *
+ * **Domain:** any finite `cents`. Returns `NaN` for non-finite input.
+ */
 export function centsToRatio(cents: number): number {
   return Math.pow(2, cents / 1200);
 }
 
+/**
+ * Compute the per-sample vibrato offset in cents.
+ *
+ * **Domain:** all numeric arguments must be finite. `rateHz` should be >= 0
+ * (negative just flips the LFO phase), `depthCents` is unbounded but typically
+ * 0..200, `onsetSec` >= 0. Returns 0 before `noteStartSec`.
+ *
+ * EB-010: NaN/Infinity in any argument propagates through `Math.sin` and the
+ * multiplication, returning NaN. Caller must validate upstream.
+ */
 export function calculateVibrato(
   tSec: number,
   noteStartSec: number,
@@ -42,16 +76,27 @@ export function calculateVibrato(
 ): number {
   const activeTime = tSec - noteStartSec;
   if (activeTime <= 0) return 0;
-  
+
   // Fade in vibrato over onsetSec
   const fade = onsetSec > 0 ? Math.min(1.0, activeTime / onsetSec) : 1.0;
-  
+
   // Sine wave LFO
   const lfo = Math.sin(2 * Math.PI * rateHz * activeTime);
-  
+
   return depthCents * fade * lfo;
 }
 
+/**
+ * Compute the ADSR envelope amplitude at time `tSec`.
+ *
+ * **Domain:** all arguments must be finite. `attackSec` and `releaseSec` MUST
+ * be > 0 — passing 0 produces a division-by-zero (`Infinity` during attack or
+ * release, `NaN` if `activeTime` is also 0). Callers using ADSR with zero
+ * attack/release should clamp upstream to a small epsilon (e.g. 1e-4) rather
+ * than rely on this function to guard. EB-010.
+ *
+ * @returns envelope amplitude in [0, 1].
+ */
 export function calculateAdsr(
   tSec: number,
   noteStartSec: number,
@@ -60,22 +105,22 @@ export function calculateAdsr(
   releaseSec: number = 0.1
 ): number {
   if (tSec < noteStartSec) return 0;
-  
+
   const activeTime = tSec - noteStartSec;
   const timeFromEnd = noteEndSec - tSec;
-  
+
   if (timeFromEnd <= 0) {
     // In release phase (or past it)
     const releaseTime = tSec - noteEndSec;
     if (releaseTime >= releaseSec) return 0;
     return 1.0 - (releaseTime / releaseSec);
   }
-  
+
   // In attack phase
   if (activeTime < attackSec) {
     return activeTime / attackSec;
   }
-  
+
   // Sustain phase
   return 1.0;
 }

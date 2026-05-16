@@ -12,15 +12,10 @@
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';
-import { fileURLToPath } from 'node:url';
-import { dirname, resolve } from 'node:path';
 import { loadVoicePreset } from '../src/preset/loader.js';
 import { LiveSynthEngine } from '../src/engine/LiveSynthEngine.js';
 import type { LoadedVoicePreset } from '../src/preset/schema.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const PRESET_PATH = resolve(__dirname, '..', 'presets', 'default-voice', 'voicepreset.json');
+import { PRESET_PATH } from './helpers/index.js';
 
 function envelopePeak(buf: Float32Array): number {
   let p = 0;

@@ -1,18 +1,42 @@
 import { Worker, isMainThread, parentPort, workerData } from 'node:worker_threads';
 import { resolve } from 'node:path';
 import { readFile } from 'node:fs/promises';
+import { runCli, CliError } from './_runner.js';
 
 // This is a mock audio backend to demonstrate the realtime architecture.
 // In a real app, this would be replaced by node-rtaudio, portaudio, or Web Audio API.
 
+const USAGE = `Usage: npx tsx src/cli/realtime-demo.ts <preset.json> <score.json>
+
+Spawns a worker_threads audio thread, renders blocks (blockSize=512) with
+deterministic="fast" + Date.now() seed, prints per-10-block RTF telemetry.
+After 1s, the control thread posts an update_score message demonstrating
+live edits crossing the thread boundary.
+
+This is an ARCHITECTURE DEMO, not a real-world entry point — there is no
+real audio device. For deterministic offline renders see play-score.ts.
+
+Example:
+  npx tsx src/cli/realtime-demo.ts presets/default-voice/voicepreset.json test-score.json
+
+Options:
+  -h, --help    Show this message and exit.`;
+
 if (isMainThread) {
   // --- Control / UI Thread ---
-  
+
   async function main() {
     const args = process.argv.slice(2);
+    if (args[0] === '-h' || args[0] === '--help') {
+      console.log(USAGE);
+      process.exit(0);
+    }
     if (args.length < 2) {
-      console.error('Usage: npx tsx src/cli/realtime-demo.ts <preset.json> <score.json>');
-      process.exit(1);
+      const err: CliError = new Error(
+        `expected 2 positional args (<preset.json> <score.json>), got ${args.length}`
+      );
+      err.hint = `run with --help for the full usage block`;
+      throw err;
     }
 
     const [presetPath, scorePath] = args;
@@ -58,7 +82,7 @@ if (isMainThread) {
     }, 1000);
   }
   
-  main().catch(console.error);
+  runCli('realtime-demo', main);
 
 } else {
   // --- Audio Thread ---

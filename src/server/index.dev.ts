@@ -10,14 +10,19 @@ import { JamSessionManager } from './services/JamSessionManager.js';
 import { liveClientMessageSchema, jamClientMessageSchema } from './services/wsSchemas.js';
 import type { ClientMessage } from '../types/live.js';
 import type { JamClientMessage } from '../types/jam.js';
+import { getLogger } from './util/logger.js';
+import { attachHeartbeat } from './util/wsHeartbeat.js';
+import { installGracefulShutdown } from './util/gracefulShutdown.js';
+import { getRenderQueue } from './services/renderQueue.js';
 
 async function startDevServer() {
+  const logger = getLogger();
   const app = createApp();
   const server = createServer(app);
 
   // Boot log: preset info
   const presetInfo = getPresetDirInfo();
-  console.log(`[boot] PRESET_DIR  = ${presetInfo.presetDir} (${presetInfo.count} presets: ${presetInfo.presets.join(', ') || 'NONE'})`);
+  logger.info({ presetDir: presetInfo.presetDir, count: presetInfo.count, presets: presetInfo.presets }, 'boot_presets');
 
   // Create Vite server in middleware mode
   const vite = await createViteServer({
@@ -39,6 +44,9 @@ async function startDevServer() {
   const wss = new WebSocketServer({ noServer: true });
   const activeSessions = new Map<WebSocket, LiveSession>();
 
+  // SB-004: heartbeat ping/pong so dead clients are reaped, not leaked.
+  attachHeartbeat(wss, 'live');
+
   wss.on('connection', (ws, req) => {
     const url = new URL(req.url || '/', `http://${req.headers.host}`);
     const token = url.searchParams.get('token') ?? undefined;
@@ -48,14 +56,15 @@ async function startDevServer() {
     }
 
     if (activeSessions.size >= MAX_CONCURRENT_SESSIONS) {
-      ws.close(4002, 'Server full');
-      console.warn(`[live] Rejected connection: ${activeSessions.size}/${MAX_CONCURRENT_SESSIONS} sessions`);
+      // SB-005-style humanization: include the active/max counts.
+      ws.close(4002, `Server full (${activeSessions.size}/${MAX_CONCURRENT_SESSIONS})`);
+      logger.warn({ active: activeSessions.size, max: MAX_CONCURRENT_SESSIONS }, 'live_session_rejected_full');
       return;
     }
 
     const session = new LiveSession(ws);
     activeSessions.set(ws, session);
-    console.log(`[live] Client connected (${activeSessions.size}/${MAX_CONCURRENT_SESSIONS} sessions)`);
+    logger.info({ active: activeSessions.size, max: MAX_CONCURRENT_SESSIONS }, 'live_session_connected');
 
     ws.on('message', async (raw) => {
       try {
@@ -68,6 +77,7 @@ async function startDevServer() {
             type: 'error',
             code: 'INVALID_MESSAGE',
             message: 'Message failed schema validation',
+            hint: 'Check the message shape against the live protocol schema',
             issues: result.error.issues.slice(0, 5).map((i) => ({
               path: i.path.join('.'),
               message: i.message,
@@ -81,6 +91,7 @@ async function startDevServer() {
           type: 'error',
           code: 'PARSE_ERROR',
           message: `Invalid message: ${err.message}`,
+          hint: 'Send a JSON message matching the live protocol',
         }));
       }
     });
@@ -88,11 +99,11 @@ async function startDevServer() {
     ws.on('close', () => {
       session.destroy();
       activeSessions.delete(ws);
-      console.log(`[live] Client disconnected (${activeSessions.size} active sessions)`);
+      logger.info({ active: activeSessions.size }, 'live_session_disconnected');
     });
 
     ws.on('error', (err) => {
-      console.error('[live] WebSocket error:', err.message);
+      logger.error({ err: err.message }, 'live_ws_error');
       session.destroy();
       activeSessions.delete(ws);
     });
@@ -101,6 +112,9 @@ async function startDevServer() {
   // ── WebSocket: Jam Mode ──────────────────────────────────────
   const jamManager = new JamSessionManager();
   const wssJam = new WebSocketServer({ noServer: true });
+
+  // SB-004: same heartbeat policy for jam sessions.
+  attachHeartbeat(wssJam, 'jam');
 
   wssJam.on('connection', (ws, req) => {
     const url = new URL(req.url || '/', `http://${req.headers.host}`);
@@ -111,7 +125,7 @@ async function startDevServer() {
     }
 
     jamManager.onConnect(ws);
-    console.log(`[jam] Client connected (${jamManager.activeConnectionCount} connections, ${jamManager.activeSessionCount} sessions)`);
+    logger.info({ connections: jamManager.activeConnectionCount, sessions: jamManager.activeSessionCount }, 'jam_session_connected');
 
     ws.on('message', async (raw) => {
       try {
@@ -126,6 +140,7 @@ async function startDevServer() {
             type: 'jam_error',
             code: 'INVALID_MESSAGE',
             message: 'Message failed schema validation',
+            hint: 'Check the message shape against the jam protocol schema',
             issues: result.error.issues.slice(0, 5).map((i) => ({
               path: i.path.join('.'),
               message: i.message,
@@ -139,17 +154,18 @@ async function startDevServer() {
           type: 'jam_error',
           code: 'PARSE_ERROR',
           message: `Invalid message: ${err.message}`,
+          hint: 'Send a JSON message matching the jam protocol',
         }));
       }
     });
 
     ws.on('close', () => {
       jamManager.onDisconnect(ws);
-      console.log(`[jam] Client disconnected (${jamManager.activeConnectionCount} connections)`);
+      logger.info({ connections: jamManager.activeConnectionCount }, 'jam_session_disconnected');
     });
 
     ws.on('error', (err) => {
-      console.error('[jam] WebSocket error:', err.message);
+      logger.error({ err: err.message }, 'jam_ws_error');
       jamManager.onDisconnect(ws);
     });
   });
@@ -186,15 +202,31 @@ async function startDevServer() {
   const host = process.env.DEV_HOST || '127.0.0.1';
   server.listen(port, host, () => {
     const displayHost = host === '127.0.0.1' ? 'localhost' : host;
-    console.log(`VocalSynth Cockpit (DEV) running at http://${displayHost}:${port}`);
+    logger.info({ port, host: displayHost, mode: 'dev' }, 'server_listening');
     if (host !== '127.0.0.1') {
-      console.warn(
-        `[boot] WARNING: DEV server is bound to ${host}; the HMR upgrade ` +
-        `channel is unauthenticated.  Restrict network exposure or set ` +
-        `DEV_HOST=127.0.0.1 for localhost-only.`
+      logger.warn(
+        { host },
+        'dev_server_lan_exposed_warning'
       );
     }
   });
+
+  // SB-003: graceful shutdown in dev so Ctrl-C drains the render queue and
+  // closes WS sessions cleanly — same behaviour as prod.
+  installGracefulShutdown({
+    httpServer: server,
+    webSocketServers: [wss, wssJam],
+    drainRenderQueue: () => getRenderQueue().drain(),
+    onShutdown: () => {
+      jamManager.destroyAll();
+      for (const session of activeSessions.values()) session.destroy();
+      activeSessions.clear();
+    },
+  });
 }
 
-startDevServer().catch(console.error);
+startDevServer().catch((err) => {
+  // eslint-disable-next-line no-console
+  console.error('[dev server] failed to start:', err);
+  process.exit(1);
+});

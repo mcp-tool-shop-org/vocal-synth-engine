@@ -1,14 +1,15 @@
+// TB-002 relocation: moved from src/cli/ to scripts/.
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { createHash } from 'node:crypto';
-import { loadVoicePreset } from '../preset/loader.js';
-import { StreamingVocalSynthEngine, StreamingVocalSynthConfig } from '../engine/StreamingVocalSynthEngine.js';
-import { VocalScore } from '../types/score.js';
+import { loadVoicePreset } from '../src/preset/loader.js';
+import { StreamingVocalSynthEngine, StreamingVocalSynthConfig } from '../src/engine/StreamingVocalSynthEngine.js';
+import { VocalScore } from '../src/types/score.js';
 
 async function main() {
   const args = process.argv.slice(2);
   if (args.length < 2) {
-    console.error('Usage: npx tsx src/cli/test-score-render.ts <preset.json> <score.json>');
+    console.error('Usage: npx tsx scripts/test-score-render.ts <preset.json> <score.json>');
     process.exit(1);
   }
 
@@ -88,4 +89,8 @@ async function main() {
   console.log(`PASS: Golden render stable.`);
 }
 
-main().catch(console.error);
+main().catch((err: any) => {
+  // TB-001: ensure a thrown render failure produces a non-zero exit code.
+  console.error(`[test-score-render] error: ${err?.message ?? err}`);
+  process.exitCode = 1;
+});

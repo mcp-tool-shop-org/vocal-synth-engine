@@ -1,11 +1,16 @@
 version: 2
 updates:
-  # Root npm package
+  # Root npm package — weekly per CB-014 (express 5 / ws 8 / zod 4 are
+  # on active release cycles; monthly was too sleepy for non-security
+  # advisories — security advisories use the out-of-band Dependabot
+  # security-updates channel enabled via repo settings).
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
     open-pull-requests-limit: 3
+    commit-message:
+      prefix: "chore(deps)"
     groups:
       npm-deps:
         patterns:
@@ -15,8 +20,10 @@ updates:
   - package-ecosystem: "npm"
     directory: "/apps/cockpit"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
     open-pull-requests-limit: 3
+    commit-message:
+      prefix: "chore(deps)"
     groups:
       cockpit-deps:
         patterns:
@@ -26,23 +33,29 @@ updates:
   - package-ecosystem: "npm"
     directory: "/site"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
     open-pull-requests-limit: 3
+    commit-message:
+      prefix: "chore(deps)"
     groups:
       site-deps:
         patterns:
           - "*"
 
-  # GitHub Actions workflows
+  # GitHub Actions workflows — slower-moving surface, monthly cadence.
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "monthly"
     open-pull-requests-limit: 3
+    commit-message:
+      prefix: "chore(ci)"
 
-  # Docker base image (Dockerfile)
+  # Docker base image (Dockerfile) — node:20-slim minor bumps, monthly.
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "monthly"
     open-pull-requests-limit: 3
+    commit-message:
+      prefix: "chore(docker)"

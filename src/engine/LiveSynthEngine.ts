@@ -69,6 +69,20 @@ export interface LiveTelemetry {
   limiterReductionDb: number;
   clickDeltaMaxRecent: number;
   rtf: number;
+  /** EB-004: voice-steals (noteOn forced to kick another voice out of the
+   *  allocation pool) since last reset. Non-zero means your maxPolyphony cap
+   *  is biting — bump it or shorten release times. */
+  voicesStolenLastWindow: number;
+  /** EB-004: voices currently sunset (mid-release after a polyphony shrink,
+   *  audibly fading but excluded from new-note allocation). Non-zero is fine
+   *  briefly after `updateConfig({maxPolyphony})`; persistent non-zero means
+   *  releases are long and you keep shrinking. */
+  sunsetVoiceCount: number;
+  /** EB-003: number of NaN/Infinity samples observed on the output bus this
+   *  window. MUST be 0 in steady state. Non-zero is a defect — find the bug,
+   *  do not increase a tolerance. The corrupt samples are zeroed in-place
+   *  before being returned to the caller, so the audio path stays clean. */
+  outputNaNCount: number;
 }
 
 export class LiveSynthEngine {
@@ -108,6 +122,12 @@ export class LiveSynthEngine {
   private voicesMaxSeen: number = 0;
   private renderTimeAccumMs: number = 0;
   private renderBlocksAccum: number = 0;
+  /** EB-004: counts noteOn() calls that had to steal a voice since last
+   *  telemetry read. Reset to 0 by getTelemetryAndReset(). */
+  private voicesStolenAccum: number = 0;
+  /** EB-003: counts NaN/Infinity samples observed on the output bus since
+   *  last telemetry read. MUST be 0 in steady state. */
+  private outputNaNAccum: number = 0;
 
   constructor(config: LiveEngineConfig, preset: LoadedVoicePreset) {
     this.config = config;
@@ -196,8 +216,68 @@ export class LiveSynthEngine {
 
   // ── Note events ──────────────────────────────────────────────
 
-  /** Start a note. Returns voice index and whether a voice was stolen. */
+  /**
+   * EB-001: validate noteOn parameters at the API boundary. NaN/Infinity in
+   * any numeric field would otherwise propagate through `midiToHz` → `pf0`
+   * → mix bus → limiter → telemetry, silently poisoning every subsequent
+   * sample until the engine is rebuilt. Throwing here surfaces the upstream
+   * bug (misbehaving MIDI controller, bad parser, etc.) at the source.
+   */
+  private validateNoteOnParams(params: LiveVoiceParams): void {
+    if (!params || typeof params !== 'object') {
+      throw new TypeError('noteOn: params must be an object');
+    }
+    if (typeof params.noteId !== 'string' || params.noteId.length === 0) {
+      throw new TypeError(`noteOn: noteId must be a non-empty string, got ${String(params.noteId)}`);
+    }
+    if (!Number.isFinite(params.midi)) {
+      throw new RangeError(`noteOn: midi must be a finite number, got ${params.midi} (noteId="${params.noteId}")`);
+    }
+    // MIDI spec is [0,127] — out-of-range is unusual but technically renderable
+    // (midiToHz works for any finite input). Warn-via-error only on egregious
+    // values so legitimate edge cases (e.g., MIDI 128 mapped to a control note)
+    // don't trip the check.
+    if (params.midi < -12 || params.midi > 139) {
+      throw new RangeError(`noteOn: midi out of sensible range [-12, 139], got ${params.midi} (noteId="${params.noteId}")`);
+    }
+    if (!Number.isFinite(params.velocity)) {
+      throw new RangeError(`noteOn: velocity must be a finite number, got ${params.velocity} (noteId="${params.noteId}")`);
+    }
+    if (params.velocity < 0 || params.velocity > 1) {
+      throw new RangeError(`noteOn: velocity must be in [0, 1], got ${params.velocity} (noteId="${params.noteId}"). MIDI 0-127 callers should divide by 127.`);
+    }
+    if (params.breathiness !== undefined) {
+      if (!Number.isFinite(params.breathiness)) {
+        throw new RangeError(`noteOn: breathiness must be a finite number, got ${params.breathiness} (noteId="${params.noteId}")`);
+      }
+    }
+    if (params.portamentoMs !== undefined) {
+      if (!Number.isFinite(params.portamentoMs) || params.portamentoMs < 0) {
+        throw new RangeError(`noteOn: portamentoMs must be a finite number >= 0, got ${params.portamentoMs} (noteId="${params.noteId}")`);
+      }
+    }
+    if (params.vibrato) {
+      const v = params.vibrato;
+      if (!Number.isFinite(v.rateHz) || v.rateHz < 0) {
+        throw new RangeError(`noteOn: vibrato.rateHz must be a finite number >= 0, got ${v.rateHz} (noteId="${params.noteId}")`);
+      }
+      if (!Number.isFinite(v.depthCents)) {
+        throw new RangeError(`noteOn: vibrato.depthCents must be a finite number, got ${v.depthCents} (noteId="${params.noteId}")`);
+      }
+      if (!Number.isFinite(v.onsetSec) || v.onsetSec < 0) {
+        throw new RangeError(`noteOn: vibrato.onsetSec must be a finite number >= 0, got ${v.onsetSec} (noteId="${params.noteId}")`);
+      }
+    }
+  }
+
+  /** Start a note. Returns voice index and whether a voice was stolen.
+   *
+   *  EB-001: throws `RangeError` / `TypeError` if any numeric field is
+   *  non-finite or out of range. The audio thread CANNOT recover from NaN
+   *  propagation silently — explicit throw at the API boundary is the only
+   *  way to point the operator at the actual upstream bug. */
   noteOn(params: LiveVoiceParams): { voiceIndex: number; stolen: boolean } {
+    this.validateNoteOnParams(params);
     // If a note with the same ID is already playing, retrigger it
     let voice = this.voices.find(v => v.noteId === params.noteId);
     let stolen = false;
@@ -240,6 +320,10 @@ export class LiveSynthEngine {
         }
         voice = bestVoice;
         stolen = true;
+        // EB-004: surface steal count in telemetry so an operator tuning
+        // polyphony can see whether their cap is biting without wrapping
+        // noteOn themselves with a counter.
+        this.voicesStolenAccum++;
         // Capture last output for crossfade (estimated from envelope * velocity)
         const ageSec = (this.currentSample - voice.noteOnSample) / sr;
         let env = ageSec < 0.01 ? ageSec / 0.01 : 1.0;
@@ -281,7 +365,68 @@ export class LiveSynthEngine {
 
   // ── Config updates ───────────────────────────────────────────
 
+  /** EB-002: maxPolyphony sanity cap. Anything beyond this is almost certainly
+   *  a unit-conversion bug or a stuck-key bug, NOT a real operator intent. The
+   *  cap is high enough that legitimate large-ensemble work passes, but low
+   *  enough that `1e6` (bad parse) trips it before we allocate gigabytes. */
+  static readonly MAX_REASONABLE_POLYPHONY = 256;
+
   updateConfig(updates: Partial<LiveEngineConfig>) {
+    // EB-002: validate the entire update set BEFORE applying any of it, so a
+    // bad rngSeed doesn't get committed while we then throw on maxPolyphony.
+    // Silent degradation here is exactly the bug class that surfaces 4 hours
+    // into a live session as 'why are my notes glitching'.
+    if (updates.defaultTimbre !== undefined) {
+      if (typeof updates.defaultTimbre !== 'string') {
+        throw new TypeError(`updateConfig: defaultTimbre must be a string, got ${typeof updates.defaultTimbre}`);
+      }
+      if (!(updates.defaultTimbre in this.preset.timbres)) {
+        const known = Object.keys(this.preset.timbres).join(', ');
+        throw new Error(
+          `updateConfig: defaultTimbre "${updates.defaultTimbre}" is not in preset.timbres [${known}]. ` +
+          `Misspelled timbre IDs silently fall back at render time — fail at the boundary instead.`
+        );
+      }
+    }
+    if (updates.rngSeed !== undefined) {
+      if (!Number.isFinite(updates.rngSeed) || !Number.isInteger(updates.rngSeed)) {
+        throw new RangeError(
+          `updateConfig: rngSeed must be a finite integer, got ${updates.rngSeed}. ` +
+          `NaN/Infinity seeds break xorshift32 (the zero-trap remap only catches seed===0).`
+        );
+      }
+    }
+    if (updates.maxPolyphony !== undefined) {
+      const m = updates.maxPolyphony;
+      if (!Number.isFinite(m) || !Number.isInteger(m)) {
+        throw new RangeError(`updateConfig: maxPolyphony must be a finite integer, got ${m}`);
+      }
+      if (m < 1) {
+        throw new RangeError(
+          `updateConfig: maxPolyphony must be >= 1, got ${m}. ` +
+          `maxPolyphony=0 leaves an empty allocation pool and the next noteOn() will throw.`
+        );
+      }
+      if (m > LiveSynthEngine.MAX_REASONABLE_POLYPHONY) {
+        throw new RangeError(
+          `updateConfig: maxPolyphony ${m} exceeds MAX_REASONABLE_POLYPHONY=${LiveSynthEngine.MAX_REASONABLE_POLYPHONY}. ` +
+          `Bump the cap deliberately if you need more voices.`
+        );
+      }
+    }
+    if (updates.sampleRateHz !== undefined && updates.sampleRateHz !== this.config.sampleRateHz) {
+      throw new Error(
+        `updateConfig: sampleRateHz is fixed at construction (currently ${this.config.sampleRateHz}). ` +
+        `Build a new engine to change sample rate — voice renderers cache it as 1/sr.`
+      );
+    }
+    if (updates.blockSize !== undefined && updates.blockSize !== this.config.blockSize) {
+      throw new Error(
+        `updateConfig: blockSize is fixed at construction (currently ${this.config.blockSize}). ` +
+        `Render buffers are sized at construction; build a new engine to change blockSize.`
+      );
+    }
+
     if (updates.defaultTimbre !== undefined) this.config.defaultTimbre = updates.defaultTimbre;
 
     if (updates.rngSeed !== undefined) {
@@ -619,8 +764,23 @@ export class LiveSynthEngine {
     // E-010: capture PRE-limiter peak so peakDbfs telemetry reflects the
     // true mix-bus level, not the limiter-clipped level. Doing this in a
     // separate loop keeps the limiter loop branch-free.
+    //
+    // EB-003: NaN/Infinity tripwire. A single NaN sample in the mix bus
+    // would otherwise poison peakSample (NaN > anything is false; comparison
+    // chains stay NaN), peakDbfs, lastSample, the click-delta detector,
+    // and the determinism hash — operators see no signal that the audio bus
+    // is corrupted and hunt the bug for days. We scan once per block, zero
+    // any non-finite sample IN PLACE (so the audio path stays clean for
+    // downstream consumers), and surface the count on telemetry. Operators
+    // see `outputNaNCount > 0` and know the engine itself caught it.
     for (let i = 0; i < blockSize; i++) {
-      const abs = Math.abs(out[i]);
+      let s = out[i];
+      if (!Number.isFinite(s)) {
+        this.outputNaNAccum++;
+        s = 0;
+        out[i] = 0;
+      }
+      const abs = s < 0 ? -s : s;
       if (abs > this.peakSample) this.peakSample = abs;
     }
 
@@ -674,6 +834,11 @@ export class LiveSynthEngine {
     const blockDurationSec = (this.config.blockSize * this.renderBlocksAccum) / this.config.sampleRateHz;
     const rtf = blockDurationSec > 0 ? (this.renderTimeAccumMs / 1000) / blockDurationSec : 0;
 
+    // EB-004: sunset voices are the ones excised by a polyphony shrink that
+    // are still audibly fading. The count includes only sunset voices that
+    // are still active (noteId !== null) — pruned ones are already gone.
+    const sunsetVoiceCount = this.sunsetVoices.filter(v => v.noteId !== null).length;
+
     const telemetry: LiveTelemetry = {
       voicesActive: activeCount,
       voicesMax: this.voicesMaxSeen,
@@ -681,6 +846,9 @@ export class LiveSynthEngine {
       limiterReductionDb,
       clickDeltaMaxRecent: this.maxDelta,
       rtf,
+      voicesStolenLastWindow: this.voicesStolenAccum,
+      sunsetVoiceCount,
+      outputNaNCount: this.outputNaNAccum,
     };
 
     // Reset accumulators
@@ -690,6 +858,8 @@ export class LiveSynthEngine {
     this.voicesMaxSeen = activeCount;
     this.renderTimeAccumMs = 0;
     this.renderBlocksAccum = 0;
+    this.voicesStolenAccum = 0;
+    this.outputNaNAccum = 0;
 
     return telemetry;
   }

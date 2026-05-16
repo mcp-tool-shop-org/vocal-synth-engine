@@ -2,15 +2,17 @@
  * Test multi-timbre rendering: render AH → EE → OO and verify
  * spectral differences + determinism + no clicks.
  *
- * Usage: npx tsx src/cli/test-multi-timbre.ts [presetId]
- *        npx tsx src/cli/test-multi-timbre.ts --help
+ * Usage: npx tsx scripts/test-multi-timbre.ts [presetId]
+ *        npx tsx scripts/test-multi-timbre.ts --help
  *
  * This is a regression script (not a vitest test). Returns exit code 0 on
  * pass, 1 on fail. Slated to migrate to tests/integration/ in a future wave.
+ *
+ * TB-002 relocation: moved from src/cli/ to scripts/.
  */
-import { renderScoreToWav } from '../server/services/renderScoreToWav.js';
+import { renderScoreToWav } from '../src/server/services/renderScoreToWav.js';
 
-const USAGE = `Usage: npx tsx src/cli/test-multi-timbre.ts [presetId]
+const USAGE = `Usage: npx tsx scripts/test-multi-timbre.ts [presetId]
 
 Renders a 3-note AH/EE/OO score, then verifies:
   - click test: maxAbsDelta below CLICK_THRESHOLD (post-normalization)

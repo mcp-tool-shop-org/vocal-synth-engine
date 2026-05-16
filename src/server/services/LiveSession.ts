@@ -650,7 +650,37 @@ export class LiveSession {
     }
   }
 
-  private sendError(code: string, message: string) {
-    this.send({ type: 'error', code, message } as ErrorMessage);
+  private sendError(code: string, message: string, hint?: string) {
+    // SB-009 humanization — include a `hint` in WS error frames so the
+    // cockpit can surface it to the user verbatim without translating
+    // codes to sentences in client code.  Hints are derived per-code
+    // below for the common cases.
+    const errorHint = hint ?? hintForCode(code);
+    const msg: ErrorMessage = { type: 'error', code, message };
+    if (errorHint) msg.hint = errorHint;
+    this.send(msg);
+  }
+}
+
+function hintForCode(code: string): string | undefined {
+  switch (code) {
+    case 'PROTOCOL_MISMATCH':
+      return 'Update your client; the server is running a different protocol version';
+    case 'NOT_INITIALIZED':
+      return 'Send a `hello` message with your protocol version before any other command';
+    case 'INIT_FAILED':
+      return 'The voice preset failed to load — check PRESET_DIR and the preset id';
+    case 'PRESET_LOAD_FAILED':
+      return 'Verify the requested presetId exists and its asset files are deployed';
+    case 'UNKNOWN_MESSAGE':
+      return 'Check the message `type` against the live protocol schema';
+    case 'RATE_LIMITED':
+      return 'Throttle your message rate; bursts above 200/s are dropped';
+    case 'INVALID_COMMAND':
+      return 'Use one of: play, stop, panic';
+    case 'RECORD_SAVE_FAILED':
+      return 'The recording could not be persisted — check disk space and RENDER_STORE_BUDGET_MB';
+    default:
+      return undefined;
   }
 }

@@ -2,6 +2,8 @@ import { Router } from 'express';
 import path from 'node:path';
 import { getPresetDirInfo } from '../services/renderScoreToWav.js';
 import { requireAuth } from '../middleware/auth.js';
+import { getRenderBudgetSnapshot } from '../storage/renderStore.js';
+import { getRenderQueue } from '../services/renderQueue.js';
 
 export const healthRouter = Router();
 
@@ -29,9 +31,22 @@ healthRouter.get('/', (_req, res) => {
  * S-018 — detailed health info gated by AUTH_TOKEN.  Same fields the public
  * /api/health used to emit; useful for operator dashboards but not exposed
  * to unauthenticated probes / scanners.
+ *
+ * SB-008 humanization: detailed health surfaces:
+ *   - render queue depth + in-flight flag (so an operator can see WHY
+ *     /api/render is feeling slow)
+ *   - render store budget snapshot (used / total MB, utilization fraction)
+ *   - process resident memory (rss) so the operator can decide whether the
+ *     spike is render-driven or jam-driven
+ *
+ * These are exactly the fields an operator paged at 3am needs to triage in
+ * one curl.
  */
 healthRouter.get('/detailed', requireAuth, (_req, res) => {
   const presetInfo = getPresetDirInfo();
+  const queue = getRenderQueue();
+  const budget = getRenderBudgetSnapshot();
+  const mem = process.memoryUsage();
   res.json({
     ok: true,
     version: process.env.APP_VERSION ?? 'dev',
@@ -42,5 +57,15 @@ healthRouter.get('/detailed', requireAuth, (_req, res) => {
     presetsFound: presetInfo.count,
     presets: presetInfo.presets,
     uptimeSec: Math.floor((Date.now() - startedAt) / 1000),
+    queue: {
+      depth: queue.depth,
+      inFlight: queue.inFlight,
+    },
+    budget,
+    memory: {
+      rssMb: Math.round(mem.rss / (1024 * 1024)),
+      heapUsedMb: Math.round(mem.heapUsed / (1024 * 1024)),
+      heapTotalMb: Math.round(mem.heapTotal / (1024 * 1024)),
+    },
   });
 });

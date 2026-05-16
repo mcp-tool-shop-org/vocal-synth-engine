@@ -10,10 +10,13 @@ import {
   updateRenderMeta,
   deleteRender,
   safeRenderDir,
+  getRenderBudgetSnapshot,
+  RenderBudgetError,
 } from "../storage/renderStore.js";
-import { renderScoreToWav } from "../services/renderScoreToWav.js";
+import { getRenderQueue } from "../services/renderQueue.js";
 import { validateBody } from "../middleware/validate.js";
 import { renderBodySchema } from "./render.js";
+import { HttpError } from "../middleware/errorHandler.js";
 
 export const rendersRouter = Router();
 
@@ -90,7 +93,11 @@ async function streamJsonFile(
 }
 
 rendersRouter.get("/", (_req, res) => {
-  res.json({ ok: true, renders: listRenders() });
+  // SB-002 humanization — expose the budget snapshot alongside the list
+  // so cockpit UIs can show "3.2 GB / 4 GB used" and warn the user BEFORE
+  // they queue another render that would fail.
+  const budget = getRenderBudgetSnapshot();
+  res.json({ ok: true, renders: listRenders(), budget });
 });
 
 rendersRouter.get("/:id/audio.wav", (req, res) => {
@@ -153,17 +160,21 @@ rendersRouter.patch("/:id", validateBody(renderPatchSchema), (req, res) => {
   }
 });
 
-rendersRouter.delete("/:id", (req, res) => {
+rendersRouter.delete("/:id", (req, res, next) => {
   const id = asStringIdOr400(req.params.id, res);
   if (id === null) return;
   try {
     deleteRender(id);
-    res.json({ ok: true });
+    // SB-002 humanization — return the post-delete budget snapshot so the
+    // cockpit can refresh its "store full" banner immediately.
+    res.json({ ok: true, budget: getRenderBudgetSnapshot() });
   } catch (err: any) {
     if (err?.code === 'INVALID_RENDER_ID') {
-      return res.status(400).json({ ok: false, error: 'Invalid render id' });
+      return next(new HttpError(400, 'INVALID_RENDER_ID', 'Invalid render id', {
+        hint: 'Render id must match /^[A-Za-z0-9_-]{1,64}$/',
+      }));
     }
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 });
 
@@ -219,11 +230,29 @@ rendersRouter.post(
       name: z.string().trim().min(1).max(200).optional(),
     }).passthrough().and(renderBodySchema)
   ),
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const { name, score, config } = req.body as any;
 
-      const result = await renderScoreToWav({ score, config });
+      // SB-001 — queue + yield-per-block (see services/renderQueue.ts).
+      const queue = getRenderQueue();
+      let queued;
+      try {
+        queued = queue.submit({ score, config, requestId: req.requestId });
+      } catch (err: any) {
+        if (err?.code === 'RENDER_QUEUE_FULL') {
+          throw new HttpError(503, err.code, err.message, {
+            hint: err.hint,
+            details: { queueDepth: queue.depth },
+          });
+        }
+        if (err?.code === 'RENDER_QUEUE_CLOSED') {
+          throw new HttpError(503, err.code, err.message, { hint: err.hint });
+        }
+        throw err;
+      }
+      res.setHeader('X-Render-Job-Id', queued.jobId);
+      const result = await queued.promise;
 
       const meta = saveRender({
         name,
@@ -235,9 +264,32 @@ rendersRouter.post(
         durationSec: result.durationSec,
       });
 
-      res.json({ ok: true, meta });
+      res.json({ ok: true, jobId: queued.jobId, meta });
     } catch (err: any) {
-      res.status(400).json({ ok: false, error: err?.message ?? String(err) });
+      if (err instanceof RenderBudgetError) {
+        return next(new HttpError(err.status, err.code, err.message, { hint: err.hint, details: err.details }));
+      }
+      if (err?.code === 'PRESET_NOT_FOUND') {
+        return next(new HttpError(404, 'PRESET_NOT_FOUND', err.message, {
+          hint: `Use one of: ${err.available?.join(', ') || '(none — deploy presets)'}`,
+          details: {
+            presetId: err.presetId,
+            presetDir: err.presetDir,
+            available: err.available,
+          },
+        }));
+      }
+      if (err?.code === 'INVALID_PRESET_ID') {
+        return next(new HttpError(400, 'INVALID_PRESET_ID', err.message, {
+          hint: 'presetId must match /^[A-Za-z0-9_-]{1,64}$/',
+        }));
+      }
+      if (err?.code === 'CANCELLED') {
+        return next(new HttpError(499, 'RENDER_CANCELLED', 'Render was cancelled', {
+          hint: 'Resubmit the render',
+        }));
+      }
+      next(err);
     }
   }
 );

@@ -12,16 +12,21 @@ const { WaveFile } = wavefile;
 import { writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { loadVoicePreset } from '../preset/loader.js';
+import { runCli, parseFiniteNumber, CliError } from './_runner.js';
 
 const USAGE = `Usage: npx tsx src/cli/resynth.ts <preset.json> <out.wav> <f0> <duration_sec> [timbre]
 
 Renders a steady additive-synthesis tone at <f0> Hz for <duration_sec>
 seconds using the named [timbre] (defaults to first timbre in preset).
-Writes <out.wav> and <out>_telemetry.json next to it.
+Writes <out.wav> only.
 
-NOTE: This is a standalone synth path used for preset spot-checks. The
-telemetry values are placeholders (meanPitchErrorCents=0,
-determinismHash='sha256:exact_match_expected'), not measured outputs.
+Example:
+  npx tsx src/cli/resynth.ts presets/default-voice/voicepreset.json \\
+    out.wav 220 2.0 AH
+
+NOTE: This is a standalone spot-check renderer (does NOT use the streaming
+engine). For a measured render with click/determinism telemetry, use
+play-score.ts.
 
 Options:
   -h, --help    Show this message and exit.`;
@@ -54,20 +59,35 @@ async function main() {
     process.exit(0);
   }
   if (args.length < 4) {
-    console.error(USAGE);
-    process.exit(1);
+    const err: CliError = new Error(
+      `expected at least 4 args (<preset.json> <out.wav> <f0> <duration_sec>), got ${args.length}`
+    );
+    err.hint = `run with --help for the full usage block`;
+    throw err;
   }
 
   const [presetPath, outWav, f0Str, durStr, timbreName] = args;
-  const f0 = parseFloat(f0Str);
-  const durationSec = parseFloat(durStr);
-  
+  // TB-005 (4): parseFloat('abc') silently became NaN and the engine wrote a
+  // silent WAV. parseFiniteNumber rejects NaN/Infinity/text at the boundary.
+  const f0 = parseFiniteNumber(f0Str, 'f0');
+  const durationSec = parseFiniteNumber(durStr, 'duration_sec');
+  if (f0 <= 0) {
+    const err: CliError = new Error(`<f0> must be positive, got ${f0}`);
+    throw err;
+  }
+  if (durationSec <= 0) {
+    const err: CliError = new Error(`<duration_sec> must be positive, got ${durationSec}`);
+    throw err;
+  }
+
   const preset = await loadVoicePreset(resolve(presetPath));
   const timbre = timbreName ? preset.timbres[timbreName] : Object.values(preset.timbres)[0];
-  
+
   if (!timbre) {
-    console.error(`Timbre not found.`);
-    process.exit(1);
+    const available = Object.keys(preset.timbres).join(', ') || '(none)';
+    const err: CliError = new Error(`timbre '${timbreName}' not found in preset`);
+    err.hint = `available timbres: ${available}`;
+    throw err;
   }
 
   const sampleRate = preset.manifest.sampleRateHz;
@@ -123,22 +143,17 @@ async function main() {
   const wav = new WaveFile();
   wav.fromScratch(1, sampleRate, '32f', outBuffer);
   await writeFile(resolve(outWav), wav.toBuffer());
-  
+
+  // TB-008: the previous version unconditionally wrote a
+  // `<out>_telemetry.json` file whose contents were labelled `_MOCK` — every
+  // invocation polluted the user's output directory with a file that LOOKED
+  // like telemetry. Matching the discipline T-002 applied to inspect.ts
+  // (either implement real measurement or remove the affordance) we drop
+  // the sidecar entirely. Users who need measured determinism / click
+  // numbers should render via play-score.ts (TB-011).
   console.log(`Resynthesized audio saved to ${outWav}`);
-  
-  // Placeholder telemetry — these fields are NOT measured from the rendered
-  // audio. Marked _MOCK so downstream tooling and humans don't mistake them
-  // for real determinism / pitch numbers. For measured determinism, use
-  // test-score-render.ts.
-  const telemetry = {
-    _note: 'PLACEHOLDER values — not measured from the rendered audio',
-    durationMs: durationSec * 1000,
-    targetF0: f0,
-    meanPitchErrorCents_MOCK: 0.0,
-    determinismHash_MOCK: 'sha256:placeholder_not_computed',
-  };
-  
-  await writeFile(resolve(outWav.replace('.wav', '_telemetry.json')), JSON.stringify(telemetry, null, 2));
+  console.log(`  Target F0: ${f0.toFixed(2)} Hz, duration: ${durationSec.toFixed(3)}s, timbre: ${timbreName ?? Object.keys(preset.timbres)[0]}`);
+  console.log(`  (no telemetry sidecar — run play-score.ts for measured determinism numbers)`);
 }
 
-main().catch(console.error);
+runCli('resynth', main);

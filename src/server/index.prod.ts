@@ -11,24 +11,29 @@ import { JamSessionManager } from './services/JamSessionManager.js';
 import { liveClientMessageSchema, jamClientMessageSchema } from './services/wsSchemas.js';
 import type { ClientMessage } from '../types/live.js';
 import type { JamClientMessage } from '../types/jam.js';
+import { getLogger } from './util/logger.js';
+import { attachHeartbeat } from './util/wsHeartbeat.js';
+import { installGracefulShutdown } from './util/gracefulShutdown.js';
+import { getRenderQueue } from './services/renderQueue.js';
 
+const logger = getLogger();
 const app = createApp();
 const server = createServer(app);
 
 // Boot log: preset + render store info
 const presetInfo = getPresetDirInfo();
 const renderStoreDir = resolve(process.env.RENDER_STORE_DIR || '.vscockpit/renders');
-console.log(`[boot] PRESET_DIR  = ${presetInfo.presetDir} (${presetInfo.count} voices: ${presetInfo.presets.join(', ') || 'NONE'})`);
-console.log(`[boot] RENDER_STORE_DIR = ${renderStoreDir}`);
+logger.info({ presetDir: presetInfo.presetDir, count: presetInfo.count, presets: presetInfo.presets }, 'boot_presets');
+logger.info({ renderStoreDir }, 'boot_render_store');
 
 if (presetInfo.count === 0) {
-  console.warn(`[boot] WARNING: No voices found in ${presetInfo.presetDir}. Renders will fail until voices are deployed.`);
+  logger.warn({ presetDir: presetInfo.presetDir }, 'boot_no_voices_warning');
 }
 
 // Serve static Vite app
 const cockpitDist = resolve(process.cwd(), 'apps/cockpit/dist');
 if (existsSync(cockpitDist)) {
-  console.log(`Serving static files from ${cockpitDist}`);
+  logger.info({ cockpitDist }, 'boot_static_assets');
   app.use(express.static(cockpitDist, { index: false }));
 
   // Fallback: serve index.html for any unknown GET
@@ -40,7 +45,7 @@ if (existsSync(cockpitDist)) {
     }
   });
 } else {
-  console.warn(`Warning: Cockpit dist not found at ${cockpitDist}. Run 'npm run build:cockpit' first.`);
+  logger.warn({ cockpitDist }, 'boot_cockpit_missing');
   app.use((req, res) => {
     res.status(404).send('Cockpit UI not built. Run npm run build:cockpit');
   });
@@ -51,6 +56,9 @@ const MAX_CONCURRENT_SESSIONS = Number(process.env.MAX_LIVE_SESSIONS) || 4;
 const wss = new WebSocketServer({ server, path: "/ws" });
 const activeSessions = new Map<WsWebSocket, LiveSession>();
 
+// SB-004: heartbeat ping/pong so dead clients are reaped, not leaked.
+attachHeartbeat(wss, 'live');
+
 wss.on('connection', (ws, req) => {
   const url = new URL(req.url || '/', `http://${req.headers.host}`);
   const token = url.searchParams.get('token') ?? undefined;
@@ -60,14 +68,16 @@ wss.on('connection', (ws, req) => {
   }
 
   if (activeSessions.size >= MAX_CONCURRENT_SESSIONS) {
-    ws.close(4002, 'Server full');
-    console.warn(`[live] Rejected connection: ${activeSessions.size}/${MAX_CONCURRENT_SESSIONS} sessions`);
+    // SB-005-style humanization: include the active/max counts so the
+    // client UI can show "server is full (4/4)" verbatim.
+    ws.close(4002, `Server full (${activeSessions.size}/${MAX_CONCURRENT_SESSIONS})`);
+    logger.warn({ active: activeSessions.size, max: MAX_CONCURRENT_SESSIONS }, 'live_session_rejected_full');
     return;
   }
 
   const session = new LiveSession(ws);
   activeSessions.set(ws, session);
-  console.log(`[live] Client connected (${activeSessions.size}/${MAX_CONCURRENT_SESSIONS} sessions)`);
+  logger.info({ active: activeSessions.size, max: MAX_CONCURRENT_SESSIONS }, 'live_session_connected');
 
   ws.on('message', async (raw) => {
     try {
@@ -80,6 +90,7 @@ wss.on('connection', (ws, req) => {
           type: 'error',
           code: 'INVALID_MESSAGE',
           message: 'Message failed schema validation',
+          hint: 'Check the message shape against the live protocol schema',
           issues: result.error.issues.slice(0, 5).map((i) => ({
             path: i.path.join('.'),
             message: i.message,
@@ -93,6 +104,7 @@ wss.on('connection', (ws, req) => {
         type: 'error',
         code: 'PARSE_ERROR',
         message: `Invalid message: ${err.message}`,
+        hint: 'Send a JSON message matching the live protocol',
       }));
     }
   });
@@ -100,11 +112,11 @@ wss.on('connection', (ws, req) => {
   ws.on('close', () => {
     session.destroy();
     activeSessions.delete(ws);
-    console.log(`[live] Client disconnected (${activeSessions.size} active sessions)`);
+    logger.info({ active: activeSessions.size }, 'live_session_disconnected');
   });
 
   ws.on('error', (err) => {
-    console.error('[live] WebSocket error:', err.message);
+    logger.error({ err: err.message }, 'live_ws_error');
     session.destroy();
     activeSessions.delete(ws);
   });
@@ -113,6 +125,9 @@ wss.on('connection', (ws, req) => {
 // ── WebSocket: Jam Mode ──────────────────────────────────────
 const jamManager = new JamSessionManager();
 const wssJam = new WebSocketServer({ server, path: "/ws/jam" });
+
+// SB-004: same heartbeat policy for jam sessions.
+attachHeartbeat(wssJam, 'jam');
 
 wssJam.on('connection', (ws, req) => {
   const url = new URL(req.url || '/', `http://${req.headers.host}`);
@@ -123,7 +138,7 @@ wssJam.on('connection', (ws, req) => {
   }
 
   jamManager.onConnect(ws);
-  console.log(`[jam] Client connected (${jamManager.activeConnectionCount} connections, ${jamManager.activeSessionCount} sessions)`);
+  logger.info({ connections: jamManager.activeConnectionCount, sessions: jamManager.activeSessionCount }, 'jam_session_connected');
 
   ws.on('message', async (raw) => {
     try {
@@ -138,6 +153,7 @@ wssJam.on('connection', (ws, req) => {
           type: 'jam_error',
           code: 'INVALID_MESSAGE',
           message: 'Message failed schema validation',
+          hint: 'Check the message shape against the jam protocol schema',
           issues: result.error.issues.slice(0, 5).map((i) => ({
             path: i.path.join('.'),
             message: i.message,
@@ -151,22 +167,38 @@ wssJam.on('connection', (ws, req) => {
         type: 'jam_error',
         code: 'PARSE_ERROR',
         message: `Invalid message: ${err.message}`,
+        hint: 'Send a JSON message matching the jam protocol',
       }));
     }
   });
 
   ws.on('close', () => {
     jamManager.onDisconnect(ws);
-    console.log(`[jam] Client disconnected (${jamManager.activeConnectionCount} connections)`);
+    logger.info({ connections: jamManager.activeConnectionCount }, 'jam_session_disconnected');
   });
 
   ws.on('error', (err) => {
-    console.error('[jam] WebSocket error:', err.message);
+    logger.error({ err: err.message }, 'jam_ws_error');
     jamManager.onDisconnect(ws);
   });
 });
 
 const port = Number(process.env.PORT ?? 4321);
 server.listen(port, () => {
-  console.log(`VocalSynth Cockpit (PROD) running at http://localhost:${port}`);
+  logger.info({ port, mode: 'prod' }, 'server_listening');
+});
+
+// SB-003: install graceful shutdown.  SIGTERM (Docker/fly) and SIGINT
+// (Ctrl-C) both trigger a clean drain: HTTP server stops accepting new
+// connections, the render queue finishes its in-flight job, every WS
+// gets a 1001 close with a human-readable reason, then exit 0.
+installGracefulShutdown({
+  httpServer: server,
+  webSocketServers: [wss, wssJam],
+  drainRenderQueue: () => getRenderQueue().drain(),
+  onShutdown: () => {
+    jamManager.destroyAll();
+    for (const session of activeSessions.values()) session.destroy();
+    activeSessions.clear();
+  },
 });

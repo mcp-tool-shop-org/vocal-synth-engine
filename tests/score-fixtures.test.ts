@@ -14,19 +14,13 @@
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';
-import { fileURLToPath } from 'node:url';
-import { dirname, resolve } from 'node:path';
+import { resolve } from 'node:path';
 import { readFileSync } from 'node:fs';
-import { createHash } from 'node:crypto';
 import { loadVoicePreset } from '../src/preset/loader.js';
 import { StreamingVocalSynthEngine } from '../src/engine/StreamingVocalSynthEngine.js';
 import type { LoadedVoicePreset } from '../src/preset/schema.js';
 import type { VocalScore } from '../src/types/score.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const REPO_ROOT = resolve(__dirname, '..');
-const PRESET_PATH = resolve(REPO_ROOT, 'presets', 'default-voice', 'voicepreset.json');
+import { PRESET_PATH, REPO_ROOT, hashFloat32 } from './helpers/index.js';
 
 const FIXTURES = [
   'test-score.json',
@@ -34,12 +28,6 @@ const FIXTURES = [
   'test-score-morph.json',
   'test-score-poly.json',
 ];
-
-function hashFloat32(buf: Float32Array): string {
-  const h = createHash('sha256');
-  h.update(new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength));
-  return h.digest('hex');
-}
 
 /**
  * Maximum frame-to-frame delta on a normalized signal. Matches the
@@ -108,13 +96,25 @@ describe('score fixtures', () => {
   });
 
   for (const fixture of FIXTURES) {
-    it(`${fixture} renders deterministically`, () => {
+    // Stage C TSB-004: pin the rendered-bytes hash via snapshot instead of
+    // comparing two same-process re-renders. A re-render-equals-re-render
+    // test only proves intra-run determinism (which the engine-determinism
+    // suite already covers); it does NOT lock the actual bytes against a
+    // silent engine-math drift (e.g., commutative-multiplication reorder
+    // that flips float32 LSBs, FM modulator sign swap, default-constant
+    // change). The snapshot files live at tests/__snapshots__/score-
+    // fixtures.test.ts.snap and are committed to git — any engine-math
+    // change surfaces as a diff that an operator MUST acknowledge.
+    it(`${fixture} renders deterministically (pinned hash)`, () => {
       const scorePath = resolve(REPO_ROOT, fixture);
       const score = JSON.parse(readFileSync(scorePath, 'utf-8')) as VocalScore;
       const seed = 123456789;
       const a = renderScore(preset, score, 1024, seed);
+      // Same-process determinism check (cheap regression brake).
       const b = renderScore(preset, score, 1024, seed);
       expect(hashFloat32(a)).toBe(hashFloat32(b));
+      // Pinned bytes — flips on any engine-math change.
+      expect(hashFloat32(a)).toMatchSnapshot(`${fixture} rngSeed=123456789 blockSize=1024 hash`);
     });
 
     it(`${fixture} produces audible output (not silent)`, () => {
@@ -129,25 +129,40 @@ describe('score fixtures', () => {
       expect(peak).toBeGreaterThan(0.01);
     });
 
-    // PENDING-CROSS-DOMAIN-FIX:
-    //   test-score-morph.json and test-score-poly.json currently exceed
-    //   the 0.25 click threshold on this engine version. The single-
-    //   timbre fixtures (test-score.json, test-score-lyrics.json) pass.
-    //   The morph + polyphony failures suggest engine-side voice-steal
-    //   (E-006) and/or timbre-switch transients (E-024 'as any' silent
-    //   key miss + smoothing alpha) still produce audible derivative
-    //   spikes. Tests are kept here as the correct contract — they will
-    //   start passing once Engine agent lands the relevant fixes.
+    // Stage C TSB-005: replace it.skip with it.todo for the two known-
+    // pending click-threshold cases so they surface in the test reporter
+    // as a discoverable backlog rather than a silent "2 skipped".
+    //
+    // TODO(engine-polyphony-clicks): test-score-morph.json and
+    //   test-score-poly.json exceed the 0.25 normalized-derivative click
+    //   threshold on this engine version. Engine-side fixes needed:
+    //     - E-006 voice-steal: stolen-voice tail should release smoothly
+    //       rather than jump-cutting. Suspected in
+    //       src/engine/LiveSynthEngine.ts noteOn voice-steal branch.
+    //     - E-024 timbre-switch transients: 'as any' silent-key miss in
+    //       src/engine/StreamingVocalSynthEngine.ts timbre-blend path +
+    //       smoothing alpha that's too aggressive at the morph boundary.
+    //   File a GitHub issue at github.com/mcp-tool-shop-org/vocal-synth-
+    //   engine/issues and link the issue number once filed. When the
+    //   engine-domain agent lands those fixes, flip the .todo back to a
+    //   regular it() block — the assertion below is already the correct
+    //   contract.
     const isKnownPending = fixture === 'test-score-morph.json' || fixture === 'test-score-poly.json';
-    (isKnownPending ? it.skip : it)(`${fixture} stays below click threshold`, () => {
-      const scorePath = resolve(REPO_ROOT, fixture);
-      const score = JSON.parse(readFileSync(scorePath, 'utf-8')) as VocalScore;
-      const buf = renderScore(preset, score, 1024, 1);
-      const delta = normalizedMaxAbsDelta(buf);
-      // The CLI's CLICK_THRESHOLD is 0.25 on normalized signal — a
-      // normalized signal should not jump more than 25% per sample
-      // under healthy synthesis. Same threshold as test-score-render.ts.
-      expect(delta).toBeLessThan(0.25);
-    });
+    if (isKnownPending) {
+      // it.todo surfaces with a distinct icon in the vitest reporter and
+      // requires no callback (planned-but-not-implemented).
+      it.todo(`${fixture} stays below click threshold (engine-polyphony-clicks)`);
+    } else {
+      it(`${fixture} stays below click threshold`, () => {
+        const scorePath = resolve(REPO_ROOT, fixture);
+        const score = JSON.parse(readFileSync(scorePath, 'utf-8')) as VocalScore;
+        const buf = renderScore(preset, score, 1024, 1);
+        const delta = normalizedMaxAbsDelta(buf);
+        // The CLI's CLICK_THRESHOLD is 0.25 on normalized signal — a
+        // normalized signal should not jump more than 25% per sample
+        // under healthy synthesis. Same threshold as test-score-render.ts.
+        expect(delta).toBeLessThan(0.25);
+      });
+    }
   }
 });

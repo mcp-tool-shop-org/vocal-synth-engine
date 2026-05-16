@@ -30,7 +30,7 @@ const phonemizeBodySchema = z
   })
   .passthrough();
 
-phonemizeRouter.post('/', validateBody(phonemizeBodySchema), (req, res) => {
+phonemizeRouter.post('/', validateBody(phonemizeBodySchema), (req, res, next) => {
   try {
     const { text, notes } = req.body as z.infer<typeof phonemizeBodySchema>;
 
@@ -42,6 +42,8 @@ phonemizeRouter.post('/', validateBody(phonemizeBodySchema), (req, res) => {
       warnings: result.warnings,
     });
   } catch (err: any) {
-    res.status(400).json({ ok: false, error: err?.message ?? String(err) });
+    // SB-005 — let the JSON error handler envelope this so the cockpit
+    // sees a consistent { code, message, hint, requestId } shape.
+    next(err);
   }
 });

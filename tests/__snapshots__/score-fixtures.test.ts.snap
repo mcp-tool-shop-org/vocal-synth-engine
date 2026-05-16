@@ -1,0 +1,9 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`score fixtures > test-score.json renders deterministically (pinned hash) > test-score.json rngSeed=123456789 blockSize=1024 hash 1`] = `"35b73abd5c0d60fc46a77f0a00136bd7c9b493b86750931842bfd7b5549c964d"`;
+
+exports[`score fixtures > test-score-lyrics.json renders deterministically (pinned hash) > test-score-lyrics.json rngSeed=123456789 blockSize=1024 hash 1`] = `"f311c80cb0905d78c4ca3b0a2f45e5496ea4833081b3f161d249f49ac937f996"`;
+
+exports[`score fixtures > test-score-morph.json renders deterministically (pinned hash) > test-score-morph.json rngSeed=123456789 blockSize=1024 hash 1`] = `"a9c7b970c6d2b690eee821d3a812495f56a99084d029dc4f23aef3f10cde936c"`;
+
+exports[`score fixtures > test-score-poly.json renders deterministically (pinned hash) > test-score-poly.json rngSeed=123456789 blockSize=1024 hash 1`] = `"5de3f835e9de80347aea8dbb837c736fc4edda3ea9dfccf1a90d2c8c28d8057f"`;

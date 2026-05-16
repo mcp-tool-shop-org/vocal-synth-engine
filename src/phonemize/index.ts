@@ -28,6 +28,22 @@ const PLOSIVES = new Set(['P', 'T', 'K', 'B', 'D', 'G', 'Q']);
 const AFFRICATES = new Set(['CH', 'JH']);
 const FRICATIVES = new Set(['F', 'V', 'S', 'Z', 'SH', 'ZH', 'TH', 'DH', 'HH']);
 
+/**
+ * Languages this pipeline has a phonemization dictionary for. The CMU dict
+ * at g2p.ts:17 is English-only; calling phonemizeLyrics with a non-English
+ * `lyrics.language` returns a warning instead of silently producing all-
+ * fallback gibberish — closes TB-006 part (a)+(d).
+ *
+ * Adding a new language: ship a dictionary + register the BCP-47 tag here.
+ */
+export const SUPPORTED_LYRICS_LANGUAGES: readonly string[] = [
+  'en', 'en-US', 'en-GB', 'en-AU', 'en-CA',
+];
+
+function isSupportedLanguage(tag: string): boolean {
+  return SUPPORTED_LYRICS_LANGUAGES.some(s => s.toLowerCase() === tag.toLowerCase());
+}
+
 function getConsonantStrength(symbol: string): number {
   if (PLOSIVES.has(symbol)) return 0.9;
   if (AFFRICATES.has(symbol)) return 0.7;
@@ -45,11 +61,35 @@ function clampConsonantDur(noteDur: number): number {
  * Syllable-to-note alignment: all words are G2P'd and syllabified,
  * then the flat syllable list maps 1:1 to the note list. Within each
  * note, onset consonants cluster at start, vowel holds, coda at end.
+ *
+ * Optional `language` (BCP-47, e.g. 'en-US', 'ja-JP') controls the supported-
+ * language warning path: a tag NOT in SUPPORTED_LYRICS_LANGUAGES pushes an
+ * explicit warning instead of letting the all-fallback path silently render
+ * gibberish for the operator. Closes TB-006 part (a)+(d).
  */
-export function phonemizeLyrics(lyricsText: string, notes: VocalNote[]): PhonemizeResult {
+export function phonemizeLyrics(
+  lyricsText: string,
+  notes: VocalNote[],
+  language?: string,
+): PhonemizeResult {
   const words = textToPhonemes(lyricsText);
   const warnings: string[] = [];
   const allSyllables: Syllable[][] = [];
+
+  if (language && !isSupportedLanguage(language)) {
+    warnings.push(
+      `lyrics.language '${language}' is not supported; only English (${SUPPORTED_LYRICS_LANGUAGES.join(', ')}) has a phonemization dictionary — output will be all-fallback letter rules`
+    );
+  }
+
+  // TB-006 part (c): if input was non-empty but tokenization produced no
+  // words, push a warning so a silent drop (e.g. all-CJK lyrics under the
+  // old non-/u tokenizer, or punctuation-only input) is visible.
+  if (lyricsText.trim().length > 0 && words.length === 0) {
+    warnings.push(
+      `lyrics text '${lyricsText.slice(0, 40)}${lyricsText.length > 40 ? '...' : ''}' produced 0 tokens after tokenization`
+    );
+  }
 
   // Flatten all syllables across all words
   const flatSyllables: Syllable[] = [];

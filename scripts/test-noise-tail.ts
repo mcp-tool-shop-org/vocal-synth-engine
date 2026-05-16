@@ -5,9 +5,11 @@
  * measures RMS energy in the last 200ms of each note's release region,
  * and asserts it drops below a threshold relative to sustain energy.
  *
- * Usage: npx tsx src/cli/test-noise-tail.ts [presetId]
+ * Usage: npx tsx scripts/test-noise-tail.ts [presetId]
+ *
+ * TB-002 relocation: moved from src/cli/ to scripts/.
  */
-import { renderScoreToWav } from '../server/services/renderScoreToWav.js';
+import { renderScoreToWav } from '../src/server/services/renderScoreToWav.js';
 import wavefile from 'wavefile';
 const { WaveFile } = wavefile;
 

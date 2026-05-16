@@ -2,10 +2,14 @@
  * Test G2P pipeline: dictionary lookup, fallback, syllabification,
  * and PhonemeEvent generation.
  *
- * Usage: npx tsx src/cli/test-g2p.ts
+ * Usage: npx tsx scripts/test-g2p.ts
+ *
+ * TB-002 relocation: moved from src/cli/ to scripts/ so this regression
+ * script no longer ships in dist/. A vitest equivalent under
+ * tests/integration/ is planned.
  */
-import { textToPhonemes, phonemizeLyrics, syllabify, formatSyllables } from '../phonemize/index.js';
-import type { VocalNote } from '../types/score.js';
+import { textToPhonemes, phonemizeLyrics, syllabify, formatSyllables } from '../src/phonemize/index.js';
+import type { VocalNote } from '../src/types/score.js';
 
 function main() {
   let allPass = true;

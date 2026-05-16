@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fft, applyHannWindow } from '../dsp/fft.js';
 import { findPitchYin } from '../dsp/pitch.js';
+import { runCli, parseCommonFlags, CliError } from './_runner.js';
 
 function computeHnr(mag: Float32Array, f0: number, sampleRate: number, fftSize: number): number {
   let harmonicEnergy = 0;
@@ -27,26 +28,35 @@ function computeHnr(mag: Float32Array, f0: number, sampleRate: number, fftSize: 
   return 10 * Math.log10(Math.max(1e-10, harmonicEnergy / noiseEnergy));
 }
 
-const USAGE = `Usage: npx tsx src/cli/compare.ts <ref.wav> <test.wav>
+const USAGE = `Usage: npx tsx src/cli/compare.ts <ref.wav> <test.wav> [--json]
 
 Compares two WAVs by RMS energy, pitch (YIN), HNR, and spectral correlation
 of log magnitudes. Prints PASS/FAIL on Pearson correlation > 0.8.
 
+Example:
+  npx tsx src/cli/compare.ts ref.wav out.wav --json
+
 Options:
+  --json        Emit a single JSON object to stdout in lieu of human banners.
+                Schema: { refRms, testRms, refF0Hz, testF0Hz, pitchErrorCents,
+                          refHnrDb, testHnrDb, correlation, verdict }
   -h, --help    Show this message and exit.`;
 
 async function main() {
-  const args = process.argv.slice(2);
-  if (args[0] === '-h' || args[0] === '--help') {
+  const { help, json, positionals } = parseCommonFlags(process.argv.slice(2));
+  if (help) {
     console.log(USAGE);
     process.exit(0);
   }
-  if (args.length < 2) {
-    console.error(USAGE);
-    process.exit(1);
+  if (positionals.length < 2) {
+    const err: CliError = new Error(
+      `expected 2 positional args (<ref.wav> <test.wav>), got ${positionals.length}`
+    );
+    err.hint = `run with --help for the full usage block`;
+    throw err;
   }
 
-  const [refPath, testPath] = args;
+  const [refPath, testPath] = positionals;
   const refWav = new WaveFile(await readFile(resolve(refPath)));
   const testWav = new WaveFile(await readFile(resolve(testPath)));
   
@@ -74,8 +84,8 @@ async function main() {
   for (let i = 0; i < testMono.length; i++) testRms += testMono[i] * testMono[i];
   testRms = Math.sqrt(testRms / testMono.length);
   
-  console.log(`RMS Energy: Ref=${refRms.toFixed(4)}, Test=${testRms.toFixed(4)}`);
-  
+  if (!json) console.log(`RMS Energy: Ref=${refRms.toFixed(4)}, Test=${testRms.toFixed(4)}`);
+
   // Spectral Correlation (middle frame)
   const fftSize = 2048;
   const halfFft = fftSize / 2 + 1;
@@ -89,12 +99,18 @@ async function main() {
   // (Also: T-006 — refuse files shorter than one frame so subarray() doesn't
   // walk off the end and produce garbage.)
   if (refMono.length < fftSize) {
-    console.error(`Ref WAV too short: ${refMono.length} samples < required ${fftSize}.`);
-    process.exit(1);
+    const err: CliError = new Error(
+      `ref WAV too short: ${refMono.length} samples < required ${fftSize}`
+    );
+    err.hint = `record/use a take of at least ~43 ms at 48 kHz`;
+    throw err;
   }
   if (testMono.length < fftSize) {
-    console.error(`Test WAV too short: ${testMono.length} samples < required ${fftSize}.`);
-    process.exit(1);
+    const err: CliError = new Error(
+      `test WAV too short: ${testMono.length} samples < required ${fftSize}`
+    );
+    err.hint = `record/use a take of at least ~43 ms at 48 kHz`;
+    throw err;
   }
 
   const getCenterFrame = (mono: Float32Array): Float32Array => {
@@ -132,12 +148,16 @@ async function main() {
   const refF0 = findPitchYin(refFrame, 48000);
   const testF0 = findPitchYin(testFrame, 48000);
   const pitchErrorCents = 1200 * Math.log2(testF0 / refF0);
-  console.log(`Pitch Error: ${pitchErrorCents.toFixed(2)} cents (Ref: ${refF0.toFixed(2)} Hz, Test: ${testF0.toFixed(2)} Hz)`);
+  if (!json) {
+    console.log(`Pitch Error: ${pitchErrorCents.toFixed(2)} cents (Ref: ${refF0.toFixed(2)} Hz, Test: ${testF0.toFixed(2)} Hz)`);
+  }
 
   // HNR
   const refHnr = computeHnr(refMag, refF0, 48000, fftSize);
   const testHnr = computeHnr(testMag, testF0, 48000, fftSize);
-  console.log(`HNR: Ref=${refHnr.toFixed(2)} dB, Test=${testHnr.toFixed(2)} dB (Diff: ${Math.abs(refHnr - testHnr).toFixed(2)} dB)`);
+  if (!json) {
+    console.log(`HNR: Ref=${refHnr.toFixed(2)} dB, Test=${testHnr.toFixed(2)} dB (Diff: ${Math.abs(refHnr - testHnr).toFixed(2)} dB)`);
+  }
 
   // Pearson correlation of log magnitudes
   let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
@@ -150,19 +170,39 @@ async function main() {
     sumX2 += x * x;
     sumY2 += y * y;
   }
-  
+
   const n = halfFft;
   const numerator = n * sumXY - sumX * sumY;
   const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
   const correlation = numerator / denominator;
-  
-  console.log(`Spectral Correlation: ${correlation.toFixed(4)}`);
-  
-  if (correlation > 0.8) {
-    console.log('PASS: Spectral correlation is high.');
+  const verdict: 'PASS' | 'FAIL' = correlation > 0.8 ? 'PASS' : 'FAIL';
+
+  if (json) {
+    // Stable schema — document in CHANGELOG when fields change.
+    const out = {
+      refRms: Number(refRms.toFixed(6)),
+      testRms: Number(testRms.toFixed(6)),
+      refF0Hz: Number(refF0.toFixed(2)),
+      testF0Hz: Number(testF0.toFixed(2)),
+      pitchErrorCents: Number(pitchErrorCents.toFixed(2)),
+      refHnrDb: Number(refHnr.toFixed(2)),
+      testHnrDb: Number(testHnr.toFixed(2)),
+      correlation: Number(correlation.toFixed(4)),
+      verdict,
+    };
+    process.stdout.write(JSON.stringify(out) + '\n');
   } else {
-    console.log('FAIL: Spectral correlation is too low.');
+    console.log(`Spectral Correlation: ${correlation.toFixed(4)}`);
+    if (verdict === 'PASS') {
+      console.log('PASS: Spectral correlation is high.');
+    } else {
+      console.log('FAIL: Spectral correlation is too low.');
+    }
   }
+
+  // TB-001 / TB-004 contract: a FAIL verdict is a real failure, not a
+  // banner — leave a non-zero exit code so CI / `set -e` chains catch it.
+  if (verdict === 'FAIL') process.exitCode = 1;
 }
 
-main().catch(console.error);
+runCli('compare', main);

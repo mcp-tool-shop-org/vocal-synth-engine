@@ -42,6 +42,16 @@ interface AnnotatedNote {
  *  note-activation check inside render() so the cursor advances correctly. */
 const RELEASE_TAIL_SEC = 0.1;
 
+/** EB-005: sanity cap on maxPolyphony. Anything beyond this is almost
+ *  certainly a unit-conversion bug (e.g. a millisecond value passed as a
+ *  voice count). Bump deliberately if you really need more voices. */
+const MAX_REASONABLE_POLYPHONY = 256;
+
+/** EB-006: ceiling on render(numSamples). The default is one minute of
+ *  audio at the engine sampleRate (sr * 60). Anything bigger likely
+ *  indicates a unit-conversion bug — chunk by caller instead. */
+const MAX_RENDER_SAMPLES_FACTOR = 60; // seconds at engine sampleRate
+
 export class StreamingVocalSynthEngine {
   private config: StreamingVocalSynthConfig;
   private preset: LoadedVoicePreset;
@@ -82,6 +92,57 @@ export class StreamingVocalSynthEngine {
   private readonly activeNoteSet: Set<VocalNote> = new Set();
 
   constructor(config: StreamingVocalSynthConfig, preset: LoadedVoicePreset, score: VocalScore) {
+    // EB-005: validate config up-front. Invalid config caught at construction
+    // is a 5-minute debug; invalid config that only surfaces 30 minutes into
+    // an offline render is a half-day. We throw with the offending value AND
+    // the constraint so the operator can fix it without reading the source.
+    if (!config || typeof config !== 'object') {
+      throw new TypeError('StreamingVocalSynthEngine: config must be an object');
+    }
+    if (!Number.isFinite(config.sampleRateHz) || config.sampleRateHz <= 0) {
+      throw new RangeError(
+        `StreamingVocalSynthEngine: sampleRateHz must be a finite number > 0, got ${config.sampleRateHz}. ` +
+        `sampleRateHz=0 makes invSampleRate=Infinity and the first-sample math goes Infinity.`
+      );
+    }
+    if (!Number.isInteger(config.blockSize) || config.blockSize < 1) {
+      throw new RangeError(
+        `StreamingVocalSynthEngine: blockSize must be an integer >= 1, got ${config.blockSize}.`
+      );
+    }
+    if (!Number.isInteger(config.maxPolyphony) || config.maxPolyphony < 1) {
+      throw new RangeError(
+        `StreamingVocalSynthEngine: maxPolyphony must be an integer >= 1, got ${config.maxPolyphony}. ` +
+        `maxPolyphony=0 leaves voices=[] and render() crashes on the empty-array reduce.`
+      );
+    }
+    if (config.maxPolyphony > MAX_REASONABLE_POLYPHONY) {
+      throw new RangeError(
+        `StreamingVocalSynthEngine: maxPolyphony ${config.maxPolyphony} exceeds ` +
+        `MAX_REASONABLE_POLYPHONY=${MAX_REASONABLE_POLYPHONY}. Bump the cap deliberately if you need more voices.`
+      );
+    }
+    if (config.maxBlockSize !== undefined) {
+      if (!Number.isInteger(config.maxBlockSize) || config.maxBlockSize < config.blockSize) {
+        throw new RangeError(
+          `StreamingVocalSynthEngine: maxBlockSize must be an integer >= blockSize (${config.blockSize}), ` +
+          `got ${config.maxBlockSize}. maxBlockSize=0 makes growBuffers's "while (newCap < n) newCap *= 2" loop forever.`
+        );
+      }
+    }
+    if (!Number.isFinite(config.rngSeed) || !Number.isInteger(config.rngSeed)) {
+      throw new RangeError(
+        `StreamingVocalSynthEngine: rngSeed must be a finite integer, got ${config.rngSeed}. ` +
+        `NaN/Infinity seeds break xorshift32 — the zero-trap remap only catches seed===0.`
+      );
+    }
+    if (typeof config.defaultTimbre !== 'string' || !(config.defaultTimbre in preset.timbres)) {
+      const known = Object.keys(preset.timbres).join(', ');
+      throw new Error(
+        `StreamingVocalSynthEngine: defaultTimbre "${config.defaultTimbre}" is not in preset.timbres [${known}].`
+      );
+    }
+
     this.config = config;
     this.preset = preset;
     this.score = score;
@@ -123,16 +184,43 @@ export class StreamingVocalSynthEngine {
     this.voiceOut = new Float32Array(this.capacity);
   }
 
+  /** EB-007: one-shot warn so growBuffers fires aren't completely invisible.
+   *  Real-time callers that hit auto-growth lose RTF predictability for a
+   *  block; surfacing the warn at least once tells the operator where the
+   *  growth came from. */
+  private warnedGrowBuffers: boolean = false;
+  /** EB-007: count of growBuffers fires for operators wanting structured
+   *  visibility. Exposed via {@link getTelemetryAndReset}. */
+  private growBuffersEventsAccum: number = 0;
+
   /** Grow the pre-allocated buffers to at least `n` samples. One-time cost
-   *  per growth — subsequent renders at this size or smaller are alloc-free. */
+   *  per growth — subsequent renders at this size or smaller are alloc-free.
+   *
+   *  EB-007: emits a one-shot console.warn on first runtime growth so an
+   *  operator chasing a "mysteriously missed frame" has a breadcrumb. Also
+   *  bumps a telemetry counter (see {@link getTelemetryAndReset}). */
   private growBuffers(n: number): void {
     if (n <= this.capacity) return;
     // Round up to next power of two to amortize growth across multiple renders.
-    let newCap = this.capacity;
+    const prev = this.capacity;
+    let newCap = prev;
     while (newCap < n) newCap *= 2;
     this.capacity = newCap;
     this.voiceParams = this.voices.map(() => this.makeRenderParams(newCap));
     this.voiceOut = new Float32Array(newCap);
+    this.growBuffersEventsAccum++;
+    if (!this.warnedGrowBuffers) {
+      this.warnedGrowBuffers = true;
+      // eslint-disable-next-line no-console
+      console.warn(
+        `StreamingVocalSynthEngine.growBuffers: capacity ${prev} -> ${newCap} samples ` +
+        `for a render of ${n}. This is a one-time GC-pressure event PER growth; ` +
+        `pass maxBlockSize at construction to size the buffers up-front and ` +
+        `keep the real-time render path alloc-free. ` +
+        `(This warning fires once per engine instance — subsequent growths bump ` +
+        `growBuffersEvents in getTelemetryAndReset() telemetry instead.)`
+      );
+    }
   }
 
   /** Walk back from idx-1 until we find a strictly earlier note. */
@@ -225,6 +313,27 @@ export class StreamingVocalSynthEngine {
   }
 
   public render(numSamples: number): Float32Array {
+    // EB-006: validate numSamples at the boundary. Each bad-input case has a
+    // distinct silent-failure mode in the body (numSamples=0 → empty array;
+    // negative → RangeError deep in `new Float32Array(-1)`; NaN → silent
+    // zero-length array PLUS `currentSample += NaN` breaks time math forever;
+    // Infinity → growBuffers infinite loop / OOM). Surface them all explicitly.
+    if (!Number.isInteger(numSamples) || numSamples < 0) {
+      throw new RangeError(
+        `StreamingVocalSynthEngine.render: numSamples must be a non-negative integer, got ${numSamples}. ` +
+        `NaN/Infinity/negative values silently corrupt currentSample (breaking all subsequent time math) ` +
+        `or attempt unbounded allocation.`
+      );
+    }
+    const maxRender = this.config.sampleRateHz * MAX_RENDER_SAMPLES_FACTOR;
+    if (numSamples > maxRender) {
+      throw new RangeError(
+        `StreamingVocalSynthEngine.render: numSamples ${numSamples} exceeds MAX (${maxRender} = ` +
+        `${MAX_RENDER_SAMPLES_FACTOR}s at ${this.config.sampleRateHz}Hz). ` +
+        `Chunk the render at the caller — single calls > 1 minute are almost certainly a unit-conversion bug.`
+      );
+    }
+
     // E-011: auto-grow pre-allocated buffers if needed (one-time cost). The
     // common-case real-time path is called with a stable blockSize and stays
     // alloc-free; callers that ask for a bigger render (e.g. offline rendering

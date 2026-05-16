@@ -16,6 +16,13 @@ import { join, resolve } from 'node:path';
 import { fft, applyHannWindow } from '../dsp/fft.js';
 import { findPitchYin } from '../dsp/pitch.js';
 import { computeAssetsHash } from '../preset/loader.js';
+import { runCli, CliError } from './_runner.js';
+
+// Strict timbre-name shape closes TB-005 (2): empty timbre ('foo.wav:') no
+// longer creates `assets/_harmonics_mag.f32` and a manifest entry with
+// `name: ''`. Keep it permissive enough for common identifiers (AH, EE_2,
+// vowel-1) but reject obvious malformed values at the boundary.
+const TIMBRE_NAME_RE = /^[A-Za-z][A-Za-z0-9_-]*$/;
 
 const SR = 48000;
 const FFT_SIZE = 2048;
@@ -46,11 +53,13 @@ async function analyzeWav(wavPath: string, timbreName: string): Promise<TimbreRe
   // analyze.ts at line 31). Negative startIdx → V8 counts from end of array
   // → garbage F0 + spectrum → silent broken preset. Fail loudly instead.
   if (mono.length < FFT_SIZE) {
-    throw new Error(
-      `Input WAV '${wavPath}' too short: ${mono.length} samples at 48 kHz = ` +
-      `${(mono.length / SR).toFixed(3)}s. Need at least ${FFT_SIZE} samples ` +
-      `(~${(FFT_SIZE / SR).toFixed(3)}s).`
+    const err: CliError = new Error(
+      `input WAV '${wavPath}' too short: ${mono.length} samples at 48 kHz = ` +
+      `${(mono.length / SR).toFixed(3)}s (need at least ${FFT_SIZE} samples ` +
+      `~${(FFT_SIZE / SR).toFixed(3)}s)`
     );
+    err.hint = `record a longer take or pad with silence`;
+    throw err;
   }
 
   // Take frame from center of file
@@ -59,8 +68,7 @@ async function analyzeWav(wavPath: string, timbreName: string): Promise<TimbreRe
   frame.set(mono.subarray(startIdx, startIdx + FFT_SIZE));
 
   const f0 = findPitchYin(frame, SR);
-  console.log(`  ${timbreName}: F0 = ${f0.toFixed(2)} Hz`);
-
+  // Caller (main) reports per-file F0 — TB-007 progress indication.
   applyHannWindow(frame);
   const real = new Float32Array(frame);
   const imag = new Float32Array(FFT_SIZE);
@@ -111,54 +119,90 @@ async function analyzeWav(wavPath: string, timbreName: string): Promise<TimbreRe
   return { name: timbreName, f0, harmonicsMag, envelopeDb, noiseDb, freqHz };
 }
 
-const USAGE = `Usage: npx tsx src/cli/build-preset.ts --out <preset-dir> <wav:timbre> [<wav:timbre> ...]
+const USAGE = `Usage: npx tsx src/cli/build-preset.ts --out <preset-dir> <wav:timbre> [<wav:timbre> ...] [--json]
 
 Builds a multi-timbre voicepreset.json + asset files from one or more WAV
 inputs. Each positional argument is <wav-path>:<timbre-name> (split on the
 LAST colon so Windows drive letters work, e.g. F:/calib/AH.wav:AH).
 
+Example:
+  npx tsx src/cli/build-preset.ts --out presets/my-voice \\
+    calib/AH.wav:AH calib/EE.wav:EE calib/OO.wav:OO
+
 Options:
   --out <dir>   Output preset directory (required).
+  --json        Emit a single JSON object to stdout in lieu of human banners.
+                Schema: { presetDir, timbres[], harmonics, freqBins, assetsHash }
   -h, --help    Show this message and exit.`;
 
 async function main() {
   const args = process.argv.slice(2);
-  if (args[0] === '-h' || args[0] === '--help') {
+  if (args.includes('-h') || args.includes('--help')) {
     console.log(USAGE);
     process.exit(0);
   }
 
-  // Parse --out flag
+  // Parse --out + --json flags, leave wav:timbre positionals untouched.
   let outDir = '';
+  let json = false;
   const inputs: { wavPath: string; timbre: string }[] = [];
 
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--out' && args[i + 1]) {
+    if (args[i] === '--out') {
+      if (!args[i + 1] || args[i + 1].startsWith('--')) {
+        // TB-005 (1): --out used to silently default to '' when missing the
+        // value; now we throw so a typo doesn't write to the wrong directory.
+        const err: CliError = new Error(`--out requires a directory argument`);
+        err.hint = `e.g. --out presets/my-voice`;
+        throw err;
+      }
       outDir = args[++i];
+    } else if (args[i] === '--json') {
+      json = true;
     } else if (args[i].includes(':')) {
       // Split on LAST colon to handle Windows drive letters (e.g. F:/path/AH.wav:AH)
       const lastColon = args[i].lastIndexOf(':');
       const wavPath = args[i].slice(0, lastColon);
       const timbre = args[i].slice(lastColon + 1);
+
+      // TB-005 (2): reject empty timbre / known-flag-as-timbre at the
+      // boundary so we don't write asset files keyed by '' or 'out'.
+      if (!TIMBRE_NAME_RE.test(timbre)) {
+        const err: CliError = new Error(
+          `invalid timbre name '${timbre}' in '${args[i]}'`
+        );
+        err.hint = `timbre names must match /^[A-Za-z][A-Za-z0-9_-]*$/ (e.g. AH, vowel_1)`;
+        throw err;
+      }
       inputs.push({ wavPath, timbre });
     }
   }
 
-  if (!outDir || inputs.length === 0) {
-    console.error(USAGE);
-    process.exit(1);
+  if (!outDir) {
+    const err: CliError = new Error(`missing required --out <preset-dir>`);
+    err.hint = `run with --help for the full usage block`;
+    throw err;
+  }
+  if (inputs.length === 0) {
+    const err: CliError = new Error(`no <wav-path>:<timbre-name> inputs given`);
+    err.hint = `pass one or more positional args like calib/AH.wav:AH`;
+    throw err;
   }
 
   const presetDir = resolve(outDir);
   const assetsDir = join(presetDir, 'assets');
   await mkdir(assetsDir, { recursive: true });
 
-  console.log(`Building preset with ${inputs.length} timbres → ${presetDir}`);
+  if (!json) console.log(`Building preset with ${inputs.length} timbres → ${presetDir}`);
 
-  // Analyze each input
+  // Analyze each input — TB-007: announce each file before its FFT pass so a
+  // multi-second per-WAV run no longer feels like a hung terminal.
   const results: TimbreResult[] = [];
   for (const { wavPath, timbre } of inputs) {
-    results.push(await analyzeWav(wavPath, timbre));
+    if (!json) process.stdout.write(`  Analyzing ${wavPath}... `);
+    const r = await analyzeWav(wavPath, timbre);
+    if (!json) process.stdout.write(`F0 = ${r.f0.toFixed(2)} Hz\n`);
+    results.push(r);
   }
 
   // Validate consistency: all freqHz arrays should be identical
@@ -234,12 +278,24 @@ async function main() {
 
   await writeFile(join(presetDir, 'voicepreset.json'), JSON.stringify(manifest, null, 2));
 
-  console.log(`\nPreset built:`);
-  console.log(`  Timbres: ${results.map(r => r.name).join(', ')}`);
-  console.log(`  Harmonics: ${MAX_HARMONICS}`);
-  console.log(`  Freq bins: ${refLen}`);
-  console.log(`  Assets: ${assetsDir}`);
-  console.log(`  Integrity: ${assetsHash}`);
+  if (json) {
+    // Stable schema — document in CHANGELOG when fields change.
+    const out = {
+      presetDir,
+      timbres: results.map(r => ({ name: r.name, f0Hz: Number(r.f0.toFixed(2)) })),
+      harmonics: MAX_HARMONICS,
+      freqBins: refLen,
+      assetsHash,
+    };
+    process.stdout.write(JSON.stringify(out) + '\n');
+  } else {
+    console.log(`\nPreset built:`);
+    console.log(`  Timbres: ${results.map(r => r.name).join(', ')}`);
+    console.log(`  Harmonics: ${MAX_HARMONICS}`);
+    console.log(`  Freq bins: ${refLen}`);
+    console.log(`  Assets: ${assetsDir}`);
+    console.log(`  Integrity: ${assetsHash}`);
+  }
 }
 
-main().catch(console.error);
+runCli('build-preset', main);

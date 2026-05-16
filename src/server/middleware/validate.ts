@@ -16,9 +16,20 @@ export function validateBody<T>(schema: ZodType<T>) {
         message: i.message,
         code: i.code,
       }));
+      // SB-014 humanization — point the operator at the FIRST failing
+      // field so the error log is actionable in one read.  We keep the full
+      // `issues` array so the client UI can highlight every bad field.
+      const first = issues[0];
+      const hint = first
+        ? `Fix the field at "${first.path || '(root)'}": ${first.message}`
+        : 'Body did not match the expected shape';
       res.status(400).json({
         ok: false,
-        error: 'Invalid request body',
+        code: 'INVALID_BODY',
+        error: 'Invalid request body', // legacy field
+        message: 'Invalid request body',
+        hint,
+        requestId: (req as any).requestId,
         issues,
       });
       return;

@@ -31,13 +31,33 @@ concurrency:
 
 jobs:
   lint-and-test:
-    runs-on: ubuntu-latest
+    # Multi-OS x multi-Node matrix per CB-007. Per memory ratchet from
+    # ollama-intern-mcp v2.5.0 → v2.5.3 (three orthogonal failure classes
+    # on first multi-OS run), we set:
+    #   - shell: bash on all jobs (Windows defaults to PowerShell otherwise)
+    #   - NO_COLOR + FORCE_COLOR off so vitest output is greppable
+    #   - || true on any pipe-into-grep would go here (none currently)
+    # If win/mac jobs go consistently red on a known issue, flip
+    # continue-on-error: true with a dated comment rather than hiding it.
+    name: test (${{ matrix.os }} / node-${{ matrix.node-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node-version: [20, 22]
+    env:
+      NO_COLOR: '1'
+      FORCE_COLOR: '0'
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: 20
+          node-version: ${{ matrix.node-version }}
           cache: npm
 
       - name: Install dependencies
@@ -58,5 +78,7 @@ jobs:
 
       - name: Security audit
         # Fail on high/critical only — moderate/low don't block release.
-        # Threshold documented in SECURITY.md.
+        # Threshold documented in SECURITY.md. Linux-only (npm audit
+        # network calls don't differ by OS; one run saves CI minutes).
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == 20
         run: npm audit --audit-level=high --omit=dev

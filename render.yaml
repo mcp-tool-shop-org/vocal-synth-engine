@@ -4,6 +4,11 @@ services:
     runtime: docker
     region: ohio
     plan: starter
+    # Render uses this for zero-downtime deploys and to flap unhealthy
+    # instances out of the pool. /api/health is the public probe (S-018:
+    # public shape {ok, version, uptimeSec}; detailed payload lives behind
+    # requireAuth at /api/health/detailed).
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
