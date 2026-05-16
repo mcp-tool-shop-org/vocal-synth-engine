@@ -6,8 +6,8 @@
  * fresh LiveSynthEngine instances.
  */
 
-import { execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
+import { getGitCommit } from '../util/gitCommit.js';
 import wavefile from 'wavefile';
 const { WaveFile } = wavefile;
 import { LiveSynthEngine } from '../../engine/LiveSynthEngine.js';
@@ -36,9 +36,9 @@ export interface ExportResult {
   eventTapeJson: string;
 }
 
-function getGitCommit(): string {
-  try { return execSync('git rev-parse HEAD').toString().trim(); } catch { return 'unknown'; }
-}
+// S-022 — git commit is now captured once at module load via
+// src/server/util/gitCommit.ts; the local helper used to spawn `git
+// rev-parse HEAD` per export (~50ms per call on Windows).
 
 /**
  * Offline re-render: replay EventTape through fresh engines → WAV.

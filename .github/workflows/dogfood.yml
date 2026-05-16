@@ -1,5 +1,12 @@
 name: Dogfood
 
+# Dispatches scenario results to mcp-tool-shop-org/dogfood-labs.
+#
+# Required repo secret:
+#   DOGFOOD_TOKEN — fine-grained PAT with `repo` scope on
+#   mcp-tool-shop-org/dogfood-labs. If unset, the Dispatch step
+#   emits a benign warning and the job still passes.
+
 on:
   push:
     branches: [main]
@@ -180,6 +187,13 @@ jobs:
 
           if [ -z "$GH_TOKEN" ]; then
             echo "::warning::DOGFOOD_TOKEN not set — skipping dispatch"
+            exit 0
+          fi
+
+          # Probe target — if the dogfood-labs receiver isn't deployed yet, treat
+          # dispatch as a no-op so the scenario verdict alone gates this workflow.
+          if ! gh api repos/mcp-tool-shop-org/dogfood-labs --silent 2>/dev/null; then
+            echo "::warning::dogfood-labs receiver not reachable (404) — skipping dispatch; scenario verdict still gates this job"
             exit 0
           fi
 

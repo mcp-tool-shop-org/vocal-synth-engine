@@ -79,11 +79,37 @@ async function main() {
   // Spectral Correlation (middle frame)
   const fftSize = 2048;
   const halfFft = fftSize / 2 + 1;
-  
-  const getSpectrum = (mono: Float32Array) => {
+
+  // T-005: extract a single center-frame slice and use it for BOTH spectrum
+  // and pitch detection. Previously getSpectrum() used a center slice while
+  // pitch detection used `mono.subarray(0, 2048)` — the first 2048 samples
+  // (~43ms at 48kHz) of a recorded WAV often contain silence or attack and
+  // produce noisy or wrong F0. HNR was then computed from those bad F0
+  // values, partly driving the PASS/FAIL verdict. Same window everywhere.
+  // (Also: T-006 — refuse files shorter than one frame so subarray() doesn't
+  // walk off the end and produce garbage.)
+  if (refMono.length < fftSize) {
+    console.error(`Ref WAV too short: ${refMono.length} samples < required ${fftSize}.`);
+    process.exit(1);
+  }
+  if (testMono.length < fftSize) {
+    console.error(`Test WAV too short: ${testMono.length} samples < required ${fftSize}.`);
+    process.exit(1);
+  }
+
+  const getCenterFrame = (mono: Float32Array): Float32Array => {
     const startIdx = Math.floor(mono.length / 2) - Math.floor(fftSize / 2);
     const frame = new Float32Array(fftSize);
     frame.set(mono.subarray(startIdx, startIdx + fftSize));
+    return frame;
+  };
+
+  const getSpectrum = (centerFrame: Float32Array) => {
+    // Hann-windowing mutates in place, so we copy first to keep the raw
+    // center frame around for findPitchYin (YIN expects the unwindowed
+    // signal — applying a Hann window before pitch detection would attenuate
+    // the edges and bias autocorrelation peaks).
+    const frame = new Float32Array(centerFrame);
     applyHannWindow(frame);
     const real = new Float32Array(frame);
     const imag = new Float32Array(fftSize);
@@ -94,13 +120,17 @@ async function main() {
     }
     return mag;
   };
-  
-  const refMag = getSpectrum(refMono);
-  const testMag = getSpectrum(testMono);
-  
-  // Pitch Error
-  const refF0 = findPitchYin(refMono.subarray(0, 2048), 48000);
-  const testF0 = findPitchYin(testMono.subarray(0, 2048), 48000);
+
+  const refFrame = getCenterFrame(refMono);
+  const testFrame = getCenterFrame(testMono);
+
+  const refMag = getSpectrum(refFrame);
+  const testMag = getSpectrum(testFrame);
+
+  // Pitch Error — SAME center frame as the spectrum. Avoids the silence/
+  // attack bias that taking samples 0..2047 used to introduce.
+  const refF0 = findPitchYin(refFrame, 48000);
+  const testF0 = findPitchYin(testFrame, 48000);
   const pitchErrorCents = 1200 * Math.log2(testF0 / refF0);
   console.log(`Pitch Error: ${pitchErrorCents.toFixed(2)} cents (Ref: ${refF0.toFixed(2)} Hz, Test: ${testF0.toFixed(2)} Hz)`);
 

@@ -13,7 +13,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { loadVoicePreset } from '../preset/loader.js';
 import { StreamingVocalSynthEngine, StreamingVocalSynthConfig } from '../engine/StreamingVocalSynthEngine.js';
-import { VocalScore } from '../types/score.js';
+import { VocalScore, parseVocalScore } from '../types/score.js';
 
 const USAGE = `Usage: npx tsx src/cli/play-score.ts <preset.json> <score.json> <out.wav>
 
@@ -39,7 +39,17 @@ async function main() {
   
   const preset = await loadVoicePreset(resolve(presetPath));
   const scoreContent = await readFile(resolve(scorePath), 'utf-8');
-  const score: VocalScore = JSON.parse(scoreContent);
+  // T-009: validate score JSON shape (notes[]/bpm/MIDI ranges/finite durations)
+  // before handing to the synth engine. JSON.parse-and-pray silently propagated
+  // NaN/Infinity into render() and produced NaN audio.
+  let score: VocalScore;
+  try {
+    score = parseVocalScore(scoreContent) as VocalScore;
+  } catch (err: any) {
+    console.error(`Invalid score JSON at ${scorePath}:`);
+    console.error(err.message);
+    process.exit(1);
+  }
   
   const config: StreamingVocalSynthConfig = {
     sampleRateHz: preset.manifest.sampleRateHz,

@@ -40,3 +40,9 @@ export interface VocalScore {
     timbreMorph?: Record<TimbreId, AutomationPoint[]>; // weights
   };
 }
+
+// Runtime Zod validation lives in ./scoreSchema. Re-export it from here so
+// new callers can pull both the type and the validator from a single import.
+// (Closes T-009: parse + validate before JSON.parse-and-pray.)
+export { VocalScoreSchema, parseVocalScore } from './scoreSchema.js';
+export type { VocalScoreParsed } from './scoreSchema.js';

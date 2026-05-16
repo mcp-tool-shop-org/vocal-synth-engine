@@ -1,7 +1,28 @@
+# Dependencies + build output
 node_modules/
 dist/
+*.tsbuildinfo
+coverage/
+
+# App-specific build dirs / caches
 test-preset/
 .vscockpit/
 calib/
 models/
 site/.astro/
+
+# Editor / IDE
+.vscode/
+.idea/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Env / secrets — never commit. .env.example is allowed for documenting required vars.
+.env
+.env.*
+!.env.example

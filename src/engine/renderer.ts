@@ -102,6 +102,18 @@ export class MonophonicRenderer implements BlockRenderer {
    *   2. Sine via 4096-entry LUT instead of Math.sin().
    *   3. dB→linear via Math.exp instead of Math.pow(10, x/20).
    *   4. Phase tracked as normalized [0..1) — avoids 2π multiplies.
+   *
+   * ⚠ **Block-rate harmonic-gain trade-off (E-021).** Because the spectral
+   * envelope is evaluated once per block at the mid-block F0, harmonic
+   * amplitudes are effectively quantized to the block boundary. For a
+   * slow-glide portamento (e.g., 200 → 220 Hz across 256 samples at 48 kHz,
+   * ~5 ms) this is inaudible. For a *fast* portamento (e.g., 200 → 800 Hz
+   * in 256 samples) the gains jump discontinuously at block edges, audible
+   * as a stair-step on the timbre. Callers driving fast pitch glides should
+   * use a block size of ≤ ~5 ms (256 samples at 48 kHz). If you need
+   * sub-millisecond glide smoothness, render with a smaller block or
+   * upgrade the envelope evaluation to per-sample (~95% CPU cost increase
+   * on this loop) — both branches are out-of-scope for the current renderer.
    */
   renderBlock(params: RenderParams, out: Float32Array): void {
     const numSamples = out.length;

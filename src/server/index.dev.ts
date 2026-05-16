@@ -178,9 +178,22 @@ async function startDevServer() {
     }
   });
 
+  // S-019 — dev server includes Vite HMR upgrade-routing fallback for any
+  // path that isn't /ws or /ws/jam; HMR is unauthenticated.  Bind to
+  // 127.0.0.1 by default so a dev server cannot be reached from the LAN
+  // unless the operator explicitly opts in via DEV_HOST=0.0.0.0.
   const port = Number(process.env.PORT ?? 4321);
-  server.listen(port, () => {
-    console.log(`VocalSynth Cockpit (DEV) running at http://localhost:${port}`);
+  const host = process.env.DEV_HOST || '127.0.0.1';
+  server.listen(port, host, () => {
+    const displayHost = host === '127.0.0.1' ? 'localhost' : host;
+    console.log(`VocalSynth Cockpit (DEV) running at http://${displayHost}:${port}`);
+    if (host !== '127.0.0.1') {
+      console.warn(
+        `[boot] WARNING: DEV server is bound to ${host}; the HMR upgrade ` +
+        `channel is unauthenticated.  Restrict network exposure or set ` +
+        `DEV_HOST=127.0.0.1 for localhost-only.`
+      );
+    }
   });
 }
 

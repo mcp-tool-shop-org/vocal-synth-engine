@@ -65,8 +65,15 @@ function sha256Short(buf: Buffer | string) {
 export function listRenders(): RenderMeta[] {
   ensureRoot();
   const dirs = fs.readdirSync(root).filter((d) => {
+    // S-017 — ignore dot-prefixed dirs (e.g. .last-staging-*, .last-trash-*)
+    // so partially-written renders are never returned to API callers.
+    if (d.startsWith('.')) return false;
     const p = path.join(root, d);
-    return fs.statSync(p).isDirectory() && fs.existsSync(path.join(p, "meta.json"));
+    try {
+      return fs.statSync(p).isDirectory() && fs.existsSync(path.join(p, "meta.json"));
+    } catch {
+      return false;
+    }
   });
 
   const metas = dirs.map((d) => {
@@ -95,6 +102,49 @@ export function getRenderDir(id: string) {
   return path.join(root, id);
 }
 
+/**
+ * S-016 — concurrent saveRender calls used to collide three ways:
+ *   1. Two ISO timestamps in the same millisecond produced identical ids,
+ *      so both writers targeted the same directory; last write wins, first
+ *      writer's files were clobbered.
+ *   2. Two writers scanning `existingDirs` simultaneously computed the
+ *      same `untitledCount`, both producing `Untitled-N+1`.
+ *   3. mkdir({recursive:true}) silently accepted the collision.
+ *
+ * Mitigations:
+ *   - Append an 8-char `randomUUID()` slug to the id.  randomUUID's high
+ *     entropy makes same-millisecond collisions astronomically unlikely.
+ *   - mkdir with {recursive:false} and retry on EEXIST with a fresh slug.
+ *   - Decorate the Untitled-N base name with the same UUID slug used in
+ *     the id so two concurrent writers picking the same N never collide
+ *     on the user-visible name.  This avoids a fragile in-process mutex
+ *     while still keeping names readable and unique.
+ */
+function nextUntitledBaseNum(): number {
+  const existingDirs = fs.readdirSync(root);
+  let maxNum = 0;
+  for (const d of existingDirs) {
+    try {
+      const meta = JSON.parse(fs.readFileSync(path.join(root, d, 'meta.json'), 'utf-8'));
+      if (meta?.name && typeof meta.name === 'string' && meta.name.startsWith('Untitled-')) {
+        const num = parseInt(meta.name.split('-')[1], 10);
+        if (Number.isFinite(num) && num > maxNum) maxNum = num;
+      }
+    } catch {}
+  }
+  return maxNum + 1;
+}
+
+function mkdirExclusive(dirPath: string): boolean {
+  try {
+    fs.mkdirSync(dirPath, { recursive: false });
+    return true;
+  } catch (err: any) {
+    if (err?.code === 'EEXIST') return false;
+    throw err;
+  }
+}
+
 export function saveRender(args: {
   name?: string;
   score: any;
@@ -106,11 +156,22 @@ export function saveRender(args: {
 }): RenderMeta {
   ensureRoot();
 
+  // S-016 — id := ISO timestamp + 8-char UUID slug so two writers in the
+  // same millisecond never collide on the directory name.  Retry up to 5
+  // times against the (astronomically unlikely) slug collision.
   const createdAt = new Date().toISOString();
-  const id = createdAt.replace(/[:.]/g, "-");
-
-  const dir = getRenderDir(id);
-  fs.mkdirSync(dir, { recursive: true });
+  let slug = crypto.randomUUID().slice(0, 8);
+  let id = `${createdAt.replace(/[:.]/g, '-')}-${slug}`;
+  let dir = getRenderDir(id);
+  for (let attempt = 0; attempt < 5 && !mkdirExclusive(dir); attempt++) {
+    slug = crypto.randomUUID().slice(0, 8);
+    id = `${createdAt.replace(/[:.]/g, '-')}-${slug}`;
+    dir = getRenderDir(id);
+  }
+  if (!fs.existsSync(dir)) {
+    // Last attempt's race lost; fall back to recursive mkdir.
+    fs.mkdirSync(dir, { recursive: true });
+  }
 
   const scoreStr = JSON.stringify(args.score, null, 2);
   const configStr = JSON.stringify(args.config, null, 2);
@@ -121,18 +182,12 @@ export function saveRender(args: {
 
   let finalName = args.name?.trim();
   if (!finalName) {
-    const existingDirs = fs.readdirSync(root);
-    let untitledCount = 0;
-    for (const d of existingDirs) {
-      try {
-        const meta = JSON.parse(fs.readFileSync(path.join(root, d, 'meta.json'), 'utf-8'));
-        if (meta.name && meta.name.startsWith('Untitled-')) {
-          const num = parseInt(meta.name.split('-')[1]);
-          if (!isNaN(num) && num > untitledCount) untitledCount = num;
-        }
-      } catch (e) {}
-    }
-    finalName = `Untitled-${untitledCount + 1}`;
+    // S-016 — append the UUID slug to the user-visible Untitled name so
+    // two concurrent renders that both picked Untitled-N don't end up
+    // displaying the same name in the UI.  Numerically the next slot is
+    // still computed off the highest existing N.
+    const num = nextUntitledBaseNum();
+    finalName = `Untitled-${num}-${slug}`;
   }
 
   const meta: RenderMeta = {
@@ -161,6 +216,25 @@ export function saveRender(args: {
   return meta;
 }
 
+/**
+ * S-017 — saveLastRender used to write 6 files non-atomically into
+ * `last/` while concurrent readers (GET /api/renders/last/audio.wav, etc.)
+ * could see partially written JSON or truncated audio mid-stream.  Two
+ * concurrent renders could also interleave their writes, producing a
+ * `last/` whose meta points at one render but whose audio is from
+ * another.
+ *
+ * Fix: stage every write inside a sibling `last.staging-<slug>/` directory
+ * then atomically swap it into place via:
+ *   1. If `last/` exists, rename it to `last.old-<slug>/`.
+ *   2. Rename the staging directory to `last/`.
+ *   3. Delete `last.old-<slug>/`.
+ *
+ * fs.renameSync of a directory is atomic on POSIX and on Windows when the
+ * source and destination live on the same volume (always true here since
+ * both are under `root`).  Readers therefore observe `last/` either at the
+ * previous render's contents or the new one — never a half-written mix.
+ */
 export function saveLastRender(args: {
   score: any;
   config: any;
@@ -171,8 +245,19 @@ export function saveLastRender(args: {
 }): RenderMeta {
   ensureRoot();
   const id = "last";
-  const dir = getRenderDir(id);
-  fs.mkdirSync(dir, { recursive: true });
+  const finalDir = getRenderDir(id);
+
+  // Staging/trash dirs use names that DO NOT match the render-id allowlist
+  // (`/^[A-Za-z0-9_-]{1,64}$/`) because they contain dots — so an API
+  // caller cannot ever request `GET /api/renders/.last-staging-xxx/...`,
+  // and `listRenders` further filters by `meta.json existing` (we write
+  // meta.json LAST in the staging phase so the dir is invisible until the
+  // atomic rename completes).
+  const slug = crypto.randomUUID().slice(0, 8);
+  const stagingDir = path.join(root, `.last-staging-${slug}`);
+  const trashDir = path.join(root, `.last-trash-${slug}`);
+
+  fs.mkdirSync(stagingDir, { recursive: true });
 
   const scoreStr = JSON.stringify(args.score, null, 2);
   const configStr = JSON.stringify(args.config, null, 2);
@@ -197,12 +282,44 @@ export function saveLastRender(args: {
     },
   };
 
-  fs.writeFileSync(path.join(dir, "meta.json"), JSON.stringify(meta, null, 2));
-  fs.writeFileSync(path.join(dir, "score.json"), scoreStr);
-  fs.writeFileSync(path.join(dir, "config.json"), configStr);
-  fs.writeFileSync(path.join(dir, "telemetry.json"), JSON.stringify(args.telemetry, null, 2));
-  fs.writeFileSync(path.join(dir, "provenance.json"), JSON.stringify(args.provenance, null, 2));
-  fs.writeFileSync(path.join(dir, "audio.wav"), args.wavBytes);
+  try {
+    // S-017 — write meta.json LAST so listRenders / any incidental
+    // directory scan that happens to land in the (dot-prefixed) staging
+    // dir cannot observe it as a complete render mid-write.
+    fs.writeFileSync(path.join(stagingDir, "score.json"), scoreStr);
+    fs.writeFileSync(path.join(stagingDir, "config.json"), configStr);
+    fs.writeFileSync(path.join(stagingDir, "telemetry.json"), JSON.stringify(args.telemetry, null, 2));
+    fs.writeFileSync(path.join(stagingDir, "provenance.json"), JSON.stringify(args.provenance, null, 2));
+    fs.writeFileSync(path.join(stagingDir, "audio.wav"), args.wavBytes);
+    fs.writeFileSync(path.join(stagingDir, "meta.json"), JSON.stringify(meta, null, 2));
+
+    // Atomic swap: stash old `last/` (if any), promote staging to `last/`,
+    // then delete the stash.  Each individual rename is atomic; readers
+    // either see the old `last/` or the new one.
+    const hadPrevious = fs.existsSync(finalDir);
+    if (hadPrevious) {
+      fs.renameSync(finalDir, trashDir);
+    }
+    try {
+      fs.renameSync(stagingDir, finalDir);
+    } catch (renameErr) {
+      // Promotion failed — try to restore the previous `last/` so the
+      // store isn't left empty.  If restoration also fails the original
+      // error is the most useful one to surface.
+      if (hadPrevious) {
+        try { fs.renameSync(trashDir, finalDir); } catch {}
+      }
+      throw renameErr;
+    }
+    if (hadPrevious) {
+      fs.rmSync(trashDir, { recursive: true, force: true });
+    }
+  } finally {
+    // Clean up staging dir if promotion never moved it (e.g. mid-write throw).
+    if (fs.existsSync(stagingDir)) {
+      try { fs.rmSync(stagingDir, { recursive: true, force: true }); } catch {}
+    }
+  }
 
   return meta;
 }

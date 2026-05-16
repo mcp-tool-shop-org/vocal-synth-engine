@@ -121,17 +121,73 @@ export function xorshift32(state: { seed: number }) {
   return (x >>> 0) / 4294967296.0;
 }
 
+/**
+ * Linear interpolation across an automation lane.
+ *
+ * **Precondition (load-bearing):** `points` MUST be sorted by `tSec` in
+ * monotonically non-decreasing order. The find-segment loop scans forward
+ * assuming order — a lane authored or de-serialized in arbitrary order
+ * would return garbage interpolated values silently (no crash). The CLI
+ * loader (`src/preset/loader.ts`) and score validator should enforce this
+ * at load time; this helper runs in the per-sample hot path and cannot
+ * afford a re-sort.
+ *
+ * For defensive robustness in dev/test builds (NODE_ENV !== 'production')
+ * we cheaply assert monotonicity on the FIRST call only and log once if
+ * the precondition is violated — the lane is then used as-is (garbage out)
+ * so the operator sees the warning rather than the function masking the bug.
+ *
+ * If `p1.tSec === p0.tSec` (duplicate breakpoint) we return `p0.value`
+ * to avoid 0/0 = NaN poisoning the entire output buffer.
+ */
 export function interpAutomation(points: AutomationPoint[], tSec: number): number {
   if (!points || points.length === 0) return 0;
   if (points.length === 1) return points[0].value;
+  assertAutomationSortedDev(points);
   if (tSec <= points[0].tSec) return points[0].value;
   if (tSec >= points[points.length - 1].tSec) return points[points.length - 1].value;
-  
+
   let i = 0;
   while (i < points.length - 1 && points[i + 1].tSec < tSec) i++;
-  
+
   const p0 = points[i];
   const p1 = points[i + 1];
-  const t = (tSec - p0.tSec) / (p1.tSec - p0.tSec);
+  // E-018: same denom-zero guard as interpLinear — duplicate adjacent tSec
+  // (allowed by non-decreasing ordering) would otherwise produce NaN.
+  const denom = p1.tSec - p0.tSec;
+  if (denom === 0) return p0.value;
+  const t = (tSec - p0.tSec) / denom;
   return p0.value + t * (p1.value - p0.value);
+}
+
+/** Module-level set of lane references already validated this process. We
+ *  cache by reference to keep the per-call cost a single Set.has() check,
+ *  not an O(N) re-scan, even though the precondition is meant to be
+ *  enforced at load time. */
+const automationSortedChecked: WeakSet<AutomationPoint[]> = new WeakSet();
+let warnedAutomationOutOfOrder = false;
+
+function assertAutomationSortedDev(points: AutomationPoint[]): void {
+  // Cheap escape on the hot path: skip in production and on already-seen lanes.
+  // The cost in dev is one WeakSet.has() per call after the first.
+  if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'production') {
+    return;
+  }
+  if (automationSortedChecked.has(points)) return;
+  for (let i = 1; i < points.length; i++) {
+    if (points[i].tSec < points[i - 1].tSec) {
+      if (!warnedAutomationOutOfOrder) {
+        warnedAutomationOutOfOrder = true;
+        // eslint-disable-next-line no-console
+        console.warn(
+          `interpAutomation: lane is not sorted by tSec ` +
+          `(points[${i - 1}].tSec=${points[i - 1].tSec}, ` +
+          `points[${i}].tSec=${points[i].tSec}). ` +
+          `Sort at load time. (This warning fires once per process.)`
+        );
+      }
+      break;
+    }
+  }
+  automationSortedChecked.add(points);
 }

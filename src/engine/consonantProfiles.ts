@@ -6,7 +6,7 @@
  */
 
 export interface ConsonantProfile {
-  envelopeKind: 'fricative' | 'plosive' | 'nasal';
+  envelopeKind: ConsonantEnvelopeKind;
   /** Peak noise burst amplitude (0..1). Independent of vowel amp. */
   noiseLevel: number;
   /** Harmonic amplitude multiplier during consonant (0=silent, 1=full). */
@@ -73,16 +73,26 @@ export function getConsonantProfile(symbol: string): ConsonantProfile | null {
   return CONSONANT_PROFILES[symbol] ?? null;
 }
 
+/** Envelope kinds known to {@link consonantEnvelope}. New kinds must be added
+ *  here AND get a case in the switch — keep the two surfaces in lockstep. */
+export type ConsonantEnvelopeKind = 'fricative' | 'plosive' | 'nasal';
+
+/** One-shot guard to avoid log spam if a bad kind keeps arriving each block. */
+let warnedUnknownConsonantKind = false;
+
 /**
  * Compute consonant envelope gain at relative time within the consonant.
  *
  * @param tRel — normalized time 0..1 (0 = consonant start, 1 = consonant end)
- * @param kind — envelope shape category
+ * @param kind — envelope shape category. Pass a typed enum where possible —
+ *               loosely-typed callers (e.g. JSON-loaded data) may slip an
+ *               unknown string through despite the union type; the default
+ *               branch returns 0 so we never leak NaN into consonantAmp math.
  * @returns amplitude gain 0..1
  */
 export function consonantEnvelope(
   tRel: number,
-  kind: 'fricative' | 'plosive' | 'nasal'
+  kind: ConsonantEnvelopeKind
 ): number {
   if (tRel < 0 || tRel > 1) return 0;
 
@@ -104,5 +114,21 @@ export function consonantEnvelope(
       if (tRel < 0.10) return tRel / 0.10;
       if (tRel < 0.90) return 1.0;
       return (1.0 - tRel) / 0.10;
+
+    default: {
+      // E-016: unreachable under sound TypeScript, but a JSON-deserialized
+      // profile (or a future-added phoneme kind that wasn't wired in here)
+      // could land here at runtime. Return 0 so consonantAmp stays valid
+      // (not NaN) — silent omission beats poisoning the buffer.
+      if (!warnedUnknownConsonantKind) {
+        warnedUnknownConsonantKind = true;
+        // eslint-disable-next-line no-console
+        console.warn(
+          `consonantEnvelope: unknown kind "${String(kind)}" — returning 0. ` +
+          `(This warning fires once per process.)`
+        );
+      }
+      return 0;
+    }
   }
 }

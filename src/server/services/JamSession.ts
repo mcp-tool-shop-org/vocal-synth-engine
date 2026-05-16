@@ -241,13 +241,24 @@ export class JamSession {
   /**
    * Snap a sample position to the nearest grid line.
    * Grid divisions: '1/4' = quarter note, '1/8' = eighth, etc.
+   *
+   * S-024 — defence in depth: even though the WS layer now validates
+   * `session_set_quantize` payloads against the literal QuantizeGrid union
+   * (wsSchemas.ts), this method must never propagate NaN sample offsets
+   * into the engine if a malformed grid value ever bypasses the schema.
    */
   private quantizeSample(sample: number): number {
     if (this.quantizeGrid === 'none') return sample;
 
-    const divisor = parseInt(this.quantizeGrid.split('/')[1]);
+    const parts = this.quantizeGrid.split('/');
+    const divisor = parts.length === 2 ? parseInt(parts[1], 10) : NaN;
+    if (!Number.isFinite(divisor) || divisor <= 0) return sample;
+
     const samplesPerBeat = (this.config.sampleRateHz * 60) / this.transport.bpm;
+    if (!Number.isFinite(samplesPerBeat) || samplesPerBeat <= 0) return sample;
+
     const gridSamples = samplesPerBeat / (divisor / 4);  // quarter = 1, eighth = 2, etc.
+    if (!Number.isFinite(gridSamples) || gridSamples <= 0) return sample;
 
     return Math.round(sample / gridSamples) * gridSamples;
   }
@@ -698,9 +709,14 @@ export class JamSession {
       this.blocksSinceLastTick = 0;
     }
 
-    // Broadcast binary PCM to all participants
+    // Broadcast binary PCM to all participants.
+    // S-021 — advance audioSeq EVERY render block regardless of whether
+    // there are listeners, so the sequence number is a true monotonic
+    // clock and re-joining participants can detect gaps instead of seeing
+    // the seq restart at zero when the participants map empties + refills.
+    const seq = this.audioSeq++;
     if (this.audioFrameBuf && this.participants.size > 0) {
-      this.audioFrameBuf.writeUInt32LE(this.audioSeq++, 0);
+      this.audioFrameBuf.writeUInt32LE(seq, 0);
       const pcmBytes = Buffer.from(mix.buffer, mix.byteOffset, mix.byteLength);
       pcmBytes.copy(this.audioFrameBuf, AUDIO_HEADER_SIZE);
       this.broadcastBinary(this.audioFrameBuf);
@@ -833,8 +849,12 @@ export class JamSession {
   private startStuckNoteWatchdog(): void {
     this.stopStuckNoteWatchdog();
     this.stuckNoteInterval = setInterval(() => {
+      // S-020 — releaseStuckNotes is a typed public method on
+      // LiveSynthEngine; the previous `(entry.engine as any).releaseStuckNotes?.(120)`
+      // silently turned into a no-op if the method ever got renamed.  The
+      // typed call now fails compile if it disappears.
       for (const [, entry] of this.tracks) {
-        (entry.engine as any).releaseStuckNotes?.(120);
+        entry.engine.releaseStuckNotes(120);
       }
     }, STUCK_NOTE_CHECK_MS);
   }
@@ -864,8 +884,12 @@ export class JamSession {
   }
 
   private broadcastBinary(frame: Buffer): void {
+    // S-021 — the 'ws' WebSocket type already exposes `bufferedAmount` as a
+    // typed number.  The previous `(ws as any).bufferedAmount` would
+    // silently become `undefined <= MAX_SEND_QUEUE_BYTES` (false) if the
+    // property ever renamed, dropping every frame for every client.
     for (const [ws] of this.participants) {
-      if (ws.readyState === 1 && (ws as any).bufferedAmount <= MAX_SEND_QUEUE_BYTES) {
+      if (ws.readyState === 1 && ws.bufferedAmount <= MAX_SEND_QUEUE_BYTES) {
         ws.send(frame);
       }
     }

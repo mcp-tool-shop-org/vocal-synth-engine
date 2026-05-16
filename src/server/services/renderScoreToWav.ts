@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { execSync } from 'node:child_process';
+import { getGitCommit } from '../util/gitCommit.js';
 import wavefile from 'wavefile';
 const { WaveFile } = wavefile;
 import { loadVoicePreset } from '../../preset/loader.js';
@@ -120,9 +120,9 @@ async function getPreset(presetId: string) {
   return presetCache.get(presetId)!;
 }
 
-function getGitCommit() {
-  try { return execSync('git rev-parse HEAD').toString().trim(); } catch (e) { return 'unknown'; }
-}
+// S-022 — git commit is now captured once at module load via
+// src/server/util/gitCommit.ts; the local helper used to spawn `git
+// rev-parse HEAD` per render.
 
 /** Return PRESET_DIR and count for boot logging */
 export function getPresetDirInfo() {

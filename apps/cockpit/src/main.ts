@@ -610,8 +610,15 @@
       const res = await fetch(`${DAEMON_URL}/api/health`);
       if (res.ok) {
         const data = await res.json();
-        currentDaemonCommit = data.commit;
-        statusBadge.textContent = `Daemon OK (v${data.engineVersion} | ${data.commit.substring(0,7)})`;
+        // S-018: /api/health is now minimal (version + uptime); commit is no
+        // longer exposed to unauthenticated callers.  Render whichever fields
+        // are present rather than crashing on undefined.substring().
+        currentDaemonCommit = typeof data.commit === 'string' ? data.commit : '';
+        const versionLabel = data.engineVersion ?? data.version ?? 'dev';
+        const commitFragment = currentDaemonCommit
+          ? ` | ${currentDaemonCommit.substring(0, 7)}`
+          : '';
+        statusBadge.textContent = `Daemon OK (v${versionLabel}${commitFragment})`;
         statusBadge.className = 'status-badge ok';
       } else throw new Error();
     } catch (e) {

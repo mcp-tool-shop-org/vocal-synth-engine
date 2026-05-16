@@ -15,6 +15,7 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { fft, applyHannWindow } from '../dsp/fft.js';
 import { findPitchYin } from '../dsp/pitch.js';
+import { computeAssetsHash } from '../preset/loader.js';
 
 const SR = 48000;
 const FFT_SIZE = 2048;
@@ -40,6 +41,17 @@ async function analyzeWav(wavPath: string, timbreName: string): Promise<TimbreRe
     samples = samples[0];
   }
   const mono = samples as Float32Array;
+
+  // T-006: refuse WAVs shorter than one FFT frame (same defect previously in
+  // analyze.ts at line 31). Negative startIdx → V8 counts from end of array
+  // → garbage F0 + spectrum → silent broken preset. Fail loudly instead.
+  if (mono.length < FFT_SIZE) {
+    throw new Error(
+      `Input WAV '${wavPath}' too short: ${mono.length} samples at 48 kHz = ` +
+      `${(mono.length / SR).toFixed(3)}s. Need at least ${FFT_SIZE} samples ` +
+      `(~${(FFT_SIZE / SR).toFixed(3)}s).`
+    );
+  }
 
   // Take frame from center of file
   const startIdx = Math.floor(mono.length / 2) - Math.floor(FFT_SIZE / 2);
@@ -160,19 +172,28 @@ async function main() {
     }
   }
 
-  // Write assets
-  const writeF32 = async (name: string, data: Float32Array) => {
-    await writeFile(join(assetsDir, name), Buffer.from(data.buffer));
+  // Write assets and collect bytes (keyed by manifest-relative path) so we
+  // can compute the integrity hash via the same helper the loader uses for
+  // verification — closes T-007.
+  const assetEntries = new Map<string, Buffer>();
+  const writeF32 = async (relPath: string, data: Float32Array) => {
+    const buf = Buffer.from(data.buffer, data.byteOffset, data.byteLength);
+    await writeFile(join(presetDir, relPath), buf);
+    assetEntries.set(relPath, buf);
   };
 
   // Shared freq axis — use first timbre's (they're all identical for same SR/FFT)
-  await writeF32('freq_axis_hz.f32', results[0].freqHz);
+  await writeF32('assets/freq_axis_hz.f32', results[0].freqHz);
 
   for (const r of results) {
-    await writeF32(`${r.name}_harmonics_mag.f32`, r.harmonicsMag);
-    await writeF32(`${r.name}_envelope_db.f32`, r.envelopeDb);
-    await writeF32(`${r.name}_noise_db.f32`, r.noiseDb);
+    await writeF32(`assets/${r.name}_harmonics_mag.f32`, r.harmonicsMag);
+    await writeF32(`assets/${r.name}_envelope_db.f32`, r.envelopeDb);
+    await writeF32(`assets/${r.name}_noise_db.f32`, r.noiseDb);
   }
+
+  // T-007: real SHA-256 from on-disk asset bytes via the shared helper. No
+  // more 'sha256:pending' — the loader will reject any future mismatch.
+  const assetsHash = computeAssetsHash(assetEntries);
 
   // Build manifest
   const manifest = {
@@ -203,9 +224,11 @@ async function main() {
         vibrato: { rateHz: 5.8, depthCents: 35, onsetMs: 220 },
       },
     })),
+    // analysisHash dropped — T-007 closes the "integrity for show" pattern.
+    // The loader only verifies assetsHash; shipping a second hash field with
+    // a stub value would re-introduce the exact misleading behaviour.
     integrity: {
-      assetsHash: 'sha256:pending',
-      analysisHash: 'sha256:pending',
+      assetsHash,
     },
   };
 
@@ -216,6 +239,7 @@ async function main() {
   console.log(`  Harmonics: ${MAX_HARMONICS}`);
   console.log(`  Freq bins: ${refLen}`);
   console.log(`  Assets: ${assetsDir}`);
+  console.log(`  Integrity: ${assetsHash}`);
 }
 
 main().catch(console.error);

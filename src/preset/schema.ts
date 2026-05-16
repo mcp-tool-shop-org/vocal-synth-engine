@@ -13,9 +13,21 @@ const RelativeAssetPath = z.string().refine(
   { message: "asset path must be relative and may not contain '..' segments" }
 );
 
+/**
+ * Strict semver shape for the manifest version field. The loader enforces
+ * compatibility against `SUPPORTED_PRESET_VERSIONS` (in ./loader.ts) — this
+ * just rejects malformed strings (e.g. 'v0.2.0', '0.2', 'latest') at parse
+ * time so the version-compat error has something useful to compare against.
+ * Closes T-010.
+ */
+const SemverVersion = z.string().regex(
+  /^\d+\.\d+\.\d+$/,
+  { message: "version must be a strict semver MAJOR.MINOR.PATCH string (e.g. '0.2.0')" }
+);
+
 export const VoicePresetSchema = z.object({
   schema: z.literal('mcp-voice-engine.voicepreset'),
-  version: z.string(),
+  version: SemverVersion,
   id: z.string(),
   sampleRateHz: z.number(),
   analysis: z.object({
@@ -53,9 +65,13 @@ export const VoicePresetSchema = z.object({
       }),
     })
   ),
+  // `integrity.analysisHash` was historically required by the schema but
+  // never verified by the loader; T-007 drops it from new writes to stop the
+  // "integrity for show" pattern. It remains accepted for backward-compat
+  // with on-disk presets (default-voice/voicepreset.json still writes both).
   integrity: z.object({
     assetsHash: z.string(),
-    analysisHash: z.string(),
+    analysisHash: z.string().optional(),
   }).optional(),
 });
 

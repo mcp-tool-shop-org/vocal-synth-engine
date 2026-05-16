@@ -1,4 +1,9 @@
-FROM node:20-slim AS builder
+# Minor-pinned to node:20.18-slim. Dependabot docker ecosystem will
+# auto-bump this on minor/patch advisories. For full reproducibility,
+# pin to an immutable digest (`@sha256:<digest>`) — current setting is
+# defense-in-depth without that strict guarantee. See SCORECARD.md
+# "Open Items" for the digest-pin upgrade path.
+FROM node:20.18-slim AS builder
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -11,7 +16,7 @@ COPY apps/ apps/
 
 RUN npm run build
 
-FROM node:20-slim
+FROM node:20.18-slim
 RUN groupadd -r vsynth && useradd -r -g vsynth vsynth
 
 WORKDIR /app

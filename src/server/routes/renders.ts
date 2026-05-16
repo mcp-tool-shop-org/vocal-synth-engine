@@ -47,6 +47,47 @@ function asStringIdOr400(id: string | string[] | undefined, res: any): string | 
   return id;
 }
 
+/**
+ * S-015 — read + JSON.parse a file inside the render store, returning typed
+ * responses for each failure mode instead of letting a synchronous throw
+ * bubble through express:
+ *   - 404 if the file does not exist
+ *   - 500 with INVALID_JSON code if the file is corrupt (partial write,
+ *     concurrent saveRender, etc.) — see S-016 / S-017
+ *   - 500 with READ_ERROR code on any other I/O failure
+ *
+ * fs.readFile is async so a 100MB telemetry file does not block the event
+ * loop for every other in-flight request.
+ */
+async function streamJsonFile(
+  filePath: string,
+  filename: string,
+  res: any,
+): Promise<void> {
+  try {
+    const raw = await fs.promises.readFile(filePath, 'utf8');
+    try {
+      res.json(JSON.parse(raw));
+    } catch (parseErr: any) {
+      res.status(500).json({
+        ok: false,
+        error: `Corrupt ${filename} for this render`,
+        code: 'INVALID_JSON',
+      });
+    }
+  } catch (err: any) {
+    if (err?.code === 'ENOENT') {
+      res.status(404).end();
+      return;
+    }
+    res.status(500).json({
+      ok: false,
+      error: `Failed to read ${filename}`,
+      code: 'READ_ERROR',
+    });
+  }
+}
+
 rendersRouter.get("/", (_req, res) => {
   res.json({ ok: true, renders: listRenders() });
 });
@@ -61,36 +102,28 @@ rendersRouter.get("/:id/audio.wav", (req, res) => {
   fs.createReadStream(p).pipe(res);
 });
 
-rendersRouter.get("/:id/meta", (req, res) => {
+rendersRouter.get("/:id/meta", async (req, res) => {
   const dir = resolveRenderDirOr400(req.params.id, res);
   if (!dir) return;
-  const p = path.join(dir, "meta.json");
-  if (!fs.existsSync(p)) return res.status(404).end();
-  res.json(JSON.parse(fs.readFileSync(p, "utf8")));
+  await streamJsonFile(path.join(dir, "meta.json"), "meta.json", res);
 });
 
-rendersRouter.get("/:id/score", (req, res) => {
+rendersRouter.get("/:id/score", async (req, res) => {
   const dir = resolveRenderDirOr400(req.params.id, res);
   if (!dir) return;
-  const p = path.join(dir, "score.json");
-  if (!fs.existsSync(p)) return res.status(404).end();
-  res.json(JSON.parse(fs.readFileSync(p, "utf8")));
+  await streamJsonFile(path.join(dir, "score.json"), "score.json", res);
 });
 
-rendersRouter.get("/:id/telemetry", (req, res) => {
+rendersRouter.get("/:id/telemetry", async (req, res) => {
   const dir = resolveRenderDirOr400(req.params.id, res);
   if (!dir) return;
-  const p = path.join(dir, "telemetry.json");
-  if (!fs.existsSync(p)) return res.status(404).end();
-  res.json(JSON.parse(fs.readFileSync(p, "utf8")));
+  await streamJsonFile(path.join(dir, "telemetry.json"), "telemetry.json", res);
 });
 
-rendersRouter.get("/:id/provenance", (req, res) => {
+rendersRouter.get("/:id/provenance", async (req, res) => {
   const dir = resolveRenderDirOr400(req.params.id, res);
   if (!dir) return;
-  const p = path.join(dir, "provenance.json");
-  if (!fs.existsSync(p)) return res.status(404).end();
-  res.json(JSON.parse(fs.readFileSync(p, "utf8")));
+  await streamJsonFile(path.join(dir, "provenance.json"), "provenance.json", res);
 });
 
 const renderPatchSchema = z

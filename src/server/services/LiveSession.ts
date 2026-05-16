@@ -25,7 +25,7 @@ import {
 } from '../../types/live.js';
 import { saveRender } from '../storage/renderStore.js';
 import { createHash } from 'node:crypto';
-import { execSync } from 'node:child_process';
+import { getGitCommit } from '../util/gitCommit.js';
 import wavefile from 'wavefile';
 const { WaveFile } = wavefile;
 
@@ -61,9 +61,9 @@ const MAX_RECORD_SEC = 60;          // cap recording at 60 seconds
 const MAX_MSGS_PER_SEC = 200;       // WS message rate limit per session
 const MAX_SEND_QUEUE_BYTES = 4 * 1024 * 1024; // 4 MB — skip audio frames if client is backed up
 
-function getGitCommit(): string {
-  try { return execSync('git rev-parse HEAD').toString().trim(); } catch { return 'unknown'; }
-}
+// S-022 — git commit is now captured once at module load via
+// src/server/util/gitCommit.ts; the local helper used to spawn `git
+// rev-parse HEAD` per record/save (~50ms per call on Windows).
 
 export class LiveSession {
   private ws: WebSocket;

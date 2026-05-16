@@ -19,6 +19,10 @@ on:
       - 'lib/**'
       - 'tests/**'
       - '.github/workflows/**'
+  schedule:
+    # Weekly Monday 06:00 UTC scheduled audit catches new advisories on
+    # dormant branches. Severity threshold documented in SECURITY.md.
+    - cron: '0 6 * * 1'
   workflow_dispatch:
 
 concurrency:
@@ -40,6 +44,10 @@ jobs:
         run: npm ci
 
       - name: Lint
+        # Intentionally guarded with --if-present. No lint config exists
+        # (no ESLint / Prettier). tsconfig `strict: true` provides the
+        # type-level guarantees we rely on. If a `lint` script is added
+        # to package.json, this step auto-engages. See SHIP_GATE.md Notes.
         run: npm run lint --if-present
 
       - name: Test
@@ -49,4 +57,6 @@ jobs:
         run: npm run build:server
 
       - name: Security audit
-        run: npm audit --omit=dev
+        # Fail on high/critical only — moderate/low don't block release.
+        # Threshold documented in SECURITY.md.
+        run: npm audit --audit-level=high --omit=dev

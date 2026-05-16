@@ -75,6 +75,11 @@ export class LiveSynthEngine {
   private config: LiveEngineConfig;
   private preset: LoadedVoicePreset;
   private voices: LiveVoice[];
+  /** E-020: voices excised by a polyphony shrink that were still mid-release.
+   *  We keep their releases audible (no abrupt click) but exclude them from
+   *  new-note allocation. Pruned at end of render() once a voice's release
+   *  fully completes. The original .voices array remains the allocation pool. */
+  private sunsetVoices: LiveVoice[] = [];
   private currentSample: number = 0;
   private playing: boolean = false;
 
@@ -165,10 +170,23 @@ export class LiveSynthEngine {
         v.releaseDurationSec = 0.01; // 10ms fast release to avoid clicks
       }
     }
-    // Zero output buffer so next frame starts clean. (Note: render() also
-    // zeros this on entry, but the explicit fill here protects any consumer
-    // who reads the buffer after panic() before the next render() call.)
-    this.outBuf.fill(0);
+    // E-020: drop any lingering sunset voices outright. Panic is supposed
+    // to take us to silence in ~10 ms; trailing them through a longer
+    // release would defeat that promise.
+    for (const v of this.sunsetVoices) {
+      v.noteId = null;
+      v.noteOffSample = -1;
+    }
+    this.sunsetVoices.length = 0;
+    // E-019: we deliberately do NOT fill this.outBuf here. render() zeros
+    // it unconditionally at entry, so any sample a consumer ever observes
+    // is one that render() produced AFTER the panic. The previous explicit
+    // fill was dead — it could only ever be read by a caller who read the
+    // buffer between panic() and the next render(), and the engine has no
+    // documented surface for that (render() returns the same buffer it
+    // mutates). If you add such a surface, restore the fill here AND
+    // document that consumers must not retain the returned buffer past
+    // the next panic()/render() boundary.
     // Clear morph weights so we fall back to per-voice timbre
     this.globalTimbreWeights = null;
     // E-009: reset click-detection reference so the next non-silent sample
@@ -287,11 +305,20 @@ export class LiveSynthEngine {
           this.voices.push(this.createVoice(i));
         }
       } else {
-        // Shrink: keep first N voices, panic extras
+        // E-020: shrink without dropping audible release tails. Voices being
+        // excised that are still sounding are kicked into release (10ms) AND
+        // moved to the sunset list, where render() continues to mix them
+        // until their release naturally completes. Without this, a voice in
+        // mid-release was silently truncated, producing an audible click.
         for (let i = newMax; i < this.voices.length; i++) {
-          if (this.voices[i].noteId !== null) {
-            this.voices[i].noteOffSample = this.currentSample;
-            this.voices[i].releaseDurationSec = 0.01;
+          const v = this.voices[i];
+          if (v.noteId !== null) {
+            // Force release if it hasn't started yet so the sunset reaches 0.
+            if (v.noteOffSample < 0) {
+              v.noteOffSample = this.currentSample;
+              v.releaseDurationSec = 0.01;
+            }
+            this.sunsetVoices.push(v);
           }
         }
         this.voices.length = newMax;
@@ -492,6 +519,103 @@ export class LiveSynthEngine {
       }
     }
 
+    // E-020: render any sunset voices (excised by a polyphony shrink while
+    // still mid-release). Same envelope math + mixing as the main pool, but
+    // these voices cannot be re-allocated — once their release completes,
+    // they're pruned from sunsetVoices. We track their contribution against
+    // activeCount so voicesActive/voicesMaxSeen tell the truth.
+    if (this.sunsetVoices.length > 0) {
+      for (const voice of this.sunsetVoices) {
+        if (voice.noteId === null) continue; // already freed
+
+        pf0.fill(0);
+        pAmp.fill(0);
+        pBreath.fill(0);
+        for (const t of timbres) pTW[t].fill(0);
+        this.paramConsonantAmp.fill(0);
+        this.paramConsonantHpfCutoff.fill(0);
+        this.paramHarmonicGain.fill(1.0);
+
+        let voiceIsActive = false;
+
+        for (let i = 0; i < blockSize; i++) {
+          const sampleIndex = this.currentSample + i;
+          const noteAgeSec = (sampleIndex - voice.noteOnSample) / sr;
+
+          const attackSec = 0.01;
+          const attackEnv = noteAgeSec >= attackSec ? 1.0 :
+                            (noteAgeSec <= 0 ? 0 : noteAgeSec / attackSec);
+
+          let releaseEnv = 1.0;
+          if (voice.noteOffSample >= 0) {
+            const releaseAgeSec = (sampleIndex - voice.noteOffSample) / sr;
+            if (releaseAgeSec < 0) {
+              releaseEnv = 1.0;
+            } else if (releaseAgeSec >= voice.releaseDurationSec) {
+              releaseEnv = 0;
+            } else {
+              releaseEnv = 1.0 - (releaseAgeSec / voice.releaseDurationSec);
+            }
+          }
+
+          const env = attackEnv < releaseEnv ? attackEnv : releaseEnv;
+          if (env <= 0.0001) continue;
+          voiceIsActive = true;
+
+          let f0 = midiToHz(voice.midi);
+          // Sunset voices don't recompute portamento/vibrato — they're
+          // strictly fading out; the held pitch is enough.
+          pf0[i] = f0;
+          pAmp[i] = env * voice.velocity;
+          pBreath[i] = voice.breathiness;
+
+          if (this.globalTimbreWeights && !voice.timbre) {
+            for (const t of timbres) {
+              pTW[t][i] = this.globalTimbreWeights[t] ?? 0;
+            }
+          } else {
+            const activeTimbre = voice.timbre || this.config.defaultTimbre;
+            for (const t of timbres) {
+              pTW[t][i] = t === activeTimbre ? 1.0 : 0.0;
+            }
+          }
+        }
+
+        if (voiceIsActive) {
+          activeCount++;
+          const params: RenderParams = {
+            f0Hz: pf0,
+            amp: pAmp,
+            timbreWeights: pTW,
+            breathiness: pBreath,
+            consonantAmp: this.paramConsonantAmp,
+            consonantHpfCutoff: this.paramConsonantHpfCutoff,
+            harmonicGain: this.paramHarmonicGain,
+          };
+          voice.renderer.renderBlock(params, voiceOut);
+          for (let i = 0; i < blockSize; i++) {
+            out[i] += voiceOut[i];
+          }
+        }
+
+        // Mark fully-faded sunset voices for prune (release reached 0).
+        if (!voiceIsActive && voice.noteOffSample >= 0) {
+          voice.noteId = null;
+          voice.noteOffSample = -1;
+        }
+      }
+
+      // Prune fully-freed sunset voices in-place.
+      let writeIdx = 0;
+      for (let readIdx = 0; readIdx < this.sunsetVoices.length; readIdx++) {
+        if (this.sunsetVoices[readIdx].noteId !== null) {
+          if (writeIdx !== readIdx) this.sunsetVoices[writeIdx] = this.sunsetVoices[readIdx];
+          writeIdx++;
+        }
+      }
+      this.sunsetVoices.length = writeIdx;
+    }
+
     // E-010: capture PRE-limiter peak so peakDbfs telemetry reflects the
     // true mix-bus level, not the limiter-clipped level. Doing this in a
     // separate loop keeps the limiter loop branch-free.
@@ -533,7 +657,12 @@ export class LiveSynthEngine {
 
   /** Read and reset telemetry counters. */
   getTelemetryAndReset(): LiveTelemetry {
-    const activeCount = this.voices.filter(v => v.noteId !== null).length;
+    // E-020: include sunset voices (mid-release after a polyphony shrink) so
+    // operators see the true sounding-voice count, not just allocation-pool
+    // members.
+    const activeCount =
+      this.voices.filter(v => v.noteId !== null).length +
+      this.sunsetVoices.filter(v => v.noteId !== null).length;
     const peak = this.peakSample > 0 ? 20 * Math.log10(this.peakSample) : -Infinity;
     // E-010: limiter reduction = how many dB the limiter pulled the peak
     // down. Positive number; 0 means the limiter was idle (or disabled).
@@ -570,9 +699,13 @@ export class LiveSynthEngine {
     return this.currentSample / this.config.sampleRateHz;
   }
 
-  /** Active voices count */
+  /** Active voices count (includes sunset voices still in mid-release after
+   *  a polyphony shrink — E-020). */
   get activeVoiceCount(): number {
-    return this.voices.filter(v => v.noteId !== null).length;
+    return (
+      this.voices.filter(v => v.noteId !== null).length +
+      this.sunsetVoices.filter(v => v.noteId !== null).length
+    );
   }
 
   /** Auto-release notes held longer than maxAgeSec. Returns count released. */
