@@ -190,16 +190,20 @@ jobs:
             exit 0
           fi
 
-          # Probe target — if the dogfood-labs receiver isn't deployed yet, treat
-          # dispatch as a no-op so the scenario verdict alone gates this workflow.
-          if ! gh api repos/mcp-tool-shop-org/dogfood-labs --silent 2>/dev/null; then
-            echo "::warning::dogfood-labs receiver not reachable (404) — skipping dispatch; scenario verdict still gates this job"
-            exit 0
-          fi
-
-          jq -n --argjson sub "$SUBMISSION" \
+          # Dispatch is best-effort: the dogfood-labs receiver may not be
+          # deployed yet. The scenario verdict above is what actually gates
+          # this workflow — so any dispatch failure becomes a warning.
+          set +e
+          DISPATCH_OUT=$(jq -n --argjson sub "$SUBMISSION" \
             '{"event_type":"dogfood_submission","client_payload":{"submission":$sub}}' \
             | gh api repos/mcp-tool-shop-org/dogfood-labs/dispatches \
-              --input - --silent
+              --input - --silent 2>&1)
+          DISPATCH_RC=$?
+          set -e
+
+          if [ $DISPATCH_RC -ne 0 ]; then
+            echo "::warning::Dispatch to mcp-tool-shop-org/dogfood-labs failed (rc=$DISPATCH_RC): $DISPATCH_OUT — scenario verdict above still gates this job"
+            exit 0
+          fi
 
           echo "Dispatched $RUN_ID to dogfood-labs"
