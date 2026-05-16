@@ -1,6 +1,7 @@
 import { Router } from "express";
 import fs from "fs";
 import path from "path";
+import { randomUUID } from "crypto";
 import { z } from "zod";
 import {
   listRenders,
@@ -176,11 +177,22 @@ rendersRouter.post("/promote-last", validateBody(promoteLastSchema), (req, res) 
     const lastDir = getRenderDir("last");
     if (!fs.existsSync(lastDir)) return res.status(404).json({ error: "No last render found" });
 
+    // S-016 / R-003 — promote-last must also use ISO timestamp + UUID slug
+    // so two concurrent promote-last calls in the same millisecond don't
+    // collide on directory name (the same race S-016 fixed in saveRender).
     const createdAt = new Date().toISOString();
-    const id = createdAt.replace(/[:.]/g, "-");
-    const newDir = getRenderDir(id);
+    const slug = randomUUID().slice(0, 8);
+    let id = `${createdAt.replace(/[:.]/g, "-")}-${slug}`;
+    let newDir = getRenderDir(id);
+    // Retry once with a fresh slug if EEXIST somehow occurs (very rare given UUID).
+    if (fs.existsSync(newDir)) {
+      const altSlug = randomUUID().slice(0, 8);
+      id = `${createdAt.replace(/[:.]/g, "-")}-${altSlug}`;
+      newDir = getRenderDir(id);
+    }
 
-    fs.cpSync(lastDir, newDir, { recursive: true });
+    fs.mkdirSync(newDir, { recursive: false });
+    fs.cpSync(lastDir, newDir, { recursive: true, force: false, errorOnExist: true });
 
     const metaPath = path.join(newDir, "meta.json");
     const meta = JSON.parse(fs.readFileSync(metaPath, "utf8"));

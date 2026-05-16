@@ -77,8 +77,11 @@ jobs:
           echo "presets_status=$PRESETS_OK" >> "$GITHUB_OUTPUT"
 
           # Verify output
+          # S-018: public /api/health response trimmed to {ok, version, uptimeSec};
+          # full details now live behind requireAuth at /api/health/detailed.
+          # The verify check only asserts the trimmed public shape.
           VERIFY_OK=fail
-          if [ "$HEALTH_OK" = "pass" ] && jq -e '.ok and .node' /tmp/health.json > /dev/null 2>&1; then
+          if [ "$HEALTH_OK" = "pass" ] && jq -e '.ok and .version and (.uptimeSec | type == "number")' /tmp/health.json > /dev/null 2>&1; then
             VERIFY_OK=pass
           fi
           echo "verify_status=$VERIFY_OK" >> "$GITHUB_OUTPUT"

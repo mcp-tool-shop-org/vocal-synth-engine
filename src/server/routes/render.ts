@@ -91,7 +91,7 @@ const configSchema = z
         message: 'blockSize must be one of 128, 256, 512, 1024, 2048',
       })
       .optional(),
-    deterministic: z.enum(['exact', 'approximate']).optional(),
+    deterministic: z.enum(['exact', 'fast']).optional(),
     rngSeed: z.number().int().min(-2_147_483_648).max(2_147_483_647).optional(),
     defaultTimbre: z.string().min(1).max(64).optional(),
     maxPolyphony: z.number().int().min(1).max(64).optional(),
