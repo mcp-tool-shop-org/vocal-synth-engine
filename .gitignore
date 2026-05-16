@@ -27,6 +27,9 @@ test-results/
 playwright-report/
 tests/__bench__/last-run.json
 
+# polyglot-mcp translation cache (local-only)
+.polyglot-cache.json
+
 # Env / secrets — never commit. .env.example is allowed for documenting required vars.
 .env
 .env.*

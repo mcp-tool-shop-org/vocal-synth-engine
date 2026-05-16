@@ -1,12 +1,5 @@
 <p align="center">
-  <a href="README.md">English</a> ·
-  <a href="README.ja.md">日本語</a> ·
-  <a href="README.zh.md">中文</a> ·
-  <a href="README.es.md">Español</a> ·
-  <a href="README.fr.md">Français</a> ·
-  <a href="README.hi.md">हिन्दी</a> ·
-  <a href="README.it.md">Italiano</a> ·
-  <a href="README.pt-BR.md">Português</a>
+  <a href="README.md">English</a> | <a href="README.zh.md">中文</a> | <a href="README.es.md">Español</a> | <a href="README.fr.md">Français</a> | <a href="README.hi.md">हिन्दी</a> | <a href="README.it.md">Italiano</a> | <a href="README.pt-BR.md">Português (BR)</a>
 </p>
 
 <p align="center">
@@ -16,25 +9,28 @@
 <p align="center">
   <a href="https://github.com/mcp-tool-shop-org/vocal-synth-engine/actions/workflows/ci.yml"><img src="https://github.com/mcp-tool-shop-org/vocal-synth-engine/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="License: MIT">
-  <a href="https://mcp-tool-shop-org.github.io/vocal-synth-engine/"><img src="https://img.shields.io/badge/Landing_Page-live-blue" alt="Landing Page"></a>
+  <img src="https://img.shields.io/badge/node-%3E%3D20-339933?logo=node.js&logoColor=white" alt="Node >=20">
+  <img src="https://img.shields.io/badge/status-pre--release-orange" alt="Status: pre-release">
 </p>
 
-<p align="center"><strong>Deterministic vocal instrument engine — additive synthesis, voice presets, real-time WebSocket streaming, multi-user jam sessions, cockpit UI</strong></p>
+<p align="center"><strong>Deterministic vocal instrument engine — 加法合成、ボイスプリセット、リアルタイムWebSocketストリーミング、マルチユーザーでの共同セッション、操作画面</strong></p>
 
-TypeScriptで構築された、決定論的な音声合成エンジンです。スコアデータから、加算合成、音声プリセット、およびリアルタイムのWebSocketストリーミングを使用して、歌声を生成します。キーボード/MIDI経由でリアルタイムに演奏したり、複数ユーザーでの共同セッションに参加したり、スコアをWAV形式でレンダリングしたりできます。
+TypeScriptで構築された、決定論的なボーカルインストゥルメントエンジンです。加法合成、ボイスプリセット、リアルタイムWebSocketストリーミングを使用して、楽譜データから歌声を生成します。キーボード/MIDIでリアルタイムに演奏したり、マルチユーザーでの共同セッションに参加したり、楽譜をWAV形式で出力したりできます。
+
+**ステータス:** v1.0.3 (ソースコード)。まだnpmに公開されていません。v1.0.4が公開されるまで、ソースコードからインストールしてください（[インストール](#install)を参照）。
 
 ## 機能
 
-- **加算音声合成**：倍音成分 + スペクトルエンベロープ + ノイズ残響
-- **15種類の音声プリセット**：Kokoro TTSの音声分析データと、ラボで作成されたプリセットを組み合わせたもので、それぞれに複数の音色バリエーションがあります。
-- **ポリフォニックレンダリング**：最大同時発音数を設定可能。各音声の状態管理と、音声の割り当てを行います。
-- **ライブモード**：キーボードまたはMIDI経由で音を演奏し、リアルタイムのWebSocketオーディオストリーミングで出力します。
-- **共同セッション**：ホスト権限を持つ、複数ユーザーでの共同セッション。参加者の識別と、録音機能があります。
-- **スコア入力**：`VocalScore`ファイルをトラックに読み込み、トランスポートと同期した自動再生を行います。
-- **録音とエクスポート**：ライブパフォーマンスをEventTapeにキャプチャし、完全な情報とともにWAV形式でエクスポートします。
-- **歌詞と音素**：文字から音素への変換パイプラインと、音素の可視化機能。
-- **コックピットUI**：ピアノロールエディター、ライブキーボード、XYパッド、レンダリングバンク、およびテレメトリ機能を備えた、ブラウザベースのSPA。
-- **決定論的**：シード値に基づいた乱数生成により、同じ入力からは常に同じ出力が得られます。
+- **加法ボーカル合成:** ハーモニック成分 + スペクトルエンベロープ + ノイズ残響
+- **15種類のボイスプリセット:** Kokoro TTSの分析データ + 実験的なプリセット。それぞれに複数の音色があります。
+- **ポリフォニック再生:** 設定可能な最大ポリフォニー。各ボイスの状態管理とボイスの切り替え機能があります。
+- **ライブモード:** キーボードまたはMIDIでノートを演奏し、リアルタイムのWebSocketオーディオストリーミングで再生します。
+- **共同セッション:** ホスト権限、参加者識別、録音機能を持つマルチユーザーの共同セッション。
+- **楽譜入力:** `VocalScore`をトラックにロードし、自動的に再生します（再生速度と同期）。
+- **録音とエクスポート:** ライブパフォーマンスをEventTapeにキャプチャし、完全な情報とともにWAV形式でエクスポートします。
+- **歌詞と音素:** 音素化パイプラインと、音素の可視化機能。
+- **操作画面:** ブラウザベースのSPAで、ピアノロールエディタ、ライブキーボード、XYパッド、レンダリングバンク、およびテレメトリー機能を提供します。
+- **決定論的:** シード値を持つ乱数生成器を使用し、同じ入力からは常に同じ出力が得られます。
 
 ## アーキテクチャ
 
@@ -58,18 +54,36 @@ TypeScriptで構築された、決定論的な音声合成エンジンです。�
               (.f32 blobs)   Pitch Det.   vibrato, automation)
 ```
 
-**主要ディレクトリ:**
+**主要なディレクトリ:**
 
 | ディレクトリ | 目的 |
-| ----------- | --------- |
-| `src/engine/` | コア合成エンジン：ブロックレンダラー、ストリーミングエンジン、ADSR/ビブラートカーブ |
-| `src/dsp/` | 信号処理：FFT、ピッチ検出 |
-| `src/preset/` | 音声プリセットのスキーマ、ローダー、および解決機能 |
+|-----------|---------|
+| `src/engine/` | コアシンセ — ブロックレンダラー、ストリーミングエンジン、ADSR/ビブラートカーブ |
+| `src/dsp/` | 信号処理 — FFT、ピッチ検出 |
+| `src/preset/` | ボイスプリセットのスキーマ、ローダー、および解決関数 |
 | `src/server/` | Express + WebSocket APIサーバー、共同セッションマネージャー |
-| `src/types/` | 共有型データ：スコア、共同セッションプロトコル、プリセット |
-| `src/cli/` | CLIツール + 統合テストスイート |
-| `apps/cockpit/` | ブラウザコックピットUI (Vite + vanilla TS) |
-| `presets/` | 15種類のバンドルされた音声プリセット（バイナリ音色データを含む） |
+| `src/types/` | 共有型データ — 楽譜、共同セッションプロトコル、プリセット |
+| `src/cli/` | ユーザー向けのCLIツール (analyze, build-preset, compare, inspect, play-score, resynth, gen-vowel-wav, realtime-demo) |
+| `scripts/` | ビルド/テストの回帰スクリプト (配布されず、`npm test`の一部ではありません) |
+| `apps/cockpit/` | ブラウザベースの操作画面 (Vite + vanilla TS) |
+| `presets/` | 15種類のバンドルされたボイスプリセット（バイナリ形式の音色データを含む） |
+
+## インストール
+
+パッケージ `@mcptoolshop/vocal-synth-engine` はまだnpmに公開されていません。v1.0.4が公開されるまで、ソースコードからインストールしてください。
+
+```bash
+git clone https://github.com/mcp-tool-shop-org/vocal-synth-engine.git
+cd vocal-synth-engine
+npm ci
+npm run build
+```
+
+特定のコミットをプロジェクトに固定するには:
+
+```bash
+npm install github:mcp-tool-shop-org/vocal-synth-engine#<commit-sha>
+```
 
 ## クイックスタート
 
@@ -78,48 +92,48 @@ npm ci
 npm run dev
 ```
 
-開発サーバーは`http://localhost:4321`で起動します。コックピットUIも同じポートで提供されます。
+開発サーバーは `http://localhost:4321` で起動します。操作画面も同じポートで提供されます。
 
-## コックピットUI
+## 操作画面
 
-コックピットは、ピアノロールエディター、ライブキーボード、XYパッド、レンダリングバンク、およびテレメトリ機能を備えた、ブラウザベースのSPAです。3つのタブがあります。
+操作画面は、3つのタブを持つブラウザベースのSPAです。
 
-### スコアエディター
+### 楽譜エディタ
 - ドラッグ＆ドロップでノートを作成、移動、サイズ変更できるピアノロール
-- 各ノートごとに、ベロシティ、音色、息の強さ、ビブラート、ポルタメントを調整可能
+- 各ノートのコントロール: ベロシティ、音色、息の強さ、ビブラート、ポルタメント
 - 自動音素生成機能付きの歌詞入力
-- ピアノロールと同期した音素表示
-- 設定可能なプリセット、ポリフォニー、シード値、およびBPMでWAV形式にレンダリング
+- ピアノロールと同期した音素の可視化
+- 設定可能なプリセット、ポリフォニー、シード値、BPMでWAV形式でレンダリング
 
 ### ライブモード
-- 24鍵のクロマティックキーボード（マウスとキーバインド）
+- 24鍵のクロマチックキーボード (マウス + キーバインド)
 - チャンネルフィルタリング機能付きのMIDIデバイス入力
-- リアルタイムの音色変化（X軸）と息の強さ（Y軸）を調整できるXYパッド
-- ホールドペダル、ベロシティ/息の強さスライダー、ビブラートコントロール
-- 量子化グリッド（1/4、1/8、1/16）付きのメトロノーム
-- レイテンシ補正（低、バランス、安全のプリセット）
+- リアルタイムの音色変化 (X軸) と息の強さ (Y軸) を調整できるXYパッド
+- ホールドペダル、ベロシティ/息の強さのスライダー、ビブラートコントロール
+- 量子化グリッド (1/4, 1/8, 1/16) 付きのメトロノーム
+- レイテンシーの調整 (低、バランス、安全のプリセット)
 - ライブパフォーマンスの録音とレンダリングバンクへの保存
-- ライブテレメトリ：音声数、ピークdBFS、RTF、クリックリスク、WebSocketのジッター
+- ライブテレメトリー: ボイス数、ピークdBFS、RTF、クリックのリスク、WebSocketのジッター
 
 ### レンダリングバンク
-- 保存されたレンダリングを閲覧、再生、ピン留め、名前変更、削除
-- レンダーのスコアをエディターに読み込み
-- レンダー間のテレメトリの比較
-- プロヴェナンスの追跡：コミットSHA、スコアハッシュ、WAVハッシュ
+- 保存したレンダリング結果の閲覧、再生、ピン留め、名前変更、削除
+- レンダリング結果のスコアをエディタに読み込み
+- レンダリング結果間のテレメトリ比較（並べて表示）
+- 起源の追跡：コミットのSHA、スコアのハッシュ値、WAVのハッシュ値
 
-## 共同セッション
+## ジャムセッション
 
-WebSocket経由での複数ユーザー共同セッション（`/ws/jam`）：
+WebSocket経由でのマルチユーザー共同セッション (`/ws/jam`):
 
-- **ホスト権限**：セッションの作成者が、再生、トラック、録音、および量子化を制御します。
-- **ゲスト参加**：ゲストは任意のトラックの音を再生できますが、セッションの状態を変更することはできません。
-- **トラックの所有権**：トラックは作成者に帰属し、所有者またはホストのみが変更または削除できます。
-- **参加者属性**：EventTapeに記録されるすべての音符イベントには、誰が演奏したかが記録されます。
-- **楽譜入力モード**：`VocalScore`をトラックに読み込み、再生速度と同期して自動的に再生します。
-- **録音**：すべての参加者の音符をEventTapeに記録し、WAV形式でエクスポートします。
-- **メトロノーム**：設定可能なBPMと拍子を持つ共有メトロノームです。
+- **ホスト権限**: セッション作成者がトランスポート、トラック、録音、量子化を制御
+- **ゲスト参加**: ゲストは任意のトラックの音を再生できますが、セッションの状態を変更することはできません。
+- **トラックの所有権**: 各トラックは作成者に属し、所有者またはホストのみが変更または削除できます。
+- **参加者属性**: EventTape内のすべての音符イベントには、誰が演奏したかが記録されます。
+- **スコア入力モード**: `VocalScore`をトラックに読み込み、トランスポートと同期した自動再生を行います。
+- **録音**: すべての参加者の音符をEventTapeにキャプチャし、WAV形式でエクスポートします。
+- **メトロノーム**: 設定可能なBPMと拍子を持つ共有メトロノーム。
 
-### Jam Protocol
+### ジャムプロトコル
 
 クライアントは`/ws/jam`に接続し、JSONメッセージを交換します。
 
@@ -135,42 +149,69 @@ Client: track_set_score → Server: score_status
 
 ## API
 
-| エンドポイント | メソッド | Auth | 説明 |
-| ---------- | -------- | ------ | ------------- |
+| エンドポイント | メソッド | 認証 | 説明 |
+|----------|--------|------|-------------|
 | `/api/health` | GET | No | サーバーの状態、バージョン、稼働時間 |
-| `/api/presets` | GET | No | 音色のプリセットを、音質とメタデータとともに一覧表示します。 |
-| `/api/phonemize` | POST | Yes | 歌詞のテキストを、音素イベントに変換します。 |
-| `/api/render` | POST | Yes | 楽譜をWAV形式に変換します。 |
-| `/api/renders` | GET | Yes | 保存されたすべての変換結果を一覧表示します。 |
-| `/api/renders/:id/audio.wav` | GET | Yes | 変換結果のWAVファイルをダウンロードします。 |
-| `/api/renders/:id/score` | GET | Yes | 元の楽譜のJSONデータ |
-| `/api/renders/:id/meta` | GET | Yes | 変換に関するメタデータ |
-| `/api/renders/:id/telemetry` | GET | Yes | 変換に関するテレメトリデータ（ピーク値、RTF、クリック数） |
-| `/api/renders/:id/provenance` | GET | Yes | 生成元情報（コミット、ハッシュ値、設定） |
+| `/api/presets` | GET | No | 音色とメタデータを持つ音声プリセットの一覧 |
+| `/api/phonemize` | POST | はい | 歌詞テキストをフォネムイベントに変換 |
+| `/api/render` | POST | はい | スコアをWAV形式でレンダリング |
+| `/api/renders` | GET | はい | 保存されたレンダリング結果の一覧 |
+| `/api/renders/:id/audio.wav` | GET | はい | レンダリングされたWAVファイルをダウンロード |
+| `/api/renders/:id/score` | GET | はい | 元のスコアのJSONデータ |
+| `/api/renders/:id/meta` | GET | はい | レンダリングのメタデータ |
+| `/api/renders/:id/telemetry` | GET | はい | レンダリングのテレメトリ（ピーク値、RTF、クリック数） |
+| `/api/renders/:id/provenance` | GET | はい | 起源情報（コミット、ハッシュ値、設定） |
 
-認証はオプションです。環境変数`AUTH_TOKEN`が設定されている場合に有効になります。
+認証はオプションです。環境変数`AUTH_TOKEN`が設定されている場合に有効になります。トークンは、`Authorization: Bearer <トークン>`ヘッダーまたは`?token=<トークン>`クエリパラメータで指定できます。
 
 ### WebSocket
 
-| Path | 目的 |
-| ------ | --------- |
+| パス | 目的 |
+|------|---------|
 | `/ws` | ライブモード：単一ユーザーによる音符の再生とオーディオストリーミング |
-| `/ws/jam` | Jamセッション：複数ユーザーによる共同作業と録音 |
+| `/ws/jam` | ジャムセッション：録音機能付きのマルチユーザー共同作業 |
 
-## 音色プリセット
+## MCPサーバー
+
+`vocal-synth-engine`には、Claudeエージェントやその他のMCPクライアントがエンジンを直接呼び出せるようにするためのMCP（Model Context Protocol）サーバーが付属しています。HTTPのオーバーヘッドは不要です。`vocal-synth-engine-mcp`というバイナリエントリーから起動します（標準入出力経由）。
+
+利用可能なツール：
+
+| ツール | 目的 |
+|------|---------|
+| `render_score` | 音声プリセットを使用してVocalScoreをレンダリング → base64エンコードされたWAVデータ + テレメトリ |
+| `phonemize_text` | 歌詞テキスト → ARPAbetフォネムイベント（`notes`が指定されている場合は音符にアライン） |
+| `list_presets` | 利用可能なプリセットIDの一覧（GET /api/presetsと同じ形式） |
+| `validate_score` | VocalScoreのJSONデータをレンダリングせずに解析および検証 |
+| `inspect_preset` | プリセットのマニフェスト + 各音色のハーモニック/エネルギー（`vse-inspect --json`と同じ） |
+
+Claude Desktop / Codeの設定に組み込む：
+
+```json
+{
+  "mcpServers": {
+    "vocal-synth-engine": {
+      "command": "npx",
+      "args": ["-y", "@mcptoolshop/vocal-synth-engine", "vocal-synth-engine-mcp"]
+    }
+  }
+}
+```
+
+## 音声プリセット
 
 マルチ音色に対応した15種類のプリセットが同梱されています。
 
-| プリセット | Voice | 音色 |
-| -------- | ------- | --------- |
-| `default-voice` | 女性の基本音 | デフォルトの音色 |
-| `bright-lab` | 実験用/研究用 | 明るい倍音 |
-| `kokoro-af-*` | Aoede, Heart, Jessica, Sky | 1つの音色につき複数 |
-| `kokoro-am-*` | Eric, Fenrir, Liam, Onyx | 1つの音色につき複数 |
-| `kokoro-bf-*` | Alice, Emma, Isabella | 1つの音色につき複数 |
-| `kokoro-bm-*` | George, Lewis | 1つの音色につき複数 |
+| プリセット | 音声 | 音色 |
+|--------|-------|---------|
+| `default-voice` | 基準となる女性の声 | デフォルトの音色 |
+| `bright-lab` | 実験用 | 明るいフォルマント |
+| `kokoro-af-*` | Aoede, Heart, Jessica, Sky | 各音声に複数 |
+| `kokoro-am-*` | Eric, Fenrir, Liam, Onyx | 各音声に複数 |
+| `kokoro-bf-*` | Alice, Emma, Isabella | 各音声に複数 |
+| `kokoro-bm-*` | George, Lewis | 各音声に複数 |
 
-各プリセットには、バイナリ形式の`.f32`ファイル（倍音の大きさ、スペクトルエンベロープ、ノイズフロア）と、音域、共鳴、ビブラートのデフォルト値を記述したJSONマニフェストが含まれています。
+各プリセットには、バイナリー形式の`.f32`ファイル（ハーモニックの振幅、スペクトルエンベロープ、ノイズフロア）と、ピッチレンジ、共鳴、ビブラートのデフォルト値を記述したJSONマニフェストが含まれています。
 
 ## スクリプト
 
@@ -183,23 +224,54 @@ npm run inspect      # CLI preset inspector
 
 ## テスト
 
-統合テストは、ライブの開発サーバーに対して実行されます。
+主要なテスト環境はvitestです。
 
 ```bash
-# Start the server first
-npm run dev
-
-# Then in another terminal:
-npx tsx src/cli/test-jam-session.ts        # Jam session lifecycle (12 tests)
-npx tsx src/cli/test-jam-recording.ts      # Recording & export (10 tests)
-npx tsx src/cli/test-jam-collaboration.ts  # Collaboration & score input (12 tests)
-npx tsx src/cli/test-score-render.ts       # Score rendering pipeline
-npx tsx src/cli/test-consonants.ts         # Consonant phonemes
-npx tsx src/cli/test-g2p.ts               # Grapheme-to-phoneme
-npx tsx src/cli/test-lyrics-golden.ts      # Lyrics golden tests
-npx tsx src/cli/test-multi-timbre.ts       # Multi-timbre rendering
-npx tsx src/cli/test-noise-tail.ts         # Tail silence/noise
+npm test                # Run all unit + integration tests once
+npm run test:watch      # Watch mode
+npm run test:coverage   # Coverage report
 ```
+
+`scripts/`ディレクトリにある追加の回帰テストスクリプト（ジャムテストには実行中の開発サーバーが必要です。他のテストはスタンドアロンで実行できます）。
+
+```bash
+npx tsx scripts/test-jam-session.ts        # Jam session lifecycle
+npx tsx scripts/test-jam-recording.ts      # Recording & export
+npx tsx scripts/test-jam-collaboration.ts  # Collaboration & score input
+npx tsx scripts/test-score-render.ts       # Score rendering pipeline
+npx tsx scripts/test-consonants.ts         # Consonant phonemes
+npx tsx scripts/test-g2p.ts                # Grapheme-to-phoneme
+npx tsx scripts/test-lyrics-golden.ts      # Lyrics golden tests
+npx tsx scripts/test-multi-timbre.ts       # Multi-timbre rendering
+npx tsx scripts/test-noise-tail.ts         # Tail silence/noise
+```
+
+これらのファイルは、将来的にvitestの`tests/integration/`ディレクトリに移行される予定であり、そのため`npm test`によるテストカバレッジが自動的に適用されます。
+
+## セキュリティとデータ範囲
+
+| 側面 | 詳細 |
+|--------|--------|
+| **Data touched** | 音声合成（メモリ内）、WebSocket接続（ローカルホスト）、WAVファイル出力、楽譜データ、音声プリセット |
+| **Data NOT touched** | テレメトリー、分析機能、クラウド同期機能、認証情報は一切保存されません。 |
+| **Permissions** | ネットワーク：ローカルホスト上のWebSocketサーバー。ディスク：ユーザーが指定したパスへのWAVファイル出力。 |
+| **Network** | ローカルホストのWebSocketサーバーのみ。外部への接続はありません。 |
+| **Telemetry** | 収集も送信も行いません。 |
+
+脆弱性に関する報告は、[SECURITY.md](SECURITY.md) を参照してください。
+
+## スコアカード
+
+| カテゴリ | スコア |
+|----------|-------|
+| A. セキュリティ | 10 |
+| B. エラー処理 | 10 |
+| C. 運用ドキュメント | 10 |
+| D. リリース時の品質管理 | 10 |
+| E. 認証（ソフト） | 10 |
+| **Overall** | **50/50** |
+
+> 詳細な監査：[SHIP_GATE.md](SHIP_GATE.md) · [SCORECARD.md](SCORECARD.md)
 
 ## ライセンス
 

@@ -4,7 +4,7 @@
 
 **Tags:** `[all]` every repo · `[npm]` `[pypi]` `[vsix]` `[desktop]` `[container]` published artifacts · `[mcp]` MCP servers · `[cli]` CLI tools
 
-**Last reviewed:** 2026-05-16 (Phase 3 Wave 3b — post-extraction refresh).
+**Last reviewed:** 2026-05-16 (Phase 10 — post-dogfood-swarm full-treatment release-prep).
 
 ---
 
@@ -44,13 +44,15 @@
 
 ## D. Shipping Hygiene
 
-- [x] `[all]` `verify` script exists (test + build + smoke in one command) — `npm run verify` (also `scripts/verify.sh`)
-- [ ] `[all]` Version in manifest matches git tag — no `v1.0.3` tag exists in local clone yet (post-extraction). Tag against release commit before publish.
+- [x] `[all]` `verify` script exists (test + build + smoke in one command) — `npm run verify` (also `scripts/verify.sh`); now includes vitest + bench gate + build:server + pack-dry-run
+- [x] `[all]` Version in manifest matches git tag — release.yml has a tag-vs-package.json equality gate that fails the publish if mismatched. v1.1.0 release-prep commit will be tagged `v1.1.0` post-translations.
 - [x] `[all]` Dependency scanning runs in CI (ecosystem-appropriate) — `npm audit --audit-level=high` on push + PR + weekly schedule
-- [x] `[all]` Automated dependency update mechanism exists — Dependabot npm + GitHub Actions + Docker (monthly grouped)
-- [x] `[npm]` `npm pack --dry-run` includes: dist/, README.md, LICENSE — files[] declared, 264.8 kB tarball post-wave-3a
+- [x] `[all]` Automated dependency update mechanism exists — Dependabot npm + GitHub Actions + Docker (weekly npm, monthly others, grouped)
+- [x] `[npm]` `npm pack --dry-run` includes: dist/, README.md, LICENSE — files[] declared, 287 kB tarball at v1.1.0
 - [x] `[npm]` `engines.node` set — `>=20`
 - [x] `[npm]` Lockfile committed
+- [x] `[npm]` Release workflow exists — `.github/workflows/release.yml` fires on `v*` tags, runs verify gate, publishes with `--provenance` (Sigstore), creates GitHub release with CHANGELOG entry as body
+- [x] `[npm]` CI matrix covers Node {20, 22} × OS {ubuntu, macos, windows} — 6 cells all green at v1.1.0
 - [ ] `[pypi]` SKIP: not a Python project
 - [ ] `[vsix]` SKIP: not a VS Code extension
 - [ ] `[desktop]` SKIP: not a desktop app
