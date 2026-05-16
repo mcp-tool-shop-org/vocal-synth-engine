@@ -81,6 +81,129 @@
   const btnBannerDismiss = document.getElementById('btn-banner-dismiss')!;
   let pendingScoreToLoad: any = null;
 
+  // Stage D polish — empty-state, budget snapshot, structured error envelope,
+  // and SSE render-progress wiring.  See apps/cockpit/index.html for markup.
+  const bankEmpty = document.getElementById('bank-empty')!;
+  const bankBudget = document.getElementById('bank-budget')!;
+  const bankBudgetUsed = document.getElementById('bank-budget-used')!;
+  const bankBudgetFill = document.getElementById('bank-budget-fill')!;
+  const renderProgress = document.getElementById('render-progress')!;
+  const renderProgressBar = document.getElementById('render-progress-bar')!;
+  const renderProgressLabel = document.getElementById('render-progress-label')!;
+  const errorDisplay = document.getElementById('error-display')!;
+  const errorDisplayCode = document.getElementById('error-display-code')!;
+  const errorDisplayMessage = document.getElementById('error-display-message')!;
+  const errorDisplayHint = document.getElementById('error-display-hint')!;
+  const errorDisplayDismiss = document.getElementById('error-display-dismiss')!;
+  let activeRenderEventSource: EventSource | null = null;
+
+  errorDisplayDismiss.addEventListener('click', () => {
+    errorDisplay.style.display = 'none';
+  });
+
+  /**
+   * Render the structured error envelope { code, message, hint, requestId }
+   * inline below the transport — replaces the old alert() which lost the hint.
+   */
+  function showStructuredError(err: { code?: string; message?: string; hint?: string }) {
+    errorDisplayCode.textContent = err.code || 'ERROR';
+    errorDisplayMessage.textContent = err.message || 'Unknown error';
+    if (err.hint) {
+      errorDisplayHint.textContent = err.hint;
+      errorDisplayHint.style.display = 'block';
+    } else {
+      errorDisplayHint.style.display = 'none';
+    }
+    errorDisplay.style.display = 'block';
+  }
+
+  function clearStructuredError() {
+    errorDisplay.style.display = 'none';
+  }
+
+  /** Format bytes as MB with one decimal — for the budget display. */
+  function fmtMB(bytes: number): string {
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  /**
+   * Render the SSE-driven progress bar.  fraction is 0..1, label is the
+   * machine-readable phase ("Queued", "Rendering 42%", "Done"). Pass
+   * `indeterminate=true` for the queued / unknown-position state.
+   */
+  function setRenderProgress(opts: { fraction?: number; label?: string; show?: boolean; indeterminate?: boolean }) {
+    if (opts.show === false) {
+      renderProgress.style.display = 'none';
+      renderProgress.classList.remove('indeterminate');
+      renderProgressBar.style.width = '0%';
+      renderProgress.setAttribute('aria-valuenow', '0');
+      return;
+    }
+    renderProgress.style.display = 'block';
+    if (opts.indeterminate) {
+      renderProgress.classList.add('indeterminate');
+      renderProgressBar.style.width = '30%';
+    } else {
+      renderProgress.classList.remove('indeterminate');
+      const pct = Math.max(0, Math.min(1, opts.fraction ?? 0)) * 100;
+      renderProgressBar.style.width = `${pct.toFixed(1)}%`;
+      renderProgress.setAttribute('aria-valuenow', String(Math.round(pct)));
+    }
+    if (opts.label) renderProgressLabel.textContent = opts.label;
+  }
+
+  /**
+   * Subscribe to /api/render/events?jobId=… and translate the stream into
+   * the visual progress bar.  Returns the EventSource so callers can close
+   * it; we also auto-close on done/failed/cancelled per the server contract.
+   */
+  function subscribeRenderProgress(jobId: string): EventSource {
+    // Tear down any prior subscription so we never leak SSE handles.
+    if (activeRenderEventSource) {
+      activeRenderEventSource.close();
+      activeRenderEventSource = null;
+    }
+    const url = `${DAEMON_URL}/api/render/events?jobId=${encodeURIComponent(jobId)}`;
+    const es = new EventSource(url);
+    activeRenderEventSource = es;
+    setRenderProgress({ show: true, indeterminate: true, label: 'Queued…' });
+
+    es.addEventListener('queued', (ev: MessageEvent) => {
+      try {
+        const data = JSON.parse(ev.data);
+        const pos = data.position ?? 0;
+        setRenderProgress({ show: true, indeterminate: true, label: pos > 0 ? `Queued (#${pos + 1})` : 'Queued…' });
+      } catch {}
+    });
+    es.addEventListener('started', () => {
+      setRenderProgress({ show: true, indeterminate: true, label: 'Rendering…' });
+    });
+    es.addEventListener('progress', (ev: MessageEvent) => {
+      try {
+        const data = JSON.parse(ev.data);
+        const f = data.progress?.fraction ?? 0;
+        setRenderProgress({ show: true, fraction: f, label: `Rendering ${Math.round(f * 100)}%` });
+      } catch {}
+    });
+    const finish = (label: string) => {
+      setRenderProgress({ show: true, fraction: 1, label });
+      setTimeout(() => setRenderProgress({ show: false }), 800);
+      es.close();
+      if (activeRenderEventSource === es) activeRenderEventSource = null;
+    };
+    es.addEventListener('done', () => finish('Done'));
+    es.addEventListener('failed', () => finish('Failed'));
+    es.addEventListener('cancelled', () => finish('Cancelled'));
+    es.onerror = () => {
+      // SSE connection lost mid-render.  Hide quietly — the HTTP response
+      // path will surface the real error (or the result) when it arrives.
+      es.close();
+      if (activeRenderEventSource === es) activeRenderEventSource = null;
+      setRenderProgress({ show: false });
+    };
+    return es;
+  }
+
   btnBannerDismiss.addEventListener('click', () => banner.style.display = 'none');
   btnBannerLoad.addEventListener('click', () => {
     if (pendingScoreToLoad) {
@@ -416,7 +539,37 @@
       const res = await fetch(`${DAEMON_URL}/api/renders`);
       const data = await res.json();
       const renders = data.renders || [];
-      
+
+      // SB-002 humanization — surface the budget snapshot if the server
+      // returned one (recent server builds always do).  Tint the fill bar
+      // amber > 70% and red > 90%.
+      if (data.budget && typeof data.budget.usedBytes === 'number') {
+        const used = data.budget.usedBytes;
+        const total = data.budget.storeBudgetBytes ?? 0;
+        const frac = data.budget.utilizationFraction ?? 0;
+        bankBudgetUsed.textContent = total > 0
+          ? `${fmtMB(used)} / ${fmtMB(total)}`
+          : fmtMB(used);
+        bankBudgetFill.style.width = `${Math.max(0, Math.min(1, frac)) * 100}%`;
+        bankBudgetFill.classList.toggle('warn', frac >= 0.7 && frac < 0.9);
+        bankBudgetFill.classList.toggle('error', frac >= 0.9);
+        bankBudget.style.display = 'block';
+      } else {
+        bankBudget.style.display = 'none';
+      }
+
+      // Empty-state. The server always synthesizes a "last" placeholder when
+      // a render exists in the buffer, so "no real renders" is anything where
+      // the list is empty OR contains only the unwritten placeholder.
+      const realRenders = renders.filter(
+        (r: any) => r.id !== 'last' || (r.durationSec ?? 0) > 0,
+      );
+      if (realRenders.length === 0) {
+        bankEmpty.style.display = 'flex';
+      } else {
+        bankEmpty.style.display = 'none';
+      }
+
       bankList.innerHTML = '';
       renders.forEach((r: any) => {
         const el = document.createElement('div');
@@ -633,7 +786,8 @@
     btnRender.disabled = true;
     btnRenderPlay.disabled = true;
     statusStrip.textContent = 'Rendering...';
-    
+    clearStructuredError();
+
     score.bpm = parseInt(inpBpm.value, 10);
 
     const config = {
@@ -643,23 +797,49 @@
       rngSeed: parseInt(inpSeed.value, 10),
       defaultTimbre: inpDefaultTimbre.value
     };
-    
+
     const res = await fetch(`${DAEMON_URL}/api/render`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ score, config })
     });
-    
+
+    // SB-001 humanization — subscribe to the SSE progress stream as soon as
+    // we know the jobId.  Server emits the X-Render-Job-Id header before
+    // the body is buffered, so we can light up the progress bar within ms.
+    const jobId = res.headers.get('X-Render-Job-Id');
+    if (jobId && res.ok) {
+      subscribeRenderProgress(jobId);
+    }
+
     if (!res.ok) {
-      const err = await res.json();
+      let err: { code?: string; message?: string; hint?: string; error?: string; available?: string[]; presetId?: string } = {};
+      try { err = await res.json(); } catch {}
+
+      // Server-side error envelope: { ok:false, code, message, hint, requestId }
+      // Show inline (with hint) instead of alert() — that's the Stage D fix.
       if (err.code === 'PRESET_NOT_FOUND') {
-        const avail = err.available?.join(', ') || 'none';
-        throw new Error(`Preset '${err.presetId}' not found on server. Available: [${avail}]`);
+        showStructuredError({
+          code: 'PRESET_NOT_FOUND',
+          message: `Preset '${err.presetId}' not found on server.`,
+          hint: err.hint || `Available: ${err.available?.join(', ') || '(none)'}`,
+        });
+        throw new Error(`Preset '${err.presetId}' not found on server.`);
       }
       if (err.code === 'ASSET_NOT_FOUND') {
-        throw new Error(`Preset asset missing on server: ${err.message}`);
+        showStructuredError({
+          code: 'ASSET_NOT_FOUND',
+          message: err.message || 'Preset asset missing on server.',
+          hint: err.hint || 'Verify all preset files are present on the daemon.',
+        });
+        throw new Error(err.message || 'Asset not found');
       }
-      throw new Error(err.error || err.message || 'Render failed');
+      showStructuredError({
+        code: err.code,
+        message: err.message || err.error || `Render failed (HTTP ${res.status})`,
+        hint: err.hint,
+      });
+      throw new Error(err.message || err.error || 'Render failed');
     }
     
     const data = await res.json();
@@ -741,17 +921,19 @@
   }
 
   btnRender.addEventListener('click', async () => {
-    try { await doRender(); } 
-    catch (e: any) { alert(e.message); statusStrip.textContent = `Error: ${e.message}`; }
+    try { await doRender(); }
+    // doRender() already surfaced the structured error envelope inline; we
+    // just need to land the status strip and re-enable the buttons.
+    catch (e: any) { statusStrip.textContent = `Error: ${e.message}`; }
     finally { btnRender.disabled = false; btnRenderPlay.disabled = false; }
   });
 
   btnRenderPlay.addEventListener('click', async () => {
-    try { 
-      await doRender(); 
+    try {
+      await doRender();
       audioPlayer.play();
-    } 
-    catch (e: any) { alert(e.message); statusStrip.textContent = `Error: ${e.message}`; }
+    }
+    catch (e: any) { statusStrip.textContent = `Error: ${e.message}`; }
     finally { btnRender.disabled = false; btnRenderPlay.disabled = false; }
   });
 

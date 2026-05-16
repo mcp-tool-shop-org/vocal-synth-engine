@@ -30,12 +30,26 @@
         <!-- Render Bank -->
         <div class="col-bank">
           <section class="panel bank-panel">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <div class="bank-header">
               <h2 style="margin: 0;">Render Bank</h2>
               <button id="btn-compare" disabled>Compare (0/2)</button>
             </div>
+            <div class="bank-budget" id="bank-budget" style="display: none;">
+              <div class="bank-budget-row">
+                <span class="bank-budget-label">Store</span>
+                <span class="bank-budget-value" id="bank-budget-used">--</span>
+              </div>
+              <div class="bank-budget-bar" aria-hidden="true">
+                <div class="bank-budget-fill" id="bank-budget-fill" style="width: 0%;"></div>
+              </div>
+            </div>
             <div class="bank-list" id="bank-list">
               <!-- Renders injected here -->
+            </div>
+            <div class="bank-empty" id="bank-empty" style="display: none;">
+              <div class="bank-empty-icon" aria-hidden="true">🎵</div>
+              <div class="bank-empty-title">No renders yet</div>
+              <div class="bank-empty-hint">Press <strong>Render</strong> above to synthesize your first take. Saved renders appear here.</div>
             </div>
           </section>
         </div>
@@ -80,7 +94,19 @@
               <label class="loop-toggle"><input type="checkbox" id="toggle-loop"> ⟳ Loop</label>
               <button id="btn-download" disabled>↓ WAV</button>
             </div>
+            <div class="render-progress" id="render-progress" style="display: none;" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <div class="render-progress-bar" id="render-progress-bar"></div>
+              <div class="render-progress-label" id="render-progress-label">Queued…</div>
+            </div>
             <div class="status-strip" id="status-strip">Ready</div>
+            <div class="error-display" id="error-display" style="display: none;" role="alert">
+              <div class="error-display-header">
+                <span class="error-display-code" id="error-display-code">ERROR</span>
+                <button class="error-display-dismiss" id="error-display-dismiss" aria-label="Dismiss error">✕</button>
+              </div>
+              <div class="error-display-message" id="error-display-message"></div>
+              <div class="error-display-hint" id="error-display-hint" style="display: none;"></div>
+            </div>
           </section>
 
           <!-- Tabbed Container: Score / Live -->
@@ -374,15 +400,50 @@
   :root {
     --bg: #121212;
     --panel-bg: #1e1e1e;
+    --panel-bg-elevated: #242424;
     --text: #e0e0e0;
+    --text-muted: #888;
+    --text-dim: #666;
     --accent: #4a90e2;
     --accent-hover: #357abd;
+    --accent-focus: #6ba9ea;
     --border: #333;
+    --border-strong: #555;
     --error: #e74c3c;
+    --error-bg: #3a1a18;
     --success: #2ecc71;
     --warn: #f39c12;
     --note-bg: #4a90e2;
     --note-selected: #f39c12;
+
+    /* Spacing scale — 4/8/16/24/32px ladder for consistent rhythm. */
+    --space-1: 0.25rem;   /* 4px */
+    --space-2: 0.5rem;    /* 8px */
+    --space-3: 1rem;      /* 16px */
+    --space-4: 1.5rem;    /* 24px */
+    --space-5: 2rem;      /* 32px */
+
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+
+    --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent-focus);
+  }
+
+  /* Keyboard-only focus outline. Mouse clicks stay clean, but every
+     focusable widget surfaces a visible ring when reached via Tab. */
+  *:focus { outline: none; }
+  *:focus-visible {
+    box-shadow: var(--focus-ring);
+    border-radius: var(--radius-sm);
+  }
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  summary:focus-visible {
+    box-shadow: var(--focus-ring);
   }
 
   body {
@@ -1212,6 +1273,204 @@
     from { transform: translateX(100%); opacity: 0; }
     to { transform: translateX(0); opacity: 1; }
   }
+
+  /* Render Bank header (replaces inline style on the .bank-panel header div) */
+  .bank-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-3);
+  }
+
+  /* Budget snapshot from /api/renders */
+  .bank-budget {
+    background: #1a1a1a;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: var(--space-2) var(--space-3);
+    margin-bottom: var(--space-3);
+    font-size: 0.75rem;
+  }
+  .bank-budget-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-1);
+  }
+  .bank-budget-label {
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.7rem;
+  }
+  .bank-budget-value {
+    font-family: monospace;
+    color: var(--text);
+  }
+  .bank-budget-bar {
+    height: 4px;
+    background: #2a2a2a;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .bank-budget-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.3s ease, background 0.3s ease;
+  }
+  .bank-budget-fill.warn { background: var(--warn); }
+  .bank-budget-fill.error { background: var(--error); }
+
+  /* Empty-state when there are 0 renders */
+  .bank-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-5) var(--space-3);
+    text-align: center;
+    color: var(--text-muted);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-md);
+    background: #161616;
+  }
+  .bank-empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: var(--space-2);
+    opacity: 0.6;
+  }
+  .bank-empty-title {
+    font-weight: bold;
+    color: var(--text);
+    margin-bottom: var(--space-1);
+  }
+  .bank-empty-hint {
+    font-size: 0.8rem;
+    line-height: 1.5;
+    max-width: 22ch;
+  }
+  .bank-empty-hint strong {
+    color: var(--accent);
+    font-weight: bold;
+  }
+
+  /* Render progress (driven by X-Render-Job-Id + /api/render/events SSE) */
+  .render-progress {
+    position: relative;
+    height: 6px;
+    background: #1a1a1a;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: var(--space-2);
+  }
+  .render-progress-bar {
+    position: absolute;
+    inset: 0;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-focus));
+    transition: width 0.2s ease;
+  }
+  .render-progress.indeterminate .render-progress-bar {
+    width: 30%;
+    animation: progress-slide 1.2s ease-in-out infinite;
+  }
+  @keyframes progress-slide {
+    0%   { left: -30%; }
+    100% { left: 100%; }
+  }
+  .render-progress-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    color: var(--text);
+    font-family: monospace;
+    text-shadow: 0 0 2px rgba(0,0,0,0.8);
+    pointer-events: none;
+  }
+
+  /* Structured error display — replaces alert() so the hint field is visible */
+  .error-display {
+    margin-top: var(--space-2);
+    padding: var(--space-3);
+    background: var(--error-bg);
+    border: 1px solid var(--error);
+    border-radius: var(--radius-md);
+    color: #fff;
+  }
+  .error-display-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+  }
+  .error-display-code {
+    font-family: monospace;
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--error);
+    padding: 2px var(--space-2);
+    border-radius: var(--radius-sm);
+  }
+  .error-display-dismiss {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.25);
+    color: #fff;
+    padding: 0 var(--space-2);
+    font-size: 0.85rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    line-height: 1.4;
+  }
+  .error-display-dismiss:hover { background: rgba(255,255,255,0.08); }
+  .error-display-message {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-bottom: var(--space-1);
+  }
+  .error-display-hint {
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: rgba(255,255,255,0.85);
+    padding-top: var(--space-2);
+    border-top: 1px solid rgba(255,255,255,0.15);
+  }
+  .error-display-hint::before {
+    content: "Hint: ";
+    font-weight: bold;
+    color: rgba(255,255,255,0.7);
+  }
+
+  /* Responsive: stack the 3-column grid on narrow viewports */
+  @media (max-width: 1100px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+    .container { padding: var(--space-3); }
+    .live-tiles { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .container { padding: var(--space-2); }
+    header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-2);
+    }
+    .transport-controls { flex-wrap: wrap; }
+    .live-tiles { grid-template-columns: repeat(2, 1fr); }
+    .compare-grid { grid-template-columns: 1fr; }
+    .modal-content { width: 92%; padding: var(--space-3); }
+  }
+
+  /* Status-badge contrast bump for keyboard users / colorblind operators */
+  .status-badge { font-weight: 600; }
+  .status-badge.ok { color: #062a13; }
+  .status-badge.error { color: #fff; }
 </style>
 
 <script type="module" src="/src/main.ts"></script>

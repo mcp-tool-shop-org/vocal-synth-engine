@@ -16,12 +16,15 @@
 <p align="center">
   <a href="https://github.com/mcp-tool-shop-org/vocal-synth-engine/actions/workflows/ci.yml"><img src="https://github.com/mcp-tool-shop-org/vocal-synth-engine/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="License: MIT">
-  <a href="https://mcp-tool-shop-org.github.io/vocal-synth-engine/"><img src="https://img.shields.io/badge/Landing_Page-live-blue" alt="Landing Page"></a>
+  <img src="https://img.shields.io/badge/node-%3E%3D20-339933?logo=node.js&logoColor=white" alt="Node >=20">
+  <img src="https://img.shields.io/badge/status-pre--release-orange" alt="Status: pre-release">
 </p>
 
 <p align="center"><strong>Deterministic vocal instrument engine — additive synthesis, voice presets, real-time WebSocket streaming, multi-user jam sessions, cockpit UI</strong></p>
 
 A deterministic vocal instrument engine built in TypeScript. Renders singing voices from score data using additive synthesis, voice presets, and real-time WebSocket streaming. Play live via keyboard/MIDI, collaborate in multi-user jam sessions, or render scores to WAV.
+
+> **Status:** v1.0.3 source — not yet published to npm. Install from source until v1.0.4 publishes (see [Install](#install)).
 
 ## What It Does
 
@@ -71,6 +74,23 @@ A deterministic vocal instrument engine built in TypeScript. Renders singing voi
 | `scripts/` | Build/test regression scripts (not shipped, not part of `npm test`) |
 | `apps/cockpit/` | Browser cockpit UI (Vite + vanilla TS) |
 | `presets/` | 15 bundled voice presets with binary timbre data |
+
+## Install
+
+The package `@mcptoolshop/vocal-synth-engine` is not yet published to npm. Until v1.0.4 ships, install from source:
+
+```bash
+git clone https://github.com/mcp-tool-shop-org/vocal-synth-engine.git
+cd vocal-synth-engine
+npm ci
+npm run build
+```
+
+To pin a specific commit in a downstream project:
+
+```bash
+npm install github:mcp-tool-shop-org/vocal-synth-engine#<commit-sha>
+```
 
 ## Quick Start
 
