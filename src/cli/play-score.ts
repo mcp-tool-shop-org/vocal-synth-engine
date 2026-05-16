@@ -1,3 +1,12 @@
+/**
+ * Render a score JSON through a voice preset and write the result to WAV.
+ *
+ * Usage: npx tsx src/cli/play-score.ts <preset.json> <score.json> <out.wav>
+ *        npx tsx src/cli/play-score.ts --help
+ *
+ * Uses StreamingVocalSynthEngine in 'exact' deterministic mode with a fixed
+ * RNG seed (123456789) so the same inputs always produce byte-identical output.
+ */
 import wavefile from 'wavefile';
 const { WaveFile } = wavefile;
 import { readFile, writeFile } from 'node:fs/promises';
@@ -6,10 +15,23 @@ import { loadVoicePreset } from '../preset/loader.js';
 import { StreamingVocalSynthEngine, StreamingVocalSynthConfig } from '../engine/StreamingVocalSynthEngine.js';
 import { VocalScore } from '../types/score.js';
 
+const USAGE = `Usage: npx tsx src/cli/play-score.ts <preset.json> <score.json> <out.wav>
+
+Renders a score (notes[]) through a voice preset using the streaming engine
+in deterministic 'exact' mode (rngSeed=123456789, blockSize=1024,
+maxPolyphony=4) and writes the normalized result to <out.wav>.
+
+Options:
+  -h, --help    Show this message and exit.`;
+
 async function main() {
   const args = process.argv.slice(2);
+  if (args[0] === '-h' || args[0] === '--help') {
+    console.log(USAGE);
+    process.exit(0);
+  }
   if (args.length < 3) {
-    console.error('Usage: npx tsx src/cli/play-score.ts <preset.json> <score.json> <out.wav>');
+    console.error(USAGE);
     process.exit(1);
   }
 

@@ -1,4 +1,4 @@
-FROM node:22-slim AS builder
+FROM node:20-slim AS builder
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -11,7 +11,7 @@ COPY apps/ apps/
 
 RUN npm run build
 
-FROM node:22-slim
+FROM node:20-slim
 RUN groupadd -r vsynth && useradd -r -g vsynth vsynth
 
 WORKDIR /app

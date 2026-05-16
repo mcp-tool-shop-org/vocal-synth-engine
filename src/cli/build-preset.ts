@@ -2,7 +2,8 @@
  * Build a multi-timbre voice preset from multiple WAV inputs.
  *
  * Usage: npx tsx src/cli/build-preset.ts --out presets/default-voice \
- *   calib/default-voice/AH.wav:AH calib/default-voice/EE.wav:EE calib/default-voice/OO.wav:OO
+ *          calib/default-voice/AH.wav:AH calib/default-voice/EE.wav:EE calib/default-voice/OO.wav:OO
+ *        npx tsx src/cli/build-preset.ts --help
  *
  * Each positional arg is <wav-path>:<timbre-name>.
  * All WAVs are analyzed with identical parameters (48kHz, FFT 2048, 80 harmonics)
@@ -98,8 +99,22 @@ async function analyzeWav(wavPath: string, timbreName: string): Promise<TimbreRe
   return { name: timbreName, f0, harmonicsMag, envelopeDb, noiseDb, freqHz };
 }
 
+const USAGE = `Usage: npx tsx src/cli/build-preset.ts --out <preset-dir> <wav:timbre> [<wav:timbre> ...]
+
+Builds a multi-timbre voicepreset.json + asset files from one or more WAV
+inputs. Each positional argument is <wav-path>:<timbre-name> (split on the
+LAST colon so Windows drive letters work, e.g. F:/calib/AH.wav:AH).
+
+Options:
+  --out <dir>   Output preset directory (required).
+  -h, --help    Show this message and exit.`;
+
 async function main() {
   const args = process.argv.slice(2);
+  if (args[0] === '-h' || args[0] === '--help') {
+    console.log(USAGE);
+    process.exit(0);
+  }
 
   // Parse --out flag
   let outDir = '';
@@ -118,7 +133,7 @@ async function main() {
   }
 
   if (!outDir || inputs.length === 0) {
-    console.error('Usage: npx tsx src/cli/build-preset.ts --out <preset-dir> <wav:timbre> [<wav:timbre> ...]');
+    console.error(USAGE);
     process.exit(1);
   }
 

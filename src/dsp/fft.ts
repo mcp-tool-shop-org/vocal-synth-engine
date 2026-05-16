@@ -1,6 +1,9 @@
 export function fft(real: Float32Array, imag: Float32Array) {
   const n = real.length;
   if ((n & (n - 1)) !== 0) throw new Error("FFT length must be power of 2");
+  // n=1 is technically 2^0 but degenerate (no butterflies, single bin = input).
+  // Reject explicitly so callers don't silently get unexpected behavior.
+  if (n < 2) throw new Error("FFT length must be at least 2");
   
   let j = 0;
   for (let i = 0; i < n - 1; i++) {
@@ -49,6 +52,9 @@ export function ifft(real: Float32Array, imag: Float32Array) {
 
 export function applyHannWindow(buffer: Float32Array) {
   const n = buffer.length;
+  // Early-return for degenerate sizes: n=0 has no samples to weight,
+  // n=1 would divide by zero (Infinity → NaN poisoning the buffer).
+  if (n < 2) return;
   for (let i = 0; i < n; i++) {
     buffer[i] *= 0.5 * (1 - Math.cos((2 * Math.PI * i) / (n - 1)));
   }

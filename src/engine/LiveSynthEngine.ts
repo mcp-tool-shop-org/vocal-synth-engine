@@ -59,7 +59,14 @@ interface LiveVoice {
 export interface LiveTelemetry {
   voicesActive: number;
   voicesMax: number;
+  /** Peak amplitude in dBFS measured BEFORE the soft limiter (E-010).
+   *  Operators tuning polyphony see the true mix-bus headroom even when
+   *  the limiter is doing significant work. */
   peakDbfs: number;
+  /** Approximate gain-reduction caused by the soft limiter on this window,
+   *  in dB (positive number, 0 = limiter idle). Computed as
+   *  20·log10(peakPre / peakPost) when both > 0. */
+  limiterReductionDb: number;
   clickDeltaMaxRecent: number;
   rtf: number;
 }
@@ -89,7 +96,8 @@ export class LiveSynthEngine {
   private limiterEnabled: boolean = true;
 
   // Telemetry accumulators (reset on read)
-  private peakSample: number = 0;
+  private peakSample: number = 0;        // pre-limiter peak (E-010)
+  private peakSamplePost: number = 0;    // post-limiter peak (for limiter-reduction calc)
   private maxDelta: number = 0;
   private lastSample: number = 0;
   private voicesMaxSeen: number = 0;
@@ -157,10 +165,15 @@ export class LiveSynthEngine {
         v.releaseDurationSec = 0.01; // 10ms fast release to avoid clicks
       }
     }
-    // Zero output buffer so next frame starts clean
+    // Zero output buffer so next frame starts clean. (Note: render() also
+    // zeros this on entry, but the explicit fill here protects any consumer
+    // who reads the buffer after panic() before the next render() call.)
     this.outBuf.fill(0);
     // Clear morph weights so we fall back to per-voice timbre
     this.globalTimbreWeights = null;
+    // E-009: reset click-detection reference so the next non-silent sample
+    // doesn't register as a fake click delta from a remembered pre-panic value.
+    this.lastSample = 0;
   }
 
   // ── Note events ──────────────────────────────────────────────
@@ -172,24 +185,52 @@ export class LiveSynthEngine {
     let stolen = false;
 
     if (!voice) {
-      // Find a free voice (noteId === null AND past release)
+      // Find a free voice (fully released — noteId === null).
       voice = this.voices.find(v => v.noteId === null);
 
       if (!voice) {
-        // Steal oldest active voice
-        voice = this.voices.reduce((oldest, v) =>
-          v.noteOnSample < oldest.noteOnSample ? v : oldest
-        );
+        // E-006: voice-steal cost function. Standard policy is:
+        //   1. fully free voices (cost 0) — caught above
+        //   2. voices in release-and-near-end (low remaining-fade cost)
+        //   3. voices in release-and-recent (higher remaining-fade cost)
+        //   4. oldest actively-held voice (worst case — interrupting a real note)
+        // Held voices are penalized by HELD_STEAL_PENALTY so any releasing
+        // voice (even one that just started its release) is preferred over
+        // any held voice. Among held voices, the OLDEST wins.
+        const HELD_STEAL_PENALTY = 1e9;
+        const sr = this.config.sampleRateHz;
+        let bestVoice = this.voices[0];
+        let bestCost = Infinity;
+        for (const v of this.voices) {
+          let cost: number;
+          if (v.noteOffSample >= 0) {
+            // In release: cost = remaining release time in samples (the audio
+            // we're about to interrupt). Smaller = closer to end = cheaper.
+            const relAgeSamples = this.currentSample - v.noteOffSample;
+            const totalRelSamples = v.releaseDurationSec * sr;
+            const remainingSamples = Math.max(0, totalRelSamples - relAgeSamples);
+            cost = remainingSamples;
+          } else {
+            // Held voice: full penalty + age-favored ordering so OLDEST held
+            // voice (smallest noteOnSample) gets the smallest within-bucket cost.
+            cost = HELD_STEAL_PENALTY + v.noteOnSample;
+          }
+          if (cost < bestCost) {
+            bestCost = cost;
+            bestVoice = v;
+          }
+        }
+        voice = bestVoice;
         stolen = true;
         // Capture last output for crossfade (estimated from envelope * velocity)
-        const ageSec = (this.currentSample - voice.noteOnSample) / this.config.sampleRateHz;
+        const ageSec = (this.currentSample - voice.noteOnSample) / sr;
         let env = ageSec < 0.01 ? ageSec / 0.01 : 1.0;
         if (voice.noteOffSample >= 0) {
-          const relAge = (this.currentSample - voice.noteOffSample) / this.config.sampleRateHz;
+          const relAge = (this.currentSample - voice.noteOffSample) / sr;
           env *= Math.max(0, 1.0 - relAge / voice.releaseDurationSec);
         }
         voice.stealLastOutput = env * voice.velocity;
-        const fadeSamples = Math.round(0.01 * this.config.sampleRateHz); // 10ms
+        const fadeSamples = Math.round(0.01 * sr); // 10ms
         voice.stealFadeSamplesLeft = fadeSamples;
         voice.stealFadeTotal = fadeSamples;
       }
@@ -224,7 +265,19 @@ export class LiveSynthEngine {
 
   updateConfig(updates: Partial<LiveEngineConfig>) {
     if (updates.defaultTimbre !== undefined) this.config.defaultTimbre = updates.defaultTimbre;
-    if (updates.rngSeed !== undefined) this.config.rngSeed = updates.rngSeed;
+
+    if (updates.rngSeed !== undefined) {
+      this.config.rngSeed = updates.rngSeed;
+      // E-007: propagate the new seed to every existing voice's renderer.
+      // Previously the seed was stored on this.config but never applied to
+      // the voices, so the documented "deterministic seed handling" contract
+      // was silently broken — callers couldn't actually re-roll randomness.
+      // We use renderer.reseed() (does NOT reset phase) so callers can update
+      // noise behavior without disrupting a held vowel's harmonic continuity.
+      for (const v of this.voices) {
+        v.renderer.reseed(updates.rngSeed + v.index);
+      }
+    }
 
     // Polyphony change: grow or shrink voice pool
     if (updates.maxPolyphony !== undefined && updates.maxPolyphony !== this.config.maxPolyphony) {
@@ -247,9 +300,38 @@ export class LiveSynthEngine {
     }
   }
 
-  /** Set global timbre morph weights (null = use per-voice timbre string). */
+  /** Set global timbre morph weights (null = use per-voice timbre string).
+   *
+   *  E-013: keys must match preset.timbres (unknown keys throw); values
+   *  must be finite numbers in [0, 1] (NaN/Infinity throw, out-of-range
+   *  values clamp). This prevents a misspelled key from silently degrading
+   *  the morph and protects the render path from Infinity/NaN poisoning.
+   */
   setTimbreWeights(weights: Record<string, number> | null) {
-    this.globalTimbreWeights = weights;
+    if (weights === null) {
+      this.globalTimbreWeights = null;
+      return;
+    }
+    const validKeys = new Set(Object.keys(this.preset.timbres));
+    const validated: Record<string, number> = {};
+    for (const key of Object.keys(weights)) {
+      if (!validKeys.has(key)) {
+        throw new Error(
+          `setTimbreWeights: unknown timbre key "${key}". ` +
+          `Preset timbres: [${Array.from(validKeys).join(', ')}].`
+        );
+      }
+      const v = weights[key];
+      if (!Number.isFinite(v)) {
+        throw new Error(`setTimbreWeights: value for "${key}" must be finite, got ${v}.`);
+      }
+      // Clamp to [0, 1]. Negative weights silently flip phase contributions
+      // and weights > 1 multiply out-of-range volume into the mix bus, which
+      // the soft limiter would then have to clean up.
+      const clamped = v < 0 ? 0 : (v > 1 ? 1 : v);
+      validated[key] = clamped;
+    }
+    this.globalTimbreWeights = validated;
   }
 
   /** Enable/disable soft limiter on mix bus. */
@@ -301,24 +383,34 @@ export class LiveSynthEngine {
         const sampleIndex = this.currentSample + i;
         const noteAgeSec = (sampleIndex - voice.noteOnSample) / sr;
 
-        // Envelope
-        let env = 1.0;
+        // E-005: compute attack and release independently and take min.
+        // The old code multiplied them — if a note was released DURING its
+        // attack, env = (partialAttack) × (releasing), so the release shape
+        // started from a fraction (e.g., 0.3) instead of 1.0, producing a
+        // perceived "thump-then-fade" rather than a continuous envelope.
+        // min(attack, release) gives an AHDSR-style envelope where the
+        // release subtracts from a virtual full-amplitude ceiling, so a
+        // mid-attack release sounds continuous from the audible level.
         const attackSec = 0.01; // fast attack for live feel
+        const attackEnv = noteAgeSec >= attackSec ? 1.0 :
+                          (noteAgeSec <= 0 ? 0 : noteAgeSec / attackSec);
 
-        // Attack ramp
-        if (noteAgeSec < attackSec) {
-          env = noteAgeSec / attackSec;
-        }
-
-        // Release
+        let releaseEnv = 1.0;
         if (voice.noteOffSample >= 0) {
           const releaseAgeSec = (sampleIndex - voice.noteOffSample) / sr;
-          if (releaseAgeSec >= voice.releaseDurationSec) {
-            env = 0;
+          // Surface logic regressions if a refactor lands releaseAgeSec < 0.
+          if (releaseAgeSec < 0) {
+            // Note-off scheduled in the future of this sample — still in
+            // the held phase. Treat as full release env (no fade yet).
+            releaseEnv = 1.0;
+          } else if (releaseAgeSec >= voice.releaseDurationSec) {
+            releaseEnv = 0;
           } else {
-            env *= 1.0 - (releaseAgeSec / voice.releaseDurationSec);
+            releaseEnv = 1.0 - (releaseAgeSec / voice.releaseDurationSec);
           }
         }
+
+        const env = attackEnv < releaseEnv ? attackEnv : releaseEnv;
 
         if (env <= 0.0001) continue;
 
@@ -400,6 +492,14 @@ export class LiveSynthEngine {
       }
     }
 
+    // E-010: capture PRE-limiter peak so peakDbfs telemetry reflects the
+    // true mix-bus level, not the limiter-clipped level. Doing this in a
+    // separate loop keeps the limiter loop branch-free.
+    for (let i = 0; i < blockSize; i++) {
+      const abs = Math.abs(out[i]);
+      if (abs > this.peakSample) this.peakSample = abs;
+    }
+
     // Soft limiter: tanh-based, transparent below 0.5, soft clips above
     if (this.limiterEnabled) {
       for (let i = 0; i < blockSize; i++) {
@@ -410,9 +510,11 @@ export class LiveSynthEngine {
     // Telemetry
     if (activeCount > this.voicesMaxSeen) this.voicesMaxSeen = activeCount;
 
+    // Post-limiter peak and click-delta telemetry. We track post-limiter
+    // peak only to compute limiterReductionDb in getTelemetryAndReset().
     for (let i = 0; i < blockSize; i++) {
       const abs = Math.abs(out[i]);
-      if (abs > this.peakSample) this.peakSample = abs;
+      if (abs > this.peakSamplePost) this.peakSamplePost = abs;
 
       const delta = Math.abs(out[i] - this.lastSample);
       if (delta > this.maxDelta) this.maxDelta = delta;
@@ -433,6 +535,12 @@ export class LiveSynthEngine {
   getTelemetryAndReset(): LiveTelemetry {
     const activeCount = this.voices.filter(v => v.noteId !== null).length;
     const peak = this.peakSample > 0 ? 20 * Math.log10(this.peakSample) : -Infinity;
+    // E-010: limiter reduction = how many dB the limiter pulled the peak
+    // down. Positive number; 0 means the limiter was idle (or disabled).
+    const limiterReductionDb =
+      this.peakSample > 0 && this.peakSamplePost > 0 && this.peakSamplePost < this.peakSample
+        ? 20 * Math.log10(this.peakSample / this.peakSamplePost)
+        : 0;
 
     const blockDurationSec = (this.config.blockSize * this.renderBlocksAccum) / this.config.sampleRateHz;
     const rtf = blockDurationSec > 0 ? (this.renderTimeAccumMs / 1000) / blockDurationSec : 0;
@@ -441,12 +549,14 @@ export class LiveSynthEngine {
       voicesActive: activeCount,
       voicesMax: this.voicesMaxSeen,
       peakDbfs: peak,
+      limiterReductionDb,
       clickDeltaMaxRecent: this.maxDelta,
       rtf,
     };
 
     // Reset accumulators
     this.peakSample = 0;
+    this.peakSamplePost = 0;
     this.maxDelta = 0;
     this.voicesMaxSeen = activeCount;
     this.renderTimeAccumMs = 0;

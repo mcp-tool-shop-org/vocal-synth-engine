@@ -1,4 +1,5 @@
 {
+  "bpm": 120,
   "notes": [
     {
       "id": "n1",
@@ -6,7 +7,7 @@
       "durationSec": 2.0,
       "midi": 60,
       "velocity": 0.8,
-      "timbre": "ah"
+      "timbre": "AH"
     },
     {
       "id": "n2",
@@ -14,7 +15,7 @@
       "durationSec": 1.5,
       "midi": 64,
       "velocity": 0.8,
-      "timbre": "oh"
+      "timbre": "OO"
     },
     {
       "id": "n3",
@@ -22,7 +23,7 @@
       "durationSec": 1.0,
       "midi": 67,
       "velocity": 0.8,
-      "timbre": "ee"
+      "timbre": "EE"
     }
   ]
 }

@@ -27,10 +27,22 @@ function computeHnr(mag: Float32Array, f0: number, sampleRate: number, fftSize: 
   return 10 * Math.log10(Math.max(1e-10, harmonicEnergy / noiseEnergy));
 }
 
+const USAGE = `Usage: npx tsx src/cli/compare.ts <ref.wav> <test.wav>
+
+Compares two WAVs by RMS energy, pitch (YIN), HNR, and spectral correlation
+of log magnitudes. Prints PASS/FAIL on Pearson correlation > 0.8.
+
+Options:
+  -h, --help    Show this message and exit.`;
+
 async function main() {
   const args = process.argv.slice(2);
+  if (args[0] === '-h' || args[0] === '--help') {
+    console.log(USAGE);
+    process.exit(0);
+  }
   if (args.length < 2) {
-    console.error('Usage: npx tsx src/cli/compare.ts <ref.wav> <test.wav>');
+    console.error(USAGE);
     process.exit(1);
   }
 

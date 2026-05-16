@@ -83,15 +83,36 @@ export function calculateAdsr(
 export function interpLinear(x: Float32Array, y: Float32Array, targetX: number): number {
   if (targetX <= x[0]) return y[0];
   if (targetX >= x[x.length - 1]) return y[y.length - 1];
-  
+
   let i = 0;
   while (i < x.length - 1 && x[i + 1] < targetX) i++;
-  
-  const t = (targetX - x[i]) / (x[i + 1] - x[i]);
+
+  // Guard against duplicate adjacent x values (denom == 0 → NaN poisoning).
+  // A malformed preset with two identical frequency entries would otherwise
+  // silently NaN-poison the entire output buffer.
+  const denom = x[i + 1] - x[i];
+  if (denom === 0) return y[i];
+
+  const t = (targetX - x[i]) / denom;
   return y[i] + t * (y[i + 1] - y[i]);
 }
 
+/**
+ * Fallback seed used when state.seed lands at xorshift32's fixed point (0).
+ * The constant is the golden-ratio integer (2^32 / phi) — a well-mixed,
+ * non-zero, non-trivial bit pattern commonly used to escape the xorshift
+ * trap. Documented invariant: xorshift32 NEVER returns identical output
+ * for two identical input seeds when seed=0 — both are silently remapped
+ * to this constant. Callers should avoid seed=0 (and the renderer's
+ * `rngSeed + index` arithmetic should not land voice 0 at seed 0).
+ */
+const XORSHIFT32_SEED_ZERO_REMAP = 0x9E3779B9 | 0;
+
 export function xorshift32(state: { seed: number }) {
+  // xorshift32 has a fixed point at 0: 0 XOR (0<<n) = 0 forever.
+  // Remap silently to a non-trivial seed to avoid a permanent-zero output
+  // stream (which would silence breath/consonant noise).
+  if (state.seed === 0) state.seed = XORSHIFT32_SEED_ZERO_REMAP;
   let x = state.seed;
   x ^= x << 13;
   x ^= x >> 17;

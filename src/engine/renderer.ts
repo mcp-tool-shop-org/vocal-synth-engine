@@ -1,3 +1,4 @@
+import { createHash, Hash } from 'node:crypto';
 import { LoadedVoicePreset } from '../preset/schema.js';
 import { interpLinear, xorshift32, fastSin, dbToLinear } from './curves.js';
 
@@ -16,9 +17,18 @@ export interface RenderParams {
   harmonicGain: Float32Array;
 }
 
+/** Telemetry returned by BlockRenderer.getTelemetryAndReset(). */
+export interface RendererTelemetry {
+  /** SHA-256 hex digest of every sample emitted since the last reset.
+   *  Format: "sha256:<64-hex-chars>". Used for cross-rig determinism checks. */
+  determinismHash: string;
+  /** Number of samples included in the hash above. */
+  samplesSeen: number;
+}
+
 export interface BlockRenderer {
   renderBlock(params: RenderParams, out: Float32Array): void;
-  getTelemetryAndReset(): unknown;
+  getTelemetryAndReset(): RendererTelemetry;
   resetPhase(): void;
 }
 
@@ -41,6 +51,13 @@ export class MonophonicRenderer implements BlockRenderer {
   private hpfLastInput: number = 0;
   private hpfLastOutput: number = 0;
 
+  /** Running SHA-256 over emitted sample bytes (little-endian Float32). */
+  private hashState: Hash;
+  /** Sample count since last getTelemetryAndReset(). */
+  private samplesSeen: number = 0;
+  /** Scratch buffer for streaming sample bytes into the hash. */
+  private hashScratch: Buffer;
+
   constructor(preset: LoadedVoicePreset, rngSeed: number = 123456789, noiseGamma: number = 1.6) {
     this.preset = preset;
     this.sampleRate = preset.manifest.sampleRateHz;
@@ -55,6 +72,18 @@ export class MonophonicRenderer implements BlockRenderer {
     }
     this.phases = new Float32Array(maxH);
     this.harmonicGains = new Float32Array(maxH);
+
+    this.hashState = createHash('sha256');
+    // Reusable buffer view for hashing — sized at construction since renderer
+    // is per-voice and not shared across threads.
+    this.hashScratch = Buffer.alloc(0);
+  }
+
+  /** Reset rng to a fresh seed. Phases and hash state are NOT reset by this
+   *  method — call resetPhase() and/or getTelemetryAndReset() separately if
+   *  you also want those cleared. */
+  public reseed(seed: number): void {
+    this.rngState.seed = seed;
   }
 
   public resetPhase(): void {
@@ -113,11 +142,18 @@ export class MonophonicRenderer implements BlockRenderer {
         for (let i = 0; i < numSamples; i++) {
           const f0 = params.f0Hz[i];
           const amp = params.amp[i];
-          if (amp <= 0 || f0 <= 0) continue;
+
+          // E-008: phase MUST advance whenever f0 > 0, regardless of amp.
+          // If we skip during silent attack samples, the oscillator phase
+          // resumes from the wrong position when amp ramps in — a 1-sample
+          // shift in note-on alignment then changes phase at sample 100,
+          // breaking byte-identical determinism. We mirror the weight<=0
+          // branch which already does the right thing.
+          if (f0 <= 0) continue;
 
           const weight = weights[i];
-          if (weight <= 0) {
-            // Still advance phases to maintain continuity
+          if (amp <= 0 || weight <= 0) {
+            // Advance phases only — no audio summation.
             for (let k = 0; k < activeH; k++) {
               phases[k] += (k + 1) * f0 * invSr;
               phases[k] -= (phases[k] | 0); // fast fractional part
@@ -178,32 +214,77 @@ export class MonophonicRenderer implements BlockRenderer {
     }
 
     // ── Consonant noise pass (amplitude-independent, HPF-shaped) ──
+    // E-003: clamp cutoff into [HPF_CUTOFF_MIN, HPF_CUTOFF_MAX] (avoid Nyquist
+    // pathology and undefined alpha when cutoff > 0.5), and guard the filter
+    // state from NaN propagation. A single NaN sample would otherwise be
+    // remembered in hpfLastInput/hpfLastOutput and permanently poison every
+    // subsequent block until the engine is rebuilt.
     for (let i = 0; i < numSamples; i++) {
       const cAmp = params.consonantAmp[i];
       if (cAmp <= 0.001) continue;
 
-      const raw = xorshift32(this.rngState) * 2 - 1;
-      const cutoff = params.consonantHpfCutoff[i];
+      let raw = xorshift32(this.rngState) * 2 - 1;
+      if (!Number.isFinite(raw)) raw = 0;
 
-      if (cutoff > 0.001) {
+      let cutoff = params.consonantHpfCutoff[i];
+      if (!Number.isFinite(cutoff)) cutoff = 0;
+      // Clamp to safe range. The 0.49 upper bound stays below Nyquist (0.5
+      // of sampleRate) where the one-pole formula is well-defined; the lower
+      // 0.001 floor avoids trivially small cutoffs that round to 0.
+      if (cutoff > HPF_CUTOFF_MAX) cutoff = HPF_CUTOFF_MAX;
+      else if (cutoff < 0) cutoff = 0;
+
+      if (cutoff > HPF_CUTOFF_MIN) {
         // One-pole HPF: y[n] = α·(y[n-1] + x[n] - x[n-1])
         // α = RC / (RC + T) where RC = 1/(2π·fc), T = 1/sr
         const cutoffHz = cutoff * this.sampleRate;
         const rc = 1.0 / (2 * Math.PI * cutoffHz);
         const alpha = rc / (rc + invSr);
-        const filtered = alpha * (this.hpfLastOutput + raw - this.hpfLastInput);
-        this.hpfLastInput = raw;
-        this.hpfLastOutput = filtered;
+        let filtered = alpha * (this.hpfLastOutput + raw - this.hpfLastInput);
+        if (!Number.isFinite(filtered)) {
+          // Reset filter state to a clean slate so we never carry a NaN forward.
+          filtered = 0;
+          this.hpfLastInput = 0;
+          this.hpfLastOutput = 0;
+        } else {
+          this.hpfLastInput = raw;
+          this.hpfLastOutput = filtered;
+        }
         out[i] += filtered * cAmp;
       } else {
         out[i] += raw * cAmp;
       }
     }
+
+    // ── Determinism telemetry: stream the emitted block into a running SHA-256.
+    // We hash the raw Float32 little-endian byte representation so two engines
+    // constructed with identical state + inputs produce byte-identical digests.
+    // Sized lazily because numSamples can vary per call (rare; usually blockSize).
+    if (this.hashScratch.length < numSamples * 4) {
+      this.hashScratch = Buffer.alloc(numSamples * 4);
+    }
+    for (let i = 0; i < numSamples; i++) {
+      this.hashScratch.writeFloatLE(out[i], i * 4);
+    }
+    this.hashState.update(this.hashScratch.subarray(0, numSamples * 4));
+    this.samplesSeen += numSamples;
   }
 
-  getTelemetryAndReset(): unknown {
+  getTelemetryAndReset(): RendererTelemetry {
+    const digest = this.hashState.digest('hex');
+    const samples = this.samplesSeen;
+    // Reset for next telemetry window.
+    this.hashState = createHash('sha256');
+    this.samplesSeen = 0;
     return {
-      determinismHash: "sha256:mock_renderer_hash"
+      determinismHash: `sha256:${digest}`,
+      samplesSeen: samples,
     };
   }
 }
+
+/** Lower bound on consonant HPF cutoff (treated as no-filter below this).
+ *  Matches the original >0.001 threshold check. */
+const HPF_CUTOFF_MIN = 0.001;
+/** Upper bound on consonant HPF cutoff (kept below Nyquist=0.5). */
+const HPF_CUTOFF_MAX = 0.49;

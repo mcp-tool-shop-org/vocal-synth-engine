@@ -2,6 +2,7 @@
  * Generate synthetic vowel calibration WAVs for preset analysis.
  *
  * Usage: npx tsx src/cli/gen-vowel-wav.ts <out-dir>
+ *        npx tsx src/cli/gen-vowel-wav.ts --help
  *
  * Produces AH.wav, EE.wav, OO.wav — 3 seconds each, 48kHz mono,
  * steady A3 (220 Hz) with formant-appropriate harmonic profiles.
@@ -10,6 +11,15 @@ import wavefile from 'wavefile';
 const { WaveFile } = wavefile;
 import { writeFile, mkdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
+
+const USAGE = `Usage: npx tsx src/cli/gen-vowel-wav.ts <out-dir>
+
+Generates AH.wav, EE.wav, OO.wav calibration files (3s each, 48kHz mono,
+A3=220Hz, peak -3 dBFS, 10ms fade in/out). Default <out-dir> is
+'calib/default-voice'.
+
+Options:
+  -h, --help    Show this message and exit.`;
 
 const SR = 48000;
 const DURATION_SEC = 3;
@@ -56,7 +66,12 @@ function formantGain(freq: number, formants: typeof VOWEL_FORMANTS['AH']): numbe
 }
 
 async function main() {
-  const outDir = resolve(process.argv[2] || 'calib/default-voice');
+  const arg0 = process.argv[2];
+  if (arg0 === '-h' || arg0 === '--help') {
+    console.log(USAGE);
+    process.exit(0);
+  }
+  const outDir = resolve(arg0 || 'calib/default-voice');
   await mkdir(outDir, { recursive: true });
 
   for (const [vowel, formants] of Object.entries(VOWEL_FORMANTS)) {

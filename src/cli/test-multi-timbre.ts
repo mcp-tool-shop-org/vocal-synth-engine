@@ -3,11 +3,32 @@
  * spectral differences + determinism + no clicks.
  *
  * Usage: npx tsx src/cli/test-multi-timbre.ts [presetId]
+ *        npx tsx src/cli/test-multi-timbre.ts --help
+ *
+ * This is a regression script (not a vitest test). Returns exit code 0 on
+ * pass, 1 on fail. Slated to migrate to tests/integration/ in a future wave.
  */
 import { renderScoreToWav } from '../server/services/renderScoreToWav.js';
 
+const USAGE = `Usage: npx tsx src/cli/test-multi-timbre.ts [presetId]
+
+Renders a 3-note AH/EE/OO score, then verifies:
+  - click test: maxAbsDelta below CLICK_THRESHOLD (post-normalization)
+  - determinism: identical wavHash on a second render with the same seed
+  - spectral distinction: vowel centroids differ by >100 Hz
+
+Options:
+  -h, --help    Show this message and exit.
+
+presetId defaults to 'default-voice'.`;
+
 async function main() {
-  const presetId = process.argv[2] || 'default-voice';
+  const arg0 = process.argv[2];
+  if (arg0 === '-h' || arg0 === '--help') {
+    console.log(USAGE);
+    process.exit(0);
+  }
+  const presetId = arg0 || 'default-voice';
 
   const score = {
     notes: [
@@ -37,13 +58,13 @@ async function main() {
   console.log(`  Voices max: ${telemetry.voicesMax}`);
 
   // --- Click detection ---
-  // maxAbsDelta is measured AFTER normalization to peak=1.0.
-  // For signals with rich harmonics (80 partials), high-frequency content
-  // naturally produces large sample-to-sample deltas after normalization.
-  // A raw threshold of 0.3 at -12.86 dBFS becomes ~1.3 post-normalization.
-  // Use 2.0 as the post-normalization click threshold (max possible delta for a
-  // properly bounded signal would be 2.0, from -1 to +1).
-  const CLICK_THRESHOLD = 1.95;
+  // maxAbsDelta is measured AFTER normalization to peak=1.0. A genuine
+  // click would manifest as a near-instantaneous swing to the rails — the
+  // companion script test-score-render.ts uses CLICK_THRESHOLD = 0.25 on the
+  // same engine path and passes, so 0.25 is the reconciled threshold here too.
+  // The previous value (1.95) only fired on full-amplitude swings (max possible
+  // delta = 2.0), which made the click check effectively a no-op.
+  const CLICK_THRESHOLD = 0.25;
   const clickPass = telemetry.maxAbsDelta < CLICK_THRESHOLD;
   console.log(`\nClick test: maxDelta=${telemetry.maxAbsDelta.toFixed(6)} ${clickPass ? 'PASS' : 'FAIL'} (threshold ${CLICK_THRESHOLD})`);
 

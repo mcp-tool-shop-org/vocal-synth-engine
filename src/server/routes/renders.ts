@@ -1,17 +1,60 @@
 import { Router } from "express";
 import fs from "fs";
 import path from "path";
-import { listRenders, getRenderDir, saveRender, updateRenderMeta, deleteRender } from "../storage/renderStore.js";
+import { z } from "zod";
+import {
+  listRenders,
+  getRenderDir,
+  saveRender,
+  updateRenderMeta,
+  deleteRender,
+  safeRenderDir,
+} from "../storage/renderStore.js";
 import { renderScoreToWav } from "../services/renderScoreToWav.js";
+import { validateBody } from "../middleware/validate.js";
+import { renderBodySchema } from "./render.js";
 
 export const rendersRouter = Router();
 
-rendersRouter.get("/", (req, res) => {
+/**
+ * S-001 / S-002 — sanitise every :id path param BEFORE it reaches
+ * fs.createReadStream / fs.readFileSync / fs.rmSync.  safeRenderDir validates
+ * the id against /^[A-Za-z0-9_-]{1,64}$/ AND verifies the resolved path is
+ * strictly inside the render store root.  Returns 400 on traversal attempts.
+ *
+ * Note: express 5's ParamsDictionary types path params as `string | string[]`
+ * (e.g. duplicate params).  We narrow to string here; anything else is
+ * rejected as an invalid id.
+ */
+function resolveRenderDirOr400(id: string | string[] | undefined, res: any): string | null {
+  if (typeof id !== 'string') {
+    res.status(400).json({ ok: false, error: 'Invalid render id', code: 'INVALID_RENDER_ID' });
+    return null;
+  }
+  try {
+    return safeRenderDir(id);
+  } catch (err: any) {
+    res.status(400).json({ ok: false, error: 'Invalid render id', code: err.code });
+    return null;
+  }
+}
+
+function asStringIdOr400(id: string | string[] | undefined, res: any): string | null {
+  if (typeof id !== 'string') {
+    res.status(400).json({ ok: false, error: 'Invalid render id', code: 'INVALID_RENDER_ID' });
+    return null;
+  }
+  return id;
+}
+
+rendersRouter.get("/", (_req, res) => {
   res.json({ ok: true, renders: listRenders() });
 });
 
 rendersRouter.get("/:id/audio.wav", (req, res) => {
-  const p = path.join(getRenderDir(req.params.id), "audio.wav");
+  const dir = resolveRenderDirOr400(req.params.id, res);
+  if (!dir) return;
+  const p = path.join(dir, "audio.wav");
   if (!fs.existsSync(p)) return res.status(404).end();
 
   res.setHeader("Content-Type", "audio/wav");
@@ -19,53 +62,84 @@ rendersRouter.get("/:id/audio.wav", (req, res) => {
 });
 
 rendersRouter.get("/:id/meta", (req, res) => {
-  const p = path.join(getRenderDir(req.params.id), "meta.json");
+  const dir = resolveRenderDirOr400(req.params.id, res);
+  if (!dir) return;
+  const p = path.join(dir, "meta.json");
   if (!fs.existsSync(p)) return res.status(404).end();
   res.json(JSON.parse(fs.readFileSync(p, "utf8")));
 });
 
 rendersRouter.get("/:id/score", (req, res) => {
-  const p = path.join(getRenderDir(req.params.id), "score.json");
+  const dir = resolveRenderDirOr400(req.params.id, res);
+  if (!dir) return;
+  const p = path.join(dir, "score.json");
   if (!fs.existsSync(p)) return res.status(404).end();
   res.json(JSON.parse(fs.readFileSync(p, "utf8")));
 });
 
 rendersRouter.get("/:id/telemetry", (req, res) => {
-  const p = path.join(getRenderDir(req.params.id), "telemetry.json");
+  const dir = resolveRenderDirOr400(req.params.id, res);
+  if (!dir) return;
+  const p = path.join(dir, "telemetry.json");
   if (!fs.existsSync(p)) return res.status(404).end();
   res.json(JSON.parse(fs.readFileSync(p, "utf8")));
 });
 
 rendersRouter.get("/:id/provenance", (req, res) => {
-  const p = path.join(getRenderDir(req.params.id), "provenance.json");
+  const dir = resolveRenderDirOr400(req.params.id, res);
+  if (!dir) return;
+  const p = path.join(dir, "provenance.json");
   if (!fs.existsSync(p)) return res.status(404).end();
   res.json(JSON.parse(fs.readFileSync(p, "utf8")));
 });
 
-rendersRouter.patch("/:id", (req, res) => {
+const renderPatchSchema = z
+  .object({
+    name: z.string().trim().min(1).max(200).optional(),
+    pinned: z.boolean().optional(),
+  })
+  .strict();
+
+rendersRouter.patch("/:id", validateBody(renderPatchSchema), (req, res) => {
+  const id = asStringIdOr400(req.params.id, res);
+  if (id === null) return;
   try {
-    const { name, pinned } = req.body;
-    if (name === undefined && pinned === undefined) return res.status(400).json({ error: "Missing updates" });
-    const updated = updateRenderMeta(req.params.id, { name, pinned });
+    const { name, pinned } = req.body as z.infer<typeof renderPatchSchema>;
+    if (name === undefined && pinned === undefined) {
+      return res.status(400).json({ error: "Missing updates" });
+    }
+    const updated = updateRenderMeta(id, { name, pinned });
     if (!updated) return res.status(404).json({ error: "Render not found" });
     res.json({ ok: true, meta: updated });
   } catch (err: any) {
+    if (err?.code === 'INVALID_RENDER_ID') {
+      return res.status(400).json({ ok: false, error: 'Invalid render id' });
+    }
     res.status(500).json({ error: err.message });
   }
 });
 
 rendersRouter.delete("/:id", (req, res) => {
+  const id = asStringIdOr400(req.params.id, res);
+  if (id === null) return;
   try {
-    deleteRender(req.params.id);
+    deleteRender(id);
     res.json({ ok: true });
   } catch (err: any) {
+    if (err?.code === 'INVALID_RENDER_ID') {
+      return res.status(400).json({ ok: false, error: 'Invalid render id' });
+    }
     res.status(500).json({ error: err.message });
   }
 });
 
-rendersRouter.post("/promote-last", (req, res) => {
+const promoteLastSchema = z
+  .object({ name: z.string().trim().min(1).max(200).optional() })
+  .strict();
+
+rendersRouter.post("/promote-last", validateBody(promoteLastSchema), (req, res) => {
   try {
-    const { name } = req.body;
+    const { name } = req.body as z.infer<typeof promoteLastSchema>;
     const lastDir = getRenderDir("last");
     if (!fs.existsSync(lastDir)) return res.status(404).json({ error: "No last render found" });
 
@@ -88,26 +162,37 @@ rendersRouter.post("/promote-last", (req, res) => {
   }
 });
 
-rendersRouter.post("/", async (req, res) => {
-  try {
-    const { name, score, config } = req.body ?? {};
-    if (!score) throw new Error("Missing score");
-    if (!config) throw new Error("Missing config");
+// S-008: /api/renders POST is just as expensive as /api/render — it MUST be
+// rate-limited (mount-level rateLimit in app.ts already provides this) AND
+// validated against the same body schema so a malformed/oversized score
+// can't trigger the engine.  We import renderBodySchema from ./render so
+// both endpoints share one source of truth.
+rendersRouter.post(
+  "/",
+  validateBody(
+    z.object({
+      name: z.string().trim().min(1).max(200).optional(),
+    }).passthrough().and(renderBodySchema)
+  ),
+  async (req, res) => {
+    try {
+      const { name, score, config } = req.body as any;
 
-    const result = await renderScoreToWav({ score, config });
+      const result = await renderScoreToWav({ score, config });
 
-    const meta = saveRender({
-      name,
-      score,
-      config,
-      telemetry: result.telemetry,
-      provenance: result.provenance,
-      wavBytes: result.wavBytes,
-      durationSec: result.durationSec,
-    });
+      const meta = saveRender({
+        name,
+        score,
+        config,
+        telemetry: result.telemetry,
+        provenance: result.provenance,
+        wavBytes: result.wavBytes,
+        durationSec: result.durationSec,
+      });
 
-    res.json({ ok: true, meta });
-  } catch (err: any) {
-    res.status(400).json({ ok: false, error: err?.message ?? String(err) });
+      res.json({ ok: true, meta });
+    } catch (err: any) {
+      res.status(400).json({ ok: false, error: err?.message ?? String(err) });
+    }
   }
-});
+);

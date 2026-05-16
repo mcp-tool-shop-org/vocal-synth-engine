@@ -4,19 +4,55 @@ import wavefile from 'wavefile';
 const { WaveFile } = wavefile;
 import { loadVoicePreset } from '../../preset/loader.js';
 import { StreamingVocalSynthEngine, StreamingVocalSynthConfig } from '../../engine/StreamingVocalSynthEngine.js';
-import { resolve, join } from 'node:path';
+import { resolve, join, sep } from 'node:path';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 
 // --- Preset directory discovery ---
 const PRESET_DIR = resolve(process.env.PRESET_DIR || 'presets');
 const presetCache: Map<string, any> = new Map();
 
+// S-014: presetId is a filesystem segment that flows from HTTP/WS input
+// directly into a path.join.  Allow only safe characters and bound length
+// so an attacker cannot escape PRESET_DIR with `../../etc` or similar.
+const PRESET_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
+
+export function isValidPresetId(id: unknown): id is string {
+  return typeof id === 'string' && PRESET_ID_PATTERN.test(id);
+}
+
 /**
  * Resolve a preset ID to its manifest path.
  * Looks for <PRESET_DIR>/<presetId>/voicepreset.json
+ *
+ * S-014: rejects presetIds that don't match a strict allowlist BEFORE
+ * touching the filesystem, and defence-in-depth re-resolves the joined
+ * path and asserts it stays inside PRESET_DIR.
  */
 export function resolvePresetPath(presetId: string): string {
+  if (!isValidPresetId(presetId)) {
+    const err: any = new Error(
+      `Invalid presetId '${presetId}'. Must match /^[A-Za-z0-9_-]{1,64}$/`
+    );
+    err.code = 'INVALID_PRESET_ID';
+    err.presetId = presetId;
+    throw err;
+  }
+
   const manifestPath = join(PRESET_DIR, presetId, 'voicepreset.json');
+
+  // Defence-in-depth: resolve the joined path and verify it remains inside
+  // PRESET_DIR (rejects symlink tricks and any sneaky bypass of the regex).
+  const resolved = resolve(manifestPath);
+  const presetDirSep = PRESET_DIR.endsWith(sep) ? PRESET_DIR : PRESET_DIR + sep;
+  if (!resolved.startsWith(presetDirSep)) {
+    const err: any = new Error(
+      `presetId '${presetId}' resolves outside PRESET_DIR`
+    );
+    err.code = 'INVALID_PRESET_ID';
+    err.presetId = presetId;
+    throw err;
+  }
+
   if (!existsSync(manifestPath)) {
     const available = listPresetIds();
     const err: any = new Error(

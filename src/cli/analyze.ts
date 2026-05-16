@@ -1,3 +1,11 @@
+/**
+ * Analyze a single WAV file into a single-timbre voice preset.
+ *
+ * Usage: npx tsx src/cli/analyze.ts <input.wav> <out-dir> <timbre-name>
+ *        npx tsx src/cli/analyze.ts --help
+ *
+ * For multi-timbre presets, use build-preset.ts instead.
+ */
 import wavefile from 'wavefile';
 const { WaveFile } = wavefile;
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
@@ -5,10 +13,28 @@ import { join, resolve } from 'node:path';
 import { fft, applyHannWindow } from '../dsp/fft.js';
 import { findPitchYin } from '../dsp/pitch.js';
 
+const USAGE = `Usage: npx tsx src/cli/analyze.ts <input.wav> <out-dir> <timbre-name>
+
+Analyzes a WAV at 48kHz mono and emits a single-timbre voice preset:
+  <out-dir>/voicepreset.json
+  <out-dir>/assets/<timbre>_harmonics_mag.f32
+  <out-dir>/assets/<timbre>_envelope_db.f32
+  <out-dir>/assets/<timbre>_noise_db.f32
+  <out-dir>/assets/freq_axis_hz.f32
+
+Options:
+  -h, --help    Show this message and exit.
+
+For multi-timbre presets see build-preset.ts.`;
+
 async function main() {
   const args = process.argv.slice(2);
+  if (args[0] === '-h' || args[0] === '--help') {
+    console.log(USAGE);
+    process.exit(0);
+  }
   if (args.length < 3) {
-    console.error('Usage: npx tsx src/cli/analyze.ts <input.wav> <out-dir> <timbre-name>');
+    console.error(USAGE);
     process.exit(1);
   }
 

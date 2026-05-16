@@ -1,8 +1,30 @@
+/**
+ * Resynthesize a steady tone from a voice preset at a given pitch + duration.
+ *
+ * Usage: npx tsx src/cli/resynth.ts <preset.json> <out.wav> <f0> <duration_sec> [timbre]
+ *        npx tsx src/cli/resynth.ts --help
+ *
+ * Standalone additive-synthesis renderer (does NOT use the streaming engine).
+ * Useful for spot-checking a preset's harmonic envelope without a full score.
+ */
 import wavefile from 'wavefile';
 const { WaveFile } = wavefile;
 import { writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { loadVoicePreset } from '../preset/loader.js';
+
+const USAGE = `Usage: npx tsx src/cli/resynth.ts <preset.json> <out.wav> <f0> <duration_sec> [timbre]
+
+Renders a steady additive-synthesis tone at <f0> Hz for <duration_sec>
+seconds using the named [timbre] (defaults to first timbre in preset).
+Writes <out.wav> and <out>_telemetry.json next to it.
+
+NOTE: This is a standalone synth path used for preset spot-checks. The
+telemetry values are placeholders (meanPitchErrorCents=0,
+determinismHash='sha256:exact_match_expected'), not measured outputs.
+
+Options:
+  -h, --help    Show this message and exit.`;
 
 function interp(x: Float32Array, y: Float32Array, targetX: number): number {
   if (targetX <= x[0]) return y[0];
@@ -27,8 +49,12 @@ function xorshift32(state: { seed: number }) {
 
 async function main() {
   const args = process.argv.slice(2);
+  if (args[0] === '-h' || args[0] === '--help') {
+    console.log(USAGE);
+    process.exit(0);
+  }
   if (args.length < 4) {
-    console.error('Usage: npx tsx src/cli/resynth.ts <preset.json> <out.wav> <f0> <duration_sec> [timbre]');
+    console.error(USAGE);
     process.exit(1);
   }
 
@@ -100,11 +126,16 @@ async function main() {
   
   console.log(`Resynthesized audio saved to ${outWav}`);
   
+  // Placeholder telemetry — these fields are NOT measured from the rendered
+  // audio. Marked _MOCK so downstream tooling and humans don't mistake them
+  // for real determinism / pitch numbers. For measured determinism, use
+  // test-score-render.ts.
   const telemetry = {
+    _note: 'PLACEHOLDER values — not measured from the rendered audio',
     durationMs: durationSec * 1000,
     targetF0: f0,
-    meanPitchErrorCents: 0.0, // Perfect in this deterministic synth
-    determinismHash: "sha256:exact_match_expected"
+    meanPitchErrorCents_MOCK: 0.0,
+    determinismHash_MOCK: 'sha256:placeholder_not_computed',
   };
   
   await writeFile(resolve(outWav.replace('.wav', '_telemetry.json')), JSON.stringify(telemetry, null, 2));

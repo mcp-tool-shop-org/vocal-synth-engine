@@ -11,20 +11,33 @@
   "title": "Vocal Synth Engine",
   "description": "Web frontend for a TTS voice synthesis engine",
   "version": "1.0.3",
-  "license": "ISC",
+  "license": "MIT",
   "datePublished": "2026-04-20",
-  "dateModified": "2026-04-20",
-  "codeRepository": "https://github.com/mcp-tool-shop-org/prototypes/tree/main/packages/vocal-synth-engine",
+  "dateModified": "2026-05-16",
+  "codeRepository": "https://github.com/mcp-tool-shop-org/vocal-synth-engine",
   "author": [
     {
       "name": "mcp-tool-shop"
     }
   ],
-  "keywords": [],
+  "keywords": [
+    "audio",
+    "synthesis",
+    "vocal",
+    "singing",
+    "additive-synthesis",
+    "tts",
+    "formant",
+    "midi",
+    "websocket",
+    "webaudio",
+    "jam-session",
+    "deterministic"
+  ],
   "lifecycle": {
-    "state": "dormant",
-    "stateSince": "2026-04-08",
-    "maturity": "prototype",
+    "state": "active",
+    "stateSince": "2026-05-16",
+    "maturity": "shipping",
     "caretaker": null,
     "graduatedTo": null,
     "resurrectionNotes": null
@@ -47,10 +60,11 @@
       "TypeScript",
       "JavaScript",
       "HTML",
-      "CSS",
-      "Starlight.js"
+      "CSS"
     ],
-    "runtimes": [],
+    "runtimes": [
+      "Node.js >=20"
+    ],
     "operatingSystems": [
       "any"
     ]
@@ -65,7 +79,7 @@
     "buildable": null
   },
   "lineage": {
-    "sourceRepo": null,
+    "sourceRepo": "https://github.com/mcp-tool-shop-org/prototypes",
     "consolidatedAt": "2026-04-08",
     "relatedSeeds": [],
     "deprecates": [],
@@ -88,10 +102,10 @@
     "excerpt": null
   },
   "ingest": {
-    "method": "ollama-backfill",
-    "model": "hermes3:8b",
-    "confidence": 0.9,
-    "manualReview": false,
-    "ingestedAt": "2026-04-20T21:59:47.237Z"
+    "method": "hand-maintained",
+    "model": null,
+    "confidence": null,
+    "manualReview": true,
+    "ingestedAt": "2026-05-16T00:00:00.000Z"
   }
 }

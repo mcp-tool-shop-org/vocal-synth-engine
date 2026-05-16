@@ -1,4 +1,17 @@
 import { z } from 'zod';
+import { isAbsolute } from 'node:path';
+
+/**
+ * Asset paths inside a voice-preset manifest must be RELATIVE to the manifest
+ * directory and may not contain parent-directory segments. Defense-in-depth:
+ * loader.ts also resolves and bounds-checks each path against the manifest
+ * directory, but rejecting the obvious cases at parse time gives a clearer
+ * error message and a smaller attack surface.
+ */
+const RelativeAssetPath = z.string().refine(
+  (p) => p.length > 0 && !isAbsolute(p) && !p.split(/[\\/]/).some((seg) => seg === '..'),
+  { message: "asset path must be relative and may not contain '..' segments" }
+);
 
 export const VoicePresetSchema = z.object({
   schema: z.literal('mcp-voice-engine.voicepreset'),
@@ -24,10 +37,10 @@ export const VoicePresetSchema = z.object({
       name: z.string(),
       kind: z.string(),
       assets: z.object({
-        harmonicsMag: z.string(),
-        envelopeDb: z.string(),
-        noiseDb: z.string(),
-        freqHz: z.string(),
+        harmonicsMag: RelativeAssetPath,
+        envelopeDb: RelativeAssetPath,
+        noiseDb: RelativeAssetPath,
+        freqHz: RelativeAssetPath,
       }),
       defaults: z.object({
         hnrDb: z.number(),

@@ -7,6 +7,7 @@ import { requireWsAuth } from './middleware/auth.js';
 import { getPresetDirInfo } from './services/renderScoreToWav.js';
 import { LiveSession } from './services/LiveSession.js';
 import { JamSessionManager } from './services/JamSessionManager.js';
+import { liveClientMessageSchema, jamClientMessageSchema } from './services/wsSchemas.js';
 import type { ClientMessage } from '../types/live.js';
 import type { JamClientMessage } from '../types/jam.js';
 
@@ -58,8 +59,23 @@ async function startDevServer() {
 
     ws.on('message', async (raw) => {
       try {
-        const msg: ClientMessage = JSON.parse(raw.toString());
-        await session.handleMessage(msg);
+        // S-013: validate parsed JSON against the discriminated-union schema
+        // BEFORE handing to session.handleMessage.  Replaces the trusted cast.
+        const parsed = JSON.parse(raw.toString());
+        const result = liveClientMessageSchema.safeParse(parsed);
+        if (!result.success) {
+          ws.send(JSON.stringify({
+            type: 'error',
+            code: 'INVALID_MESSAGE',
+            message: 'Message failed schema validation',
+            issues: result.error.issues.slice(0, 5).map((i) => ({
+              path: i.path.join('.'),
+              message: i.message,
+            })),
+          }));
+          return;
+        }
+        await session.handleMessage(result.data as ClientMessage);
       } catch (err: any) {
         ws.send(JSON.stringify({
           type: 'error',
@@ -99,8 +115,25 @@ async function startDevServer() {
 
     ws.on('message', async (raw) => {
       try {
-        const msg: JamClientMessage = JSON.parse(raw.toString());
-        await jamManager.handleMessage(ws, msg);
+        // S-012 + S-013: validate parsed JSON against the jam discriminated
+        // union BEFORE jamManager.handleMessage routes it.  session_create
+        // payload bounds (blockSize, bpm, seed, timeSig) are enforced here
+        // so JamSession can never receive a 2-billion blockSize.
+        const parsed = JSON.parse(raw.toString());
+        const result = jamClientMessageSchema.safeParse(parsed);
+        if (!result.success) {
+          ws.send(JSON.stringify({
+            type: 'jam_error',
+            code: 'INVALID_MESSAGE',
+            message: 'Message failed schema validation',
+            issues: result.error.issues.slice(0, 5).map((i) => ({
+              path: i.path.join('.'),
+              message: i.message,
+            })),
+          }));
+          return;
+        }
+        await jamManager.handleMessage(ws, result.data as JamClientMessage);
       } catch (err: any) {
         ws.send(JSON.stringify({
           type: 'jam_error',
