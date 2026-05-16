@@ -1,0 +1,191 @@
+name: Dogfood
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "package.json"
+      - ".github/workflows/dogfood.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: dogfood-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dogfood:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run build:server
+
+      # --- Scenario: health-and-presets-roundtrip ---
+      # Exercise the real product: start server, hit health + presets endpoints
+      # All steps in one shell because background server must persist across checks
+
+      - name: Run scenario
+        id: scenario
+        shell: bash --noprofile --norc {0}
+        run: |
+          set +e
+          # Start the server in background
+          node dist/server/index.prod.js &
+          SERVER_PID=$!
+
+          # Wait for server to be ready
+          START_OK=fail
+          for i in $(seq 1 20); do
+            if curl -sf http://localhost:4321/api/health > /dev/null 2>&1; then
+              START_OK=pass
+              break
+            fi
+            sleep 1
+          done
+          echo "start_status=$START_OK" >> "$GITHUB_OUTPUT"
+
+          # Health check
+          HEALTH_OK=fail
+          if [ "$START_OK" = "pass" ]; then
+            curl -sf http://localhost:4321/api/health | tee /tmp/health.json
+            if jq -e '.ok == true' /tmp/health.json > /dev/null 2>&1; then
+              HEALTH_OK=pass
+            fi
+          fi
+          echo "health_status=$HEALTH_OK" >> "$GITHUB_OUTPUT"
+
+          # Presets check
+          PRESETS_OK=fail
+          if [ "$START_OK" = "pass" ]; then
+            curl -sf http://localhost:4321/api/presets 2>&1 | tee /tmp/presets.json
+            if [ -s /tmp/presets.json ]; then
+              PRESETS_OK=pass
+            fi
+          fi
+          echo "presets_status=$PRESETS_OK" >> "$GITHUB_OUTPUT"
+
+          # Verify output
+          VERIFY_OK=fail
+          if [ "$HEALTH_OK" = "pass" ] && jq -e '.ok and .node' /tmp/health.json > /dev/null 2>&1; then
+            VERIFY_OK=pass
+          fi
+          echo "verify_status=$VERIFY_OK" >> "$GITHUB_OUTPUT"
+
+          # Stop server
+          kill $SERVER_PID 2>/dev/null || true
+
+      # --- Verdict ---
+
+      - name: Determine overall verdict
+        id: verdict
+        run: |
+          S="${{ steps.scenario.outputs.start_status }}"
+          H="${{ steps.scenario.outputs.health_status }}"
+          P="${{ steps.scenario.outputs.presets_status }}"
+          V="${{ steps.scenario.outputs.verify_status }}"
+          if [ "$S" = "pass" ] && [ "$H" = "pass" ] && [ "$P" = "pass" ] && [ "$V" = "pass" ]; then
+            echo "verdict=pass" >> "$GITHUB_OUTPUT"
+          else
+            echo "verdict=fail" >> "$GITHUB_OUTPUT"
+          fi
+
+      # --- Build + dispatch ---
+
+      - name: Build submission
+        run: |
+          FINISHED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          cat > /tmp/submission.json << 'INNER_EOF'
+          {
+            "schema_version": "1.0.0",
+            "run_id": "vocal-synth-engine-RUN_ID-ATTEMPT",
+            "repo": "REPO_SLUG",
+            "ref": {
+              "branch": "REF_NAME",
+              "commit_sha": "COMMIT_SHA"
+            },
+            "source": {
+              "provider": "github",
+              "workflow": "dogfood.yml",
+              "provider_run_id": "PROVIDER_RUN_ID",
+              "attempt": ATTEMPT_NUM,
+              "run_url": "RUN_URL_PLACEHOLDER",
+              "actor": "ACTOR_NAME"
+            },
+            "timing": {
+              "started_at": "STARTED_PLACEHOLDER",
+              "finished_at": "FINISHED_PLACEHOLDER",
+              "duration_ms": 0
+            },
+            "ci_checks": [],
+            "scenario_results": [
+              {
+                "scenario_id": "health-and-presets-roundtrip",
+                "scenario_name": "Start server, verify health and presets endpoints",
+                "scenario_version": "1.0.0",
+                "product_surface": "api",
+                "execution_mode": "bot",
+                "verdict": "VERDICT_PLACEHOLDER",
+                "step_results": [
+                  { "step_id": "start-server", "status": "START_STATUS" },
+                  { "step_id": "health-check", "status": "HEALTH_STATUS" },
+                  { "step_id": "presets-check", "status": "PRESETS_STATUS" },
+                  { "step_id": "verify-output", "status": "VERIFY_STATUS" }
+                ],
+                "evidence": [
+                  {
+                    "kind": "log",
+                    "url": "RUN_URL_PLACEHOLDER",
+                    "description": "CI run log with health + presets response"
+                  }
+                ],
+                "notes": "Bot-driven API health and presets roundtrip"
+              }
+            ],
+            "overall_verdict": "VERDICT_PLACEHOLDER",
+            "notes": "Phase 2 rollout: vocal-synth-engine API dogfood."
+          }
+          INNER_EOF
+
+          sed -i "s|REPO_SLUG|${GITHUB_REPOSITORY}|g" /tmp/submission.json
+          sed -i "s|REF_NAME|${GITHUB_REF_NAME}|g" /tmp/submission.json
+          sed -i "s|COMMIT_SHA|${GITHUB_SHA}|g" /tmp/submission.json
+          sed -i "s|PROVIDER_RUN_ID|${GITHUB_RUN_ID}|g" /tmp/submission.json
+          sed -i "s|ATTEMPT_NUM|${GITHUB_RUN_ATTEMPT}|g" /tmp/submission.json
+          sed -i "s|RUN_URL_PLACEHOLDER|https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}|g" /tmp/submission.json
+          sed -i "s|ACTOR_NAME|${GITHUB_ACTOR}|g" /tmp/submission.json
+          sed -i "s|STARTED_PLACEHOLDER|${{ github.event.head_commit.timestamp || github.event.repository.pushed_at }}|g" /tmp/submission.json
+          sed -i "s|FINISHED_PLACEHOLDER|${FINISHED_AT}|g" /tmp/submission.json
+          sed -i "s|vocal-synth-engine-RUN_ID-ATTEMPT|vocal-synth-engine-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}|g" /tmp/submission.json
+          sed -i "s|VERDICT_PLACEHOLDER|${{ steps.verdict.outputs.verdict }}|g" /tmp/submission.json
+          sed -i "s|START_STATUS|${{ steps.scenario.outputs.start_status }}|g" /tmp/submission.json
+          sed -i "s|HEALTH_STATUS|${{ steps.scenario.outputs.health_status }}|g" /tmp/submission.json
+          sed -i "s|PRESETS_STATUS|${{ steps.scenario.outputs.presets_status }}|g" /tmp/submission.json
+          sed -i "s|VERIFY_STATUS|${{ steps.scenario.outputs.verify_status }}|g" /tmp/submission.json
+
+          jq empty /tmp/submission.json
+          echo "Submission built:"
+          jq '.run_id, .overall_verdict' /tmp/submission.json
+
+      - name: Dispatch to dogfood-labs
+        env:
+          GH_TOKEN: ${{ secrets.DOGFOOD_TOKEN }}
+        run: |
+          SUBMISSION=$(cat /tmp/submission.json)
+          RUN_ID=$(echo "$SUBMISSION" | jq -r '.run_id')
+
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::warning::DOGFOOD_TOKEN not set — skipping dispatch"
+            exit 0
+          fi
+
+          jq -n --argjson sub "$SUBMISSION" \
+            '{"event_type":"dogfood_submission","client_payload":{"submission":$sub}}' \
+            | gh api repos/mcp-tool-shop-org/dogfood-labs/dispatches \
+              --input - --silent
+
+          echo "Dispatched $RUN_ID to dogfood-labs"

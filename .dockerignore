@@ -1,0 +1,7 @@
+node_modules
+dist
+.vscockpit
+*.wav
+ref/out
+test-preset
+.git

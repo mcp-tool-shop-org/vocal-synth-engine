@@ -1,0 +1,33 @@
+{
+  "bpm": 120,
+  "notes": [
+    {
+      "id": "n1",
+      "startSec": 0.0,
+      "durationSec": 2.0,
+      "midi": 60,
+      "velocity": 0.9,
+      "vibrato": {
+        "rateHz": 5.5,
+        "depthCents": 40,
+        "onsetSec": 0.5
+      }
+    }
+  ],
+  "lanes": {
+    "timbreMorph": {
+      "AH": [
+        { "tSec": 0.0, "value": 1.0 },
+        { "tSec": 0.5, "value": 1.0 },
+        { "tSec": 1.5, "value": 0.0 },
+        { "tSec": 2.0, "value": 0.0 }
+      ],
+      "OO": [
+        { "tSec": 0.0, "value": 0.0 },
+        { "tSec": 0.5, "value": 0.0 },
+        { "tSec": 1.5, "value": 1.0 },
+        { "tSec": 2.0, "value": 1.0 }
+      ]
+    }
+  }
+}

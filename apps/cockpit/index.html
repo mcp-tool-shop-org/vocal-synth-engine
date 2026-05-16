@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width" />
+    <title>VocalSynth Cockpit</title>
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <div class="header-left">
+          <a href="https://mcptoolshop.com/lab/" class="back-link">&larr; Lab</a>
+          <h1>VocalSynth Cockpit</h1>
+        </div>
+        <div id="health-status" class="status-badge">Checking daemon...</div>
+      </header>
+
+      <div id="commit-mismatch-banner" class="banner warning" style="display: none;">
+        <span id="commit-mismatch-text"></span>
+        <div class="banner-actions">
+          <button id="btn-banner-load">Load anyway</button>
+          <button id="btn-banner-render">Re-render now</button>
+          <button id="btn-banner-dismiss">Dismiss</button>
+        </div>
+      </div>
+
+      <div class="grid">
+        <!-- Render Bank -->
+        <div class="col-bank">
+          <section class="panel bank-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h2 style="margin: 0;">Render Bank</h2>
+              <button id="btn-compare" disabled>Compare (0/2)</button>
+            </div>
+            <div class="bank-list" id="bank-list">
+              <!-- Renders injected here -->
+            </div>
+          </section>
+        </div>
+
+        <div class="col-main">
+          <!-- Quick Controls -->
+          <section class="panel controls-panel">
+            <h2>Engine Config</h2>
+            <div class="control-grid">
+              <label>Voice:
+                <select id="inp-preset">
+                  <option value="default-voice">Loading...</option>
+                </select>
+              </label>
+              <label>Def. Timbre: 
+                <select id="inp-default-timbre">
+                  <option value="ah">ah</option>
+                  <option value="oo">oo</option>
+                  <option value="ee">ee</option>
+                </select>
+              </label>
+              <label>Polyphony: <input type="number" id="inp-polyphony" value="4" min="1" max="16"></label>
+              <label>Determinism: 
+                <select id="inp-determinism">
+                  <option value="exact">Exact</option>
+                  <option value="fast">Fast</option>
+                </select>
+              </label>
+              <label>Seed: <input type="number" id="inp-seed" value="123456789"></label>
+              <label>BPM: <input type="number" id="inp-bpm" value="120"></label>
+            </div>
+          </section>
+
+          <!-- Transport -->
+          <section class="panel transport-panel">
+            <div class="transport-controls">
+              <button id="btn-render-play" class="primary">⚙️ Render + Play</button>
+              <button id="btn-render">⚙️ Render</button>
+              <button id="btn-save-render">💾 Save Render</button>
+              <button id="btn-play" disabled>▶ Play</button>
+              <button id="btn-stop" disabled>■ Stop</button>
+              <label class="loop-toggle"><input type="checkbox" id="toggle-loop"> ⟳ Loop</label>
+              <button id="btn-download" disabled>↓ WAV</button>
+            </div>
+            <div class="status-strip" id="status-strip">Ready</div>
+          </section>
+
+          <!-- Tabbed Container: Score / Live -->
+          <section class="panel tabbed-panel">
+            <div class="tab-bar">
+              <button class="tab-btn active" data-tab="score">Score</button>
+              <button class="tab-btn" data-tab="live">Live</button>
+            </div>
+
+            <!-- ── Score Tab ── -->
+            <div class="tab-content active" id="tab-score">
+              <div class="editor-header">
+                <h2>Piano Roll</h2>
+                <div class="editor-tools">
+                  <span class="hint">Click to add • Drag to move/resize • Del to remove</span>
+                </div>
+              </div>
+
+              <!-- Lyric Editor -->
+              <div class="lyric-bar">
+                <label>Lyrics:
+                  <input type="text" id="inp-lyrics" placeholder="Type lyrics (e.g. hello world)" spellcheck="false">
+                </label>
+                <button id="btn-phonemize">Generate Phonemes</button>
+                <label class="toggle-label phoneme-toggle">
+                  <input type="checkbox" id="toggle-phonemes" checked> Show
+                </label>
+              </div>
+
+              <div class="piano-roll-wrapper">
+                <!-- Phoneme overlay (above piano roll, scrolls together) -->
+                <div class="phoneme-lane" id="phoneme-lane">
+                  <!-- Phoneme blocks injected via JS -->
+                </div>
+                <div class="piano-roll-container" id="pr-container">
+                  <div class="piano-roll-content" id="pr-content">
+                    <!-- Grid and notes injected via JS -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Note Inspector -->
+              <div class="note-inspector" id="note-inspector" style="display: none;">
+                <h3>Note Inspector</h3>
+                <div class="inspector-grid">
+                  <label>Timbre:
+                    <select id="insp-timbre">
+                      <option value="">(Default)</option>
+                      <option value="ah">ah</option>
+                      <option value="oo">oo</option>
+                      <option value="ee">ee</option>
+                    </select>
+                  </label>
+                  <label>Velocity: <input type="range" id="insp-vel" min="0" max="1" step="0.01"></label>
+                  <label>Portamento (s): <input type="range" id="insp-porta" min="0" max="0.5" step="0.01" value="0"></label>
+                  <label>Breathiness: <input type="range" id="insp-breath" min="0" max="1" step="0.01" value="0"></label>
+
+                  <div class="vib-group">
+                    <label class="toggle-label"><input type="checkbox" id="insp-vib-toggle"> Vibrato</label>
+                    <label>Rate (Hz): <input type="range" id="insp-vib-rate" min="1" max="10" step="0.1"></label>
+                    <label>Depth (ct): <input type="range" id="insp-vib-depth" min="0" max="100" step="1"></label>
+                    <label>Onset (s): <input type="range" id="insp-vib-onset" min="0" max="1" step="0.05"></label>
+                  </div>
+                </div>
+              </div>
+
+              <details class="advanced-json">
+                <summary>Advanced (Score JSON)</summary>
+                <textarea id="score-input" rows="10" spellcheck="false"></textarea>
+              </details>
+            </div>
+
+            <!-- ── Live Tab ── -->
+            <div class="tab-content" id="tab-live">
+              <!-- Connection -->
+              <div class="live-header">
+                <div class="live-controls">
+                  <button id="btn-live-toggle">Connect Live</button>
+                  <span id="live-status" class="live-badge off">Disconnected</span>
+                </div>
+              </div>
+
+              <div id="no-voices-banner" class="no-voices-banner" style="display:none;">
+                No voices installed on this server.
+              </div>
+
+              <!-- MIDI Input -->
+              <div class="live-midi-bar">
+                <label>MIDI: <select id="midi-input"><option value="">None</option></select></label>
+                <span id="midi-status" class="midi-badge off">No MIDI</span>
+                <label><input type="number" id="midi-channel" value="0" min="0" max="15" title="0 = all channels"> Ch</label>
+              </div>
+
+              <!-- Live Controls -->
+              <div class="live-controls-grid">
+                <label>Voice:
+                  <select id="live-preset"></select>
+                </label>
+                <span id="voice-info" class="voice-info"></span>
+                <label>Timbre:
+                  <select id="live-timbre"></select>
+                </label>
+                <label>Polyphony:
+                  <input type="number" id="live-polyphony" value="4" min="1" max="16">
+                </label>
+                <label>Latency:
+                  <select id="live-latency">
+                    <option value="low">Low (~60ms)</option>
+                    <option value="balanced" selected>Balanced (~100ms)</option>
+                    <option value="safe">Safe (~150ms)</option>
+                  </select>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="live-limiter" checked> Limiter
+                </label>
+                <label>Velocity:
+                  <input type="range" id="live-velocity" min="0" max="1" step="0.01" value="0.8">
+                  <span class="slider-value" id="live-velocity-val">0.80</span>
+                </label>
+                <label>Breathiness:
+                  <input type="range" id="live-breathiness" min="0" max="1" step="0.01" value="0">
+                  <span class="slider-value" id="live-breathiness-val">0.00</span>
+                </label>
+                <label>Vibrato:
+                  <input type="range" id="live-vibrato" min="0" max="100" step="1" value="0">
+                  <span class="slider-value" id="live-vibrato-val">0 ct</span>
+                </label>
+                <label>Portamento:
+                  <input type="range" id="live-portamento" min="0" max="500" step="10" value="0">
+                  <span class="slider-value" id="live-portamento-val">0 ms</span>
+                </label>
+              </div>
+
+              <!-- Metronome -->
+              <div class="live-metronome-bar">
+                <label><input type="checkbox" id="metro-toggle"> Metronome</label>
+                <label>BPM: <input type="number" id="metro-bpm" value="120" min="30" max="300" step="1"></label>
+                <label>Beats: <select id="metro-beats">
+                  <option value="4">4/4</option>
+                  <option value="3">3/4</option>
+                  <option value="2">2/4</option>
+                </select></label>
+                <label><input type="checkbox" id="metro-quantize"> Quantize</label>
+                <label>Grid: <select id="metro-grid" disabled>
+                  <option value="4">1/4</option>
+                  <option value="8">1/8</option>
+                  <option value="16">1/16</option>
+                </select></label>
+              </div>
+
+              <!-- XY Pad (Timbre Morph + Breathiness) -->
+              <div class="live-xy-pad-container">
+                <canvas id="xy-pad" width="200" height="200"></canvas>
+                <div class="xy-labels">
+                  <span class="xy-label-x">Timbre blend &rarr;</span>
+                  <span class="xy-label-y">&uarr; Breathiness</span>
+                  <span id="xy-readout">--</span>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="live-actions">
+                <button id="btn-panic" class="btn-panic" disabled>Panic</button>
+                <button id="btn-record" disabled>Record</button>
+                <button id="btn-hold" disabled>Hold</button>
+              </div>
+
+              <!-- Keyboard -->
+              <div class="live-keyboard" id="live-keyboard">
+                <!-- Keyboard rendered via JS -->
+              </div>
+
+              <!-- Live Telemetry Tiles -->
+              <div class="live-tiles" id="live-telemetry" style="display:none;">
+                <div class="live-tile" id="lt-voices">
+                  <div class="lt-label">Voices</div>
+                  <div class="lt-value" id="live-voices">0</div>
+                </div>
+                <div class="live-tile" id="lt-peak">
+                  <div class="lt-label">Peak dBFS</div>
+                  <div class="lt-value" id="live-peak">--</div>
+                </div>
+                <div class="live-tile" id="lt-underruns">
+                  <div class="lt-label">Underruns</div>
+                  <div class="lt-value" id="live-underruns">0</div>
+                </div>
+                <div class="live-tile" id="lt-click-delta">
+                  <div class="lt-label">Click &Delta;</div>
+                  <div class="lt-value" id="live-click-delta">--</div>
+                </div>
+                <div class="live-tile" id="lt-rtf">
+                  <div class="lt-label">RTF</div>
+                  <div class="lt-value" id="live-rtf">--</div>
+                </div>
+                <div class="live-tile" id="lt-jitter">
+                  <div class="lt-label">WS Jitter</div>
+                  <div class="lt-value" id="live-jitter">--</div>
+                </div>
+              </div>
+
+              <!-- Live Alert Badges -->
+              <div class="live-alerts" id="live-alerts" style="display:none;">
+                <span class="live-alert clipping" id="alert-clipping" style="display:none;">CLIPPING</span>
+                <span class="live-alert click-risk" id="alert-click-risk" style="display:none;">CLICK RISK</span>
+                <span class="live-alert buffer-starved" id="alert-buffer-starved" style="display:none;">BUFFER STARVED</span>
+              </div>
+
+              <!-- Latency Calibration -->
+              <div class="live-latency-bar" id="latency-bar" style="display:none;">
+                <button id="btn-tap-test">Tap Test</button>
+                <span class="latency-readout">
+                  WS RTT: <span id="lat-rtt">--</span>ms &nbsp;|&nbsp;
+                  Audio: <span id="lat-audio">--</span>ms &nbsp;|&nbsp;
+                  Total: <span id="lat-total">--</span>ms
+                </span>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="col-side">
+          <!-- Telemetry -->
+          <section class="panel telemetry-panel">
+            <h2>Telemetry</h2>
+            <div class="metric-tiles">
+              <div class="tile" id="tile-clicks">
+                <div class="label">Max Δ (Clicks)</div>
+                <div class="value">--</div>
+              </div>
+              <div class="tile" id="tile-rtf">
+                <div class="label">RTF</div>
+                <div class="value">--</div>
+              </div>
+              <div class="tile" id="tile-peak">
+                <div class="label">Peak dBFS</div>
+                <div class="value">--</div>
+              </div>
+              <div class="tile" id="tile-voices">
+                <div class="label">Max Voices</div>
+                <div class="value">--</div>
+              </div>
+              <div class="tile" id="tile-duration" style="grid-column: 1 / -1;">
+                <div class="label">Duration</div>
+                <div class="value">--</div>
+                <div class="sub-label" id="tile-duration-sub">--</div>
+              </div>
+            </div>
+            <details class="raw-details">
+              <summary>Raw Telemetry</summary>
+              <pre id="telemetry-output">No data yet.</pre>
+            </details>
+          </section>
+
+          <!-- Provenance -->
+          <section class="panel provenance-panel">
+            <h2>Flight Recorder</h2>
+            <div class="prov-list">
+              <div><strong>Commit:</strong> <span id="prov-commit" class="hash">--</span></div>
+              <div><strong>Score Hash:</strong> <span id="prov-score" class="hash">--</span></div>
+              <div><strong>WAV Hash:</strong> <span id="prov-wav" class="hash">--</span></div>
+              <div id="prov-config" class="prov-config"></div>
+            </div>
+            <details class="raw-details">
+              <summary>Raw Provenance</summary>
+              <pre id="provenance-output">No data yet.</pre>
+            </details>
+          </section>
+        </div>
+      </div>
+    </main>
+    <audio id="audio-player" style="display: none;"></audio>
+    
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Compare Modal -->
+    <div id="compare-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>A/B Compare</h2>
+          <button id="btn-close-compare">✕</button>
+        </div>
+        <div class="compare-grid" id="compare-grid">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
+<style>
+  :root {
+    --bg: #121212;
+    --panel-bg: #1e1e1e;
+    --text: #e0e0e0;
+    --accent: #4a90e2;
+    --accent-hover: #357abd;
+    --border: #333;
+    --error: #e74c3c;
+    --success: #2ecc71;
+    --warn: #f39c12;
+    --note-bg: #4a90e2;
+    --note-selected: #f39c12;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+
+  .container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1rem;
+  }
+
+  h1 { margin: 0; font-size: 1.5rem; }
+  .header-left { display: flex; align-items: center; gap: 1rem; }
+  .back-link {
+    color: #888;
+    text-decoration: none;
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+  .back-link:hover { color: var(--text); border-color: #555; }
+
+  .status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    background: var(--border);
+  }
+  .status-badge.ok { background: var(--success); color: #000; }
+  .status-badge.error { background: var(--error); color: #fff; }
+
+  .banner {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+  }
+  .banner.warning {
+    background: var(--warn);
+    color: #000;
+  }
+  .banner-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .banner-actions button {
+    background: rgba(0,0,0,0.2);
+    color: #000;
+    border: 1px solid rgba(0,0,0,0.3);
+  }
+  .banner-actions button:hover {
+    background: rgba(0,0,0,0.3);
+  }
+
+  .modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  .modal-content {
+    background: var(--panel-bg);
+    padding: 2rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    width: 80%;
+    max-width: 800px;
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  .modal-header h2 { margin: 0; }
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+  .compare-col {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .compare-stat {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem;
+    background: #222;
+    border-radius: 4px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 280px 2.5fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .col-main, .col-side, .col-bank {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .panel {
+    background: var(--panel-bg);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  h2 {
+    margin-top: 0;
+    font-size: 1.1rem;
+    color: #aaa;
+    margin-bottom: 1rem;
+  }
+
+  /* Render Bank */
+  .bank-panel {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .bank-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .bank-item {
+    background: #222;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.75rem;
+    font-size: 0.85rem;
+    position: relative;
+  }
+  .bank-item:hover { border-color: #555; }
+  .bank-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.25rem;
+  }
+  .bank-item-name {
+    font-weight: bold;
+    color: var(--accent);
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    color: var(--accent);
+    font-size: 0.9rem;
+    padding: 0;
+    width: 100%;
+  }
+  .bank-item-name:focus {
+    outline: none;
+    border-bottom: 1px solid var(--accent);
+  }
+  .bank-item-meta {
+    color: #888;
+    font-size: 0.75rem;
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .bank-item-actions {
+    display: flex;
+    gap: 0.25rem;
+  }
+  .bank-item-actions button {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.75rem;
+    background: #333;
+  }
+  .bank-item-actions button:hover { background: #555; }
+
+  /* Controls */
+  .control-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+  }
+  .control-grid label {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.85rem;
+    color: #888;
+    gap: 0.25rem;
+  }
+  .control-grid input, .control-grid select {
+    background: #2a2a2a;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.4rem;
+    border-radius: 4px;
+    font-family: monospace;
+  }
+
+  /* Transport */
+  .transport-controls {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  .loop-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  .status-strip {
+    font-size: 0.85rem;
+    color: #888;
+    background: #1a1a1a;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-family: monospace;
+  }
+
+  /* Lyric Bar */
+  .lyric-bar {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  .lyric-bar label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    color: #888;
+    flex: 1;
+  }
+  .lyric-bar input[type="text"] {
+    flex: 1;
+    background: #2a2a2a;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.4rem 0.6rem;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.85rem;
+  }
+  .lyric-bar .phoneme-toggle {
+    flex: none;
+    font-size: 0.8rem;
+    gap: 0.25rem;
+    cursor: pointer;
+  }
+
+  /* Piano Roll Wrapper (scroll-linked phoneme lane + roll) */
+  .piano-roll-wrapper {
+    position: relative;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: #111;
+  }
+
+  /* Phoneme Lane (above piano roll, scroll-linked) */
+  .phoneme-lane {
+    position: relative;
+    height: 28px;
+    background: #1a1a1a;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .ph-block {
+    position: absolute;
+    top: 2px;
+    height: 24px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-family: monospace;
+    font-weight: bold;
+    color: #fff;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3);
+  }
+  .ph-block.vowel { background: #2d7d46; }
+  .ph-block.consonant { background: #7d4b2d; }
+
+  /* Piano Roll */
+  .editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  .editor-header h2 { margin: 0; }
+  .hint { font-size: 0.8rem; color: #666; }
+
+  .piano-roll-container {
+    width: 100%;
+    height: 350px;
+    background: #111;
+    border: none;
+    overflow: auto;
+    position: relative;
+    cursor: crosshair;
+  }
+  .piano-roll-content {
+    position: relative;
+    background-image: linear-gradient(#222 1px, transparent 1px), linear-gradient(90deg, #222 1px, transparent 1px);
+    background-size: 100px 14px; /* 100px = 1sec, 14px = 1 semitone */
+  }
+  .pr-grid-line-h {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #333;
+    pointer-events: none;
+  }
+  .pr-grid-line-h.c-note {
+    background: #555;
+    height: 2px;
+  }
+  .pr-note {
+    position: absolute;
+    background: var(--note-bg);
+    border-radius: 2px;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.5);
+    cursor: move;
+    user-select: none;
+  }
+  .pr-note:hover { filter: brightness(1.2); }
+  .pr-note.selected { background: var(--note-selected); z-index: 10; }
+  .pr-resize-handle {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    cursor: ew-resize;
+    background: rgba(255,255,255,0.2);
+  }
+
+  /* Note Inspector */
+  .note-inspector {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: #222;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+  .note-inspector h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+    color: var(--accent);
+  }
+  .inspector-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+  .inspector-grid label {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.8rem;
+    color: #aaa;
+    gap: 0.3rem;
+  }
+  .inspector-grid input[type="range"] { width: 100%; }
+  .vib-group {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 1rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #333;
+  }
+  .toggle-label {
+    flex-direction: row !important;
+    align-items: center;
+  }
+
+  /* Advanced JSON */
+  .advanced-json { margin-top: 1.5rem; }
+  .advanced-json summary { cursor: pointer; color: #888; font-size: 0.9rem; }
+  textarea {
+    width: 100%;
+    background: #1a1a1a;
+    color: #00ff00;
+    border: 1px solid var(--border);
+    padding: 1rem;
+    font-family: monospace;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    resize: vertical;
+    box-sizing: border-box;
+    margin-top: 0.5rem;
+  }
+
+  /* Telemetry Tiles */
+  .metric-tiles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .tile {
+    background: #2a2a2a;
+    padding: 1rem;
+    border-radius: 6px;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+  .tile .label {
+    font-size: 0.7rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+  }
+  .tile .value {
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: monospace;
+  }
+  .tile .sub-label {
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 0.25rem;
+  }
+  .tile.ok { border-color: var(--success); }
+  .tile.warn { border-color: var(--warn); }
+  .tile.error { border-color: var(--error); }
+
+  /* Provenance */
+  .prov-list {
+    font-size: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .hash {
+    font-family: monospace;
+    background: #2a2a2a;
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    color: #aaa;
+  }
+  .prov-config {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+    color: #888;
+  }
+
+  /* Buttons */
+  button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    background: var(--border);
+    color: var(--text);
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+  }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  button:hover:not(:disabled) { background: #555; }
+  button.primary { background: var(--accent); color: white; }
+  button.primary:hover:not(:disabled) { background: var(--accent-hover); }
+
+  .raw-details { margin-top: 1rem; font-size: 0.85rem; }
+  pre {
+    background: #1a1a1a;
+    padding: 1rem;
+    border-radius: 4px;
+    overflow-x: auto;
+    font-size: 0.8rem;
+    margin: 0.5rem 0 0 0;
+    color: #ccc;
+  }
+
+  /* Live Mode */
+  .live-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  .live-header h2 { margin: 0; }
+  .live-controls { display: flex; gap: 0.75rem; align-items: center; }
+  .live-badge {
+    padding: 0.2rem 0.6rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: bold;
+  }
+  .live-badge.off { background: #333; color: #888; }
+  .live-badge.connecting { background: var(--warn); color: #000; }
+  .live-badge.on { background: var(--success); color: #000; }
+
+  .live-keyboard {
+    display: flex;
+    height: 80px;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    user-select: none;
+  }
+  .key {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 4px;
+    font-size: 0.6rem;
+    cursor: pointer;
+    transition: background 0.05s;
+    position: relative;
+    border-right: 1px solid #222;
+  }
+  .key.white { background: #ddd; color: #333; min-width: 24px; }
+  .key.black {
+    background: #222;
+    color: #888;
+    min-width: 16px;
+    flex: 0.6;
+    height: 55px;
+    margin-left: -8px;
+    margin-right: -8px;
+    z-index: 2;
+    border-radius: 0 0 3px 3px;
+    border-right: none;
+  }
+  .key.active { background: var(--accent) !important; color: #fff !important; }
+  .key.white:hover { background: #ccc; }
+  .key.black:hover { background: #444; }
+
+  /* Tabs */
+  .tab-bar {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+  .tab-btn {
+    padding: 0.5rem 1.5rem;
+    background: transparent;
+    border: none;
+    color: #888;
+    font-weight: bold;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Live Controls Grid */
+  .live-controls-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .live-controls-grid label {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.85rem;
+    color: #888;
+    gap: 0.25rem;
+  }
+  .live-controls-grid input,
+  .live-controls-grid select {
+    background: #2a2a2a;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.4rem;
+    border-radius: 4px;
+    font-family: monospace;
+  }
+  .slider-value {
+    font-family: monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    text-align: right;
+  }
+  .no-voices-banner {
+    background: #442200;
+    color: #ffaa33;
+    padding: 0.6rem 1rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+  .voice-info {
+    grid-column: 1 / -1;
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: -0.5rem;
+  }
+  .voice-info .voice-tags {
+    display: inline;
+    margin-left: 0.5rem;
+  }
+  .voice-info .voice-tag {
+    display: inline-block;
+    background: #333;
+    color: #aaa;
+    font-size: 0.7rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    margin-left: 0.25rem;
+  }
+
+  /* Live Action Buttons */
+  .live-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .btn-panic {
+    background: var(--error) !important;
+    color: #fff !important;
+  }
+  .btn-panic:hover:not(:disabled) {
+    background: #c0392b !important;
+  }
+  #btn-hold.held {
+    background: var(--warn) !important;
+    color: #000 !important;
+  }
+
+  /* MIDI Bar */
+  .live-midi-bar {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+  }
+  .live-midi-bar label { display: flex; align-items: center; gap: 0.3rem; color: #888; }
+  .live-midi-bar select, .live-midi-bar input[type="number"] {
+    background: #2a2a2a; border: 1px solid var(--border); color: var(--text);
+    padding: 0.2rem 0.4rem; border-radius: 4px; font-family: monospace; font-size: 0.8rem;
+  }
+  .live-midi-bar input[type="number"] { width: 3rem; }
+  .midi-badge {
+    padding: 0.15rem 0.5rem; border-radius: 8px; font-size: 0.75rem; font-weight: bold;
+  }
+  .midi-badge.off { background: #333; color: #666; }
+  .midi-badge.on { background: var(--success); color: #000; }
+  .midi-badge.flash { background: var(--accent); color: #000; }
+
+  /* Metronome Bar */
+  .live-metronome-bar {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    font-size: 0.85rem;
+  }
+  .live-metronome-bar label { display: flex; align-items: center; gap: 0.3rem; color: #888; }
+  .live-metronome-bar input[type="number"], .live-metronome-bar select {
+    background: #2a2a2a; border: 1px solid var(--border); color: var(--text);
+    padding: 0.2rem 0.4rem; border-radius: 4px; font-family: monospace; font-size: 0.8rem;
+  }
+  .live-metronome-bar input[type="number"] { width: 4rem; }
+
+  /* XY Pad */
+  .live-xy-pad-container {
+    display: inline-flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+  }
+  #xy-pad {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    cursor: crosshair;
+    background: #1a1a1a;
+    touch-action: none;
+  }
+  .xy-labels {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    color: #666;
+  }
+  #xy-readout {
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: var(--accent);
+    margin-top: 0.5rem;
+  }
+
+  /* Latency Bar */
+  .live-latency-bar {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+  }
+  .latency-readout { color: #888; font-family: monospace; font-size: 0.8rem; }
+  .latency-readout span { color: var(--accent); }
+
+  /* Live Telemetry Tiles */
+  .live-tiles {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+  .live-tile {
+    background: #2a2a2a;
+    padding: 0.75rem;
+    border-radius: 6px;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+  .lt-label {
+    font-size: 0.65rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.3rem;
+  }
+  .lt-value {
+    font-size: 1rem;
+    font-weight: bold;
+    font-family: monospace;
+    color: var(--text);
+  }
+
+  /* Live Alert Badges */
+  .live-alerts {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .live-alert {
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    animation: alert-pulse 1s ease-in-out infinite;
+  }
+  .live-alert.clipping {
+    background: #d32f2f;
+    color: #fff;
+  }
+  .live-alert.click-risk {
+    background: #f57c00;
+    color: #fff;
+  }
+  .live-alert.buffer-starved {
+    background: #e64a19;
+    color: #fff;
+  }
+  @keyframes alert-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  /* Toasts */
+  .toast-container {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    z-index: 1000;
+  }
+  .toast {
+    background: #333;
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    font-size: 0.9rem;
+    animation: slideIn 0.3s ease-out;
+  }
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+</style>
+
+<script type="module" src="/src/main.ts"></script>

@@ -1,0 +1,97 @@
+{
+  "$schema": "../../schemas/passport.schema.json",
+  "conformsTo": [
+    "codemeta:3.0",
+    "ro-crate:1.1",
+    "mcp-prototypes:passport:1"
+  ],
+  "id": "seed:vocal-synth-engine:1.0.3",
+  "swhid": null,
+  "name": "vocal-synth-engine",
+  "title": "Vocal Synth Engine",
+  "description": "Web frontend for a TTS voice synthesis engine",
+  "version": "1.0.3",
+  "license": "ISC",
+  "datePublished": "2026-04-20",
+  "dateModified": "2026-04-20",
+  "codeRepository": "https://github.com/mcp-tool-shop-org/prototypes/tree/main/packages/vocal-synth-engine",
+  "author": [
+    {
+      "name": "mcp-tool-shop"
+    }
+  ],
+  "keywords": [],
+  "lifecycle": {
+    "state": "dormant",
+    "stateSince": "2026-04-08",
+    "maturity": "prototype",
+    "caretaker": null,
+    "graduatedTo": null,
+    "resurrectionNotes": null
+  },
+  "taxonomy": {
+    "category": "voice-and-sound",
+    "domains": [],
+    "tags": [
+      "typescript",
+      "javascript",
+      "cli",
+      "mcp",
+      "astro",
+      "starlight"
+    ]
+  },
+  "technical": {
+    "kind": "library",
+    "programmingLanguages": [
+      "TypeScript",
+      "JavaScript",
+      "HTML",
+      "CSS",
+      "Starlight.js"
+    ],
+    "runtimes": [],
+    "operatingSystems": [
+      "any"
+    ]
+  },
+  "health": {
+    "lineCount": null,
+    "lastCommitAt": null,
+    "commitRecencyDays": null,
+    "hasTests": null,
+    "hasReadme": null,
+    "hasLicense": null,
+    "buildable": null
+  },
+  "lineage": {
+    "sourceRepo": null,
+    "consolidatedAt": "2026-04-08",
+    "relatedSeeds": [],
+    "deprecates": [],
+    "successors": []
+  },
+  "sbom": {
+    "format": "none",
+    "url": null,
+    "hash": null
+  },
+  "discovery": {
+    "oneLiner": "Web UI for a TTS voice synthesis engine",
+    "whyItMatters": "Provides an easy-to-use web interface to experiment with and use the underlying voice synthesis capabilities, making it more accessible to non-technical users."
+  },
+  "patterns": [],
+  "failureModes": [],
+  "priorArt": [],
+  "agentCapsule": {
+    "insight": null,
+    "excerpt": null
+  },
+  "ingest": {
+    "method": "ollama-backfill",
+    "model": "hermes3:8b",
+    "confidence": 0.9,
+    "manualReview": false,
+    "ingestedAt": "2026-04-20T21:59:47.237Z"
+  }
+}

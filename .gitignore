@@ -1,0 +1,7 @@
+node_modules/
+dist/
+test-preset/
+.vscockpit/
+calib/
+models/
+site/.astro/

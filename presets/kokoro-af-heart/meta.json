@@ -1,0 +1,7 @@
+{
+  "id": "kokoro-af-heart",
+  "name": "Heart",
+  "description": "Warm female voice (Kokoro af_heart).",
+  "tags": ["kokoro", "female", "warm"],
+  "defaultTimbre": "AH"
+}

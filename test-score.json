@@ -1,0 +1,44 @@
+{
+  "bpm": 120,
+  "notes": [
+    {
+      "id": "n1",
+      "startSec": 0.0,
+      "durationSec": 0.5,
+      "midi": 57,
+      "velocity": 0.8
+    },
+    {
+      "id": "n2",
+      "startSec": 0.5,
+      "durationSec": 0.5,
+      "midi": 60,
+      "velocity": 0.9,
+      "portamentoSec": 0.1
+    },
+    {
+      "id": "n3",
+      "startSec": 1.0,
+      "durationSec": 0.5,
+      "midi": 64,
+      "velocity": 1.0,
+      "vibrato": {
+        "rateHz": 5.5,
+        "depthCents": 50,
+        "onsetSec": 0.2
+      }
+    },
+    {
+      "id": "n4",
+      "startSec": 1.5,
+      "durationSec": 1.0,
+      "midi": 57,
+      "velocity": 0.8,
+      "vibrato": {
+        "rateHz": 6.0,
+        "depthCents": 30,
+        "onsetSec": 0.3
+      }
+    }
+  ]
+}

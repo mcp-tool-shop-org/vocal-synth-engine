@@ -1,0 +1,7 @@
+{
+  "id": "kokoro-am-liam",
+  "name": "Liam",
+  "description": "Natural male voice.",
+  "tags": ["kokoro", "male", "american"],
+  "defaultTimbre": "AH"
+}

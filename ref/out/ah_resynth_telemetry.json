@@ -1,0 +1,6 @@
+{
+  "durationMs": 2000,
+  "targetF0": 220,
+  "meanPitchErrorCents": 0,
+  "determinismHash": "sha256:exact_match_expected"
+}
