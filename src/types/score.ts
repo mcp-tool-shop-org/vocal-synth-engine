@@ -9,6 +9,10 @@ export interface VocalNote {
   timbre?: TimbreId;      // default if omitted
   vibrato?: { rateHz: number; depthCents: number; onsetSec: number };
   portamentoSec?: number; // glide into this note
+  /** FE-004: stereo pan in [-1, 1]. -1 = hard left, 0 = center, 1 = hard right.
+   *  Defaults to 0 (center). Consumed only when StreamingVocalSynthConfig.channels === 2;
+   *  ignored on mono renders. Equal-power panning is applied per voice. */
+  pan?: number;
 }
 
 /** A single phoneme event on the lyric timeline. */

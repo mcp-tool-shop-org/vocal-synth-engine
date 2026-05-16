@@ -1,0 +1,153 @@
+name: Release
+
+# Release-spine: fires on `v*` tags. Verify-then-ship, with a tag-vs-package
+# version equality gate enforced in the publish job. The pattern mirrors
+# ollama-intern-mcp v2.5.0's canonical release-spine (memory note 2026-05-15)
+# and rig-bridge v1.0.2 (memory note 2026-05-15): single workflow, two jobs,
+# hard tag-vs-package.json check before npm publish + Sigstore provenance
+# attestation, then `gh release create` with CHANGELOG-extracted body.
+#
+# Required repo secrets:
+#   NPM_TOKEN — npm automation token with publish rights on
+#   @mcptoolshop/vocal-synth-engine. Provenance is generated via OIDC, but
+#   NPM_TOKEN is still needed for the publish call itself.
+#
+# Triggering: push a `v*` tag (e.g. `git tag v1.0.4 && git push --tags`).
+# A tag whose name doesn't match the package.json version fails the
+# tag-vs-pkg-version gate before any npm.publish side effect.
+#
+# Why two jobs: verify on a fresh runner with the same matrix idea as
+# ci.yml (Linux + Node 20) is the smoke; ship only runs if verify is
+# green AND the tag-vs-pkg-version gate passes. Provenance attestations
+# require permissions.id-token:write on the ship job (Sigstore/Rekor).
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # ── Stage 1: re-run the verify gate against the tagged commit ──
+  # This guards against tagging a commit that doesn't pass the same
+  # gate ci.yml enforces on push/PR. We tag, push, and CI eventually
+  # gates the same commit on the main branch — but a tag can land on
+  # a commit that hasn't been gated yet, so we re-run here.
+  verify:
+    name: verify (ubuntu-latest / node-20)
+    runs-on: ubuntu-latest
+    env:
+      NO_COLOR: '1'
+      FORCE_COLOR: '0'
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint --if-present
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build:server
+
+      - name: Verify gate
+        run: bash scripts/verify.sh
+
+  # ── Stage 2: publish to npm + create GH release ──
+  ship:
+    name: ship
+    runs-on: ubuntu-latest
+    needs: verify
+    permissions:
+      id-token: write  # Sigstore provenance (OIDC token)
+      contents: write  # gh release create
+    env:
+      NO_COLOR: '1'
+      FORCE_COLOR: '0'
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+          cache: npm
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build:server
+
+      # Hard gate: tag name (minus the leading `v`) MUST match the
+      # package.json version field. A mismatch is a release-engineering
+      # error and must fail loud before any npm.publish side effect.
+      - name: Tag-vs-package.json version equality
+        id: version-check
+        run: |
+          TAG_REF="${GITHUB_REF_NAME}"
+          # Strip leading `v` from tag name
+          TAG_VERSION="${TAG_REF#v}"
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          echo "tag_ref=$TAG_REF"
+          echo "tag_version=$TAG_VERSION"
+          echo "pkg_version=$PKG_VERSION"
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+            echo "::error::Tag $TAG_REF does not match package.json version $PKG_VERSION (expected v$PKG_VERSION)"
+            exit 1
+          fi
+          echo "version=$PKG_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Publish to npm with provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --provenance --access public
+
+      # Extract the CHANGELOG section for this version. The format is
+      # Keep-a-Changelog: each version is a `## [X.Y.Z] - YYYY-MM-DD`
+      # heading. We slice from this version's heading up to (but not
+      # including) the next `## [` heading.
+      - name: Extract CHANGELOG entry
+        id: changelog
+        run: |
+          VERSION="${{ steps.version-check.outputs.version }}"
+          # awk: when we hit the `## [VERSION]` header, start printing.
+          # When we hit the NEXT `## [` header, stop.
+          BODY=$(awk -v v="$VERSION" '
+            $0 ~ "^## \\[" v "\\]" { found=1; next }
+            found && /^## \[/      { exit }
+            found                  { print }
+          ' CHANGELOG.md)
+          if [ -z "$BODY" ]; then
+            BODY="See CHANGELOG.md for v$VERSION details."
+          fi
+          # Write to a tempfile so we don't have to escape newlines for
+          # GITHUB_OUTPUT. The release step reads it via --notes-file.
+          echo "$BODY" > /tmp/release-notes.md
+          echo "notes_file=/tmp/release-notes.md" >> "$GITHUB_OUTPUT"
+          echo "--- extracted release notes ---"
+          cat /tmp/release-notes.md
+          echo "--- end ---"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME" \
+            --notes-file "${{ steps.changelog.outputs.notes_file }}" \
+            --verify-tag

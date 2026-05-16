@@ -12,6 +12,15 @@ export type RenderMeta = {
   wavHash: string;
   durationSec: number;
   pinned?: boolean;
+  /**
+   * FS-002 — principal id from requireAuth.  In open-access mode this is
+   * 'anonymous'; in legacy AUTH_TOKEN mode it is 'legacy'; in keys mode it
+   * matches the {id} of the key that authenticated the request.  Older
+   * renders written before FS-002 will not have this field — readers MUST
+   * treat absence as "any user can see this" so the existing bank stays
+   * visible after upgrade.
+   */
+  createdBy?: string;
   summary?: {
     polyphony?: number;
     deterministic?: string;
@@ -154,6 +163,8 @@ export function saveRender(args: {
   provenance: any;
   wavBytes: Buffer;
   durationSec: number;
+  /** FS-002 — req.userId from requireAuth.  Persisted into meta.createdBy. */
+  createdBy?: string;
 }): RenderMeta {
   ensureRoot();
 
@@ -212,6 +223,10 @@ export function saveRender(args: {
     scoreHash,
     wavHash,
     durationSec: args.durationSec,
+    // FS-002 — only set the field if the caller actually attributed the
+    // render.  Leaving it undefined keeps the meta shape backward-compatible
+    // with renders written before this field existed.
+    ...(args.createdBy ? { createdBy: args.createdBy } : {}),
     summary: {
       polyphony: args.config?.maxPolyphony,
       deterministic: args.config?.deterministic,

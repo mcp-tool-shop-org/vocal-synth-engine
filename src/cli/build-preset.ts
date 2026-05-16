@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * Build a multi-timbre voice preset from multiple WAV inputs.
  *

@@ -14,8 +14,27 @@
           <a href="https://mcptoolshop.com/lab/" class="back-link">&larr; Lab</a>
           <h1>VocalSynth Cockpit</h1>
         </div>
-        <div id="health-status" class="status-badge">Checking daemon...</div>
+        <div class="header-right">
+          <button id="btn-auth-settings" class="header-button" title="API Key settings">🔑 <span id="auth-status-label">No key</span></button>
+          <div id="health-status" class="status-badge">Checking daemon...</div>
+        </div>
       </header>
+
+      <!-- API Key panel (FS-009) — opens on click of header button or 401 -->
+      <div id="auth-panel" class="auth-panel" style="display: none;">
+        <div class="auth-panel-row">
+          <label for="auth-token-input">API Key (AUTH_TOKEN):</label>
+          <input type="password" id="auth-token-input" autocomplete="off" spellcheck="false" placeholder="paste your AUTH_TOKEN here">
+          <button id="btn-auth-save" class="primary">Save</button>
+          <button id="btn-auth-clear">Clear</button>
+          <button id="btn-auth-close">Close</button>
+        </div>
+        <div id="auth-panel-explain" class="auth-panel-explain">
+          The daemon may require a bearer token (when AUTH_TOKEN is set server-side).
+          The key is stored in your browser's localStorage and sent as
+          <code>Authorization: Bearer …</code> on every API call.
+        </div>
+      </div>
 
       <div id="commit-mismatch-banner" class="banner warning" style="display: none;">
         <span id="commit-mismatch-text"></span>
@@ -99,6 +118,11 @@
               <div class="render-progress-label" id="render-progress-label">Queued…</div>
             </div>
             <div class="status-strip" id="status-strip">Ready</div>
+            <!-- FCD-001: peak-bucket waveform of the last render. Hidden until first render. -->
+            <div class="waveform-row" id="waveform-row" style="display: none;">
+              <canvas id="render-waveform" width="800" height="80" aria-label="Waveform of last render"></canvas>
+              <div class="waveform-meta" id="waveform-meta"></div>
+            </div>
             <div class="error-display" id="error-display" style="display: none;" role="alert">
               <div class="error-display-header">
                 <span class="error-display-code" id="error-display-code">ERROR</span>
@@ -277,6 +301,11 @@
               <!-- Keyboard -->
               <div class="live-keyboard" id="live-keyboard">
                 <!-- Keyboard rendered via JS -->
+              </div>
+
+              <!-- FCD-001: live scope from AnalyserNode on the live worklet -->
+              <div class="live-scope-row" id="live-scope-row" style="display: none;">
+                <canvas id="live-scope" width="600" height="80" aria-label="Live audio scope"></canvas>
               </div>
 
               <!-- Live Telemetry Tiles -->
@@ -490,6 +519,107 @@
   }
   .status-badge.ok { background: var(--success); color: #000; }
   .status-badge.error { background: var(--error); color: #fff; }
+
+  /* ── FS-009: header API-key affordance + panel ──────────────────── */
+  .header-right { display: flex; align-items: center; gap: 0.75rem; }
+  .header-button {
+    background: var(--panel-bg-elevated);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    line-height: 1.4;
+  }
+  .header-button:hover { background: #2c2c2c; border-color: var(--border-strong); }
+  .header-button.has-token { border-color: var(--success); color: var(--success); }
+  .auth-panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .auth-panel-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .auth-panel-row label {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+  }
+  .auth-panel-row input[type="password"] {
+    flex: 1 1 280px;
+    background: #181818;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.4rem 0.6rem;
+    font-family: monospace;
+  }
+  .auth-panel-explain {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    line-height: 1.4;
+  }
+  .auth-panel-explain code {
+    background: #181818;
+    padding: 0.05rem 0.3rem;
+    border-radius: 3px;
+    font-size: 0.85em;
+  }
+
+  /* ── FCD-001: waveform display + live scope ─────────────────────── */
+  .waveform-row {
+    margin-top: 0.75rem;
+    padding: 0.5rem;
+    background: #161616;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+  #render-waveform {
+    width: 100%;
+    height: 80px;
+    display: block;
+  }
+  .waveform-meta {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    text-align: right;
+    font-family: monospace;
+  }
+  .live-scope-row {
+    margin: 0.75rem 0;
+    padding: 0.5rem;
+    background: #161616;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+  #live-scope {
+    width: 100%;
+    height: 80px;
+    display: block;
+  }
+  .bank-waveform {
+    width: 100%;
+    height: 36px;
+    display: block;
+    background: #161616;
+    border-radius: 3px;
+    margin-top: 0.4rem;
+  }
+  .compare-waveform {
+    width: 100%;
+    height: 80px;
+    background: #161616;
+    border-radius: 3px;
+    margin-top: 0.5rem;
+  }
 
   .banner {
     padding: 1rem;

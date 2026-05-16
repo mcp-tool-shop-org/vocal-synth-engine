@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * Resynthesize a steady tone from a voice preset at a given pitch + duration.
  *

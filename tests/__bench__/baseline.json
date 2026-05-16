@@ -1,0 +1,8 @@
+{
+  "benches": {
+    "tests/render.bench.ts > StreamingVocalSynthEngine.render > render 48000 samples (one second @ 48kHz, exact, polyphony 4)": 19.11929411038716,
+    "tests/render.bench.ts > LiveSynthEngine real-time path > noteOn + 100 × render() blocks of 256 samples (steady-state RT)": 41.209926088668205,
+    "tests/render.bench.ts > phonemizeLyrics throughput > phonemizeLyrics(\"hello world\") × 1000": 676.3838987037856
+  },
+  "createdAt": "2026-05-16T18:45:03.392Z"
+}

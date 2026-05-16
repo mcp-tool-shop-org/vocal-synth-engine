@@ -16,6 +16,37 @@ export interface StreamingVocalSynthConfig {
   /** Optional max samples per render() call. Allocations are sized to this.
    *  Defaults to blockSize. render() calls with numSamples > this throw. */
   maxBlockSize?: number;
+  /** FE-004: number of output channels. Defaults to 1 (mono) for backward
+   *  compatibility. When set to 2 the renderer interleaves [L0, R0, L1, R1, ...]
+   *  samples in the returned Float32Array (so an N-sample mono render becomes
+   *  a 2N-element interleaved stereo render) and applies equal-power panning
+   *  per voice using `VocalNote.pan` (-1..1, default 0). Mono renders ignore
+   *  pan. WAV writers downstream must read `channels` from the engine and
+   *  size the file header accordingly. */
+  channels?: 1 | 2;
+}
+
+/** FE-003: telemetry surface symmetric with LiveSynthEngine.LiveTelemetry.
+ *  Read + reset via {@link StreamingVocalSynthEngine.getTelemetryAndReset}. */
+export interface StreamingTelemetry {
+  /** Total samples emitted since last reset. For stereo, this counts
+   *  *frames* (not interleaved samples), matching {@link getCurrentTime}. */
+  samplesRendered: number;
+  /** Active voices (activeNote !== null) at the moment of read. */
+  voicesActive: number;
+  /** Peak amplitude on the output bus since last reset, in dBFS.
+   *  -Infinity if the bus stayed silent (no samples > 0). For stereo this
+   *  is the per-channel peak max across L and R. */
+  peakDbfs: number;
+  /** Count of non-finite (NaN/Infinity) samples observed and zeroed on
+   *  the output bus since last reset. MUST be 0 in steady state — non-zero
+   *  is a defect in the DSP chain that the engine itself caught. */
+  outputNaNCount: number;
+  /** EB-007: number of times growBuffers() fired since last reset.
+   *  Each fire is a one-time GC-pressure event for that render block;
+   *  bump `maxBlockSize` at construction to keep this at 0 for steady-state
+   *  real-time use. */
+  growBuffersEvents: number;
 }
 
 interface VoiceState {
@@ -54,9 +85,21 @@ const MAX_RENDER_SAMPLES_FACTOR = 60; // seconds at engine sampleRate
 
 export class StreamingVocalSynthEngine {
   private config: StreamingVocalSynthConfig;
+  /** FE-004: cached channel count (1 or 2). Always resolved at construction
+   *  from `config.channels ?? 1` so the render hot path never re-derives it. */
+  private channels: 1 | 2;
   private preset: LoadedVoicePreset;
   private score: VocalScore;
   private voices: VoiceState[];
+
+  // ── Telemetry accumulators (FE-003) ───────────────────────────
+  /** Total *frames* (mono samples or stereo frames) emitted since last
+   *  getTelemetryAndReset(). For stereo, one frame == one [L, R] pair. */
+  private samplesRenderedAccum: number = 0;
+  /** Max |sample| observed on output bus since last reset. */
+  private peakSampleAccum: number = 0;
+  /** Count of NaN/Infinity samples zeroed on output bus since last reset. */
+  private outputNaNAccum: number = 0;
 
   /** Notes sorted by startSec with cached prev-note + precomputed bounds. */
   private notesSorted: AnnotatedNote[];
@@ -142,8 +185,15 @@ export class StreamingVocalSynthEngine {
         `StreamingVocalSynthEngine: defaultTimbre "${config.defaultTimbre}" is not in preset.timbres [${known}].`
       );
     }
+    if (config.channels !== undefined && config.channels !== 1 && config.channels !== 2) {
+      throw new RangeError(
+        `StreamingVocalSynthEngine: channels must be 1 or 2, got ${config.channels}. ` +
+        `Other channel counts are not supported by the renderer's equal-power pan law.`
+      );
+    }
 
     this.config = config;
+    this.channels = config.channels ?? 1;
     this.preset = preset;
     this.score = score;
     this.capacity = config.maxBlockSize ?? config.blockSize;
@@ -340,7 +390,13 @@ export class StreamingVocalSynthEngine {
     // a whole song) pay one growth and then remain alloc-free.
     if (numSamples > this.capacity) this.growBuffers(numSamples);
 
-    const out = new Float32Array(numSamples);
+    // FE-004: when channels === 2, returned buffer holds 2N interleaved
+    // samples [L0,R0,L1,R1,...]. `numSamples` is the *frame* count (one frame
+    // == one [L,R] pair for stereo, one sample for mono) and matches the
+    // caller's existing mental model from mono renders. The internal voice
+    // buffer voiceOut[i] remains mono per voice — we apply the per-voice
+    // equal-power pan gains while mixing into the interleaved output.
+    const out = new Float32Array(numSamples * this.channels);
     const sampleRate = this.config.sampleRateHz;
 
     // E-011: reuse pre-allocated voiceParams — zero out only the prefix we'll use.
@@ -509,7 +565,18 @@ export class StreamingVocalSynthEngine {
           // Amplitude (ADSR)
           const velocity = note.velocity ?? 1.0;
           const env = calculateAdsr(tSec, note.startSec, note.startSec + note.durationSec, 0.05, RELEASE_TAIL_SEC);
-          params.amp[i] = env * velocity;
+          // FE-002: apply score.lanes.dynamics as a multiplier on the per-voice
+          // amplitude bus. Lane values are in [0, 1] per scoreSchema (no upper
+          // bound enforced but the convention is 0..1); we clamp the multiplier
+          // to [0, 1] so a malformed lane can't push amp above 1.0 and require
+          // a post-mix limiter pass. Missing lane → multiplier 1.0 (no change),
+          // preserving byte-identical output for legacy scores without lanes.
+          let dynMul = 1.0;
+          if (this.score.lanes?.dynamics && this.score.lanes.dynamics.length > 0) {
+            const raw = interpAutomation(this.score.lanes.dynamics, tSec);
+            dynMul = raw < 0 ? 0 : (raw > 1 ? 1 : raw);
+          }
+          params.amp[i] = env * velocity * dynMul;
 
           // Timbre (Note override or global)
           if (note.timbre) {
@@ -523,12 +590,25 @@ export class StreamingVocalSynthEngine {
           }
 
           // Breathiness
-          let currentBreathiness = 0;
-          for (const id of Object.keys(this.preset.timbres)) {
-            const defaultB = this.preset.timbres[id]?.defaults.breathiness ?? 0.1;
-            currentBreathiness += defaultB * params.timbreWeights[id][i];
+          // FE-002: when score.lanes.breathiness is provided, the lane value
+          // OVERRIDES the timbre-derived breathiness mix for that sample (the
+          // operator authored an explicit breathy/clean target — respect it).
+          // Lane value is in [0, 1]; we clamp to that range so the parameter
+          // stays inside the renderer's expected domain. Missing lane → fall
+          // back to the per-timbre default-weighted mix that's always been
+          // the legacy behavior, so scores without the lane render byte-
+          // identical to pre-FE-002.
+          if (this.score.lanes?.breathiness && this.score.lanes.breathiness.length > 0) {
+            const raw = interpAutomation(this.score.lanes.breathiness, tSec);
+            params.breathiness[i] = raw < 0 ? 0 : (raw > 1 ? 1 : raw);
+          } else {
+            let currentBreathiness = 0;
+            for (const id of Object.keys(this.preset.timbres)) {
+              const defaultB = this.preset.timbres[id]?.defaults.breathiness ?? 0.1;
+              currentBreathiness += defaultB * params.timbreWeights[id][i];
+            }
+            params.breathiness[i] = currentBreathiness;
           }
-          params.breathiness[i] = currentBreathiness;
 
           // Consonant synthesis — use cached activePhoneme from step 2
           if (activePhoneme && activePhoneme.kind === 'consonant') {
@@ -602,11 +682,201 @@ export class StreamingVocalSynthEngine {
         params.timbreWeights = tw;
       }
       this.voices[vIdx].renderer.renderBlock(params, view);
-      for (let i = 0; i < numSamples; i++) {
-        out[i] += view[i];
+
+      // FE-004: equal-power per-voice pan. For mono, gL == 1.0 (skip the
+      // pan math entirely — keeps legacy behavior byte-identical). For
+      // stereo, gL = cos((pan+1)·PI/4), gR = sin((pan+1)·PI/4) which gives
+      // -3 dB center, 0 dB hard left/right, no level dip at the centre
+      // (constant-power law, the standard mixing-console / DAW choice).
+      const voiceNote = this.voices[vIdx].activeNote;
+      const pan = voiceNote?.pan ?? 0;
+      if (this.channels === 2) {
+        const theta = (pan + 1) * Math.PI * 0.25;
+        const gL = Math.cos(theta);
+        const gR = Math.sin(theta);
+        for (let i = 0; i < numSamples; i++) {
+          const s = view[i];
+          out[i * 2] += s * gL;
+          out[i * 2 + 1] += s * gR;
+        }
+      } else {
+        for (let i = 0; i < numSamples; i++) {
+          out[i] += view[i];
+        }
       }
     }
 
+    // FE-003: NaN/Infinity scrub on the output bus, mirroring LiveSynthEngine
+    // EB-003. A single NaN sample would otherwise poison peakSample (NaN >
+    // anything is false) and corrupt every downstream pipeline that hashes
+    // or scans the buffer. Zero in place + bump the telemetry counter so
+    // operators see "outputNaNCount > 0" and know the engine caught the bug.
+    const total = out.length;
+    for (let i = 0; i < total; i++) {
+      let s = out[i];
+      if (!Number.isFinite(s)) {
+        this.outputNaNAccum++;
+        s = 0;
+        out[i] = 0;
+      }
+      const abs = s < 0 ? -s : s;
+      if (abs > this.peakSampleAccum) this.peakSampleAccum = abs;
+    }
+    this.samplesRenderedAccum += numSamples;
+
     return out;
+  }
+
+  // ── FE-003: Streaming-engine ergonomics surface ─────────────────
+  //
+  // Pre-FE-003 the only public method was render(). DAW/editor integrations
+  // wanting to re-preview after an edit had to discard the engine and rebuild
+  // a fresh one — paying score-sorting + voice-allocation cost every time.
+  // The methods below mirror LiveSynthEngine's transport+telemetry surface
+  // so a streaming engine can be reused across edits.
+
+  /** Current internal render cursor, in seconds. Equal to (samples emitted
+   *  so far) / sampleRate. Use this in editors that overlay a playhead. */
+  getCurrentTime(): number {
+    return this.currentSample / this.config.sampleRateHz;
+  }
+
+  /** Fast-forward (or rewind) the render cursor to `timeSec`. Voice state,
+   *  phoneme cursor, and note cursor are reset so the next render() picks up
+   *  cleanly at the target time. Does NOT emit audio for the skipped span. */
+  seek(timeSec: number): void {
+    if (!Number.isFinite(timeSec) || timeSec < 0) {
+      throw new RangeError(
+        `StreamingVocalSynthEngine.seek: timeSec must be a finite non-negative number, got ${timeSec}.`
+      );
+    }
+    this.currentSample = Math.round(timeSec * this.config.sampleRateHz);
+    // Reset cursors so the next render's findActiveNotes / findActivePhoneme
+    // can re-locate the active window from the new time. Without these
+    // resets a backwards seek would silently fall through to "nothing
+    // active" until time caught back up to the cursor.
+    this.noteCursor = 0;
+    this.phonemeCursor = 0;
+    // Drop active note assignments — they'll be re-bound on the next render
+    // tick from the seek-target time. Phase is preserved per voice so a
+    // seek inside a held note doesn't audibly click on first re-render.
+    for (const v of this.voices) {
+      v.activeNote = null;
+      v.noteStartTime = 0;
+      v.releaseEndTime = 0;
+    }
+    // Reset smoothed harmonic-suppression — its slow lerp would otherwise
+    // hold a stale consonant target across the seek boundary.
+    this.smoothedHarmonicGain = 1.0;
+    this.lastVowelTimbre = null;
+    this.lastVowelBlend = null;
+  }
+
+  /** Return to t=0 with no voice state, no telemetry. Equivalent to a fresh
+   *  engine but without re-paying the score-sort + buffer-allocation cost. */
+  reset(): void {
+    this.currentSample = 0;
+    this.noteCursor = 0;
+    this.phonemeCursor = 0;
+    for (const v of this.voices) {
+      v.activeNote = null;
+      v.noteStartTime = 0;
+      v.releaseEndTime = 0;
+      // Reset oscillator phase so the next note's first sample is at phase 0
+      // — without this, a reset() that lands inside a held note would carry
+      // accumulated phase from the previous render run.
+      v.renderer.resetPhase();
+    }
+    this.smoothedHarmonicGain = 1.0;
+    this.lastVowelTimbre = null;
+    this.lastVowelBlend = null;
+    // Re-seed smoothed timbre weights to the default timbre, mirroring the
+    // constructor's initial state — without this a previous render's blend
+    // would persist as the starting point for the new playback.
+    for (const timbreId of Object.keys(this.preset.timbres)) {
+      this.smoothedTimbreWeights[timbreId] =
+        timbreId === this.config.defaultTimbre ? 1.0 : 0.0;
+    }
+    // Telemetry accumulators are PER-PLAY-RANGE, not engine-lifetime, so
+    // reset() clears them too. (Operators wanting to keep cross-reset
+    // counters should snapshot via getTelemetryAndReset() first.)
+    this.samplesRenderedAccum = 0;
+    this.peakSampleAccum = 0;
+    this.outputNaNAccum = 0;
+    this.growBuffersEventsAccum = 0;
+  }
+
+  /** Stop every voice immediately, reset render state. Symmetric with
+   *  LiveSynthEngine.panic(). Like reset() but explicit semantics for
+   *  emergency-stop scenarios (stuck note, runaway voice). */
+  panic(): void {
+    for (const v of this.voices) {
+      v.activeNote = null;
+      v.noteStartTime = 0;
+      v.releaseEndTime = 0;
+      v.renderer.resetPhase();
+    }
+    this.smoothedHarmonicGain = 1.0;
+    this.lastVowelTimbre = null;
+    this.lastVowelBlend = null;
+    // Note: panic() does NOT rewind the render cursor — the operator may
+    // want to keep playing forward after silencing the stuck voices. Use
+    // reset() to rewind to t=0.
+  }
+
+  /** Swap the automation lanes on the underlying score in place. Useful for
+   *  DAW workflows where the user is dragging a dynamics or breathiness
+   *  envelope and wants to re-preview without rebuilding the engine. The
+   *  notes themselves are unchanged — call setScore() to swap notes too. */
+  setLanes(lanes: VocalScore['lanes']): void {
+    this.score = { ...this.score, lanes };
+  }
+
+  /** Swap the entire score and rewind to t=0. Re-sorts notes and re-caches
+   *  prevNote pointers — cost is O(N log N) on note count, same as the
+   *  constructor. Use this for edit-loop workflows where the score has
+   *  structural changes (notes added/removed/moved) that setLanes() can't
+   *  express. */
+  setScore(score: VocalScore): void {
+    this.score = score;
+    // Re-sort + re-annotate notes (mirrors constructor logic).
+    const sorted = [...score.notes].sort((a, b) => a.startSec - b.startSec);
+    this.notesSorted = sorted.map((note, idx) => ({
+      note,
+      noteEndSec: note.startSec + note.durationSec,
+      activeEndSec: note.startSec + note.durationSec + RELEASE_TAIL_SEC,
+      prevNote: this.findPrevNote(sorted, idx),
+    }));
+    // Re-sort phonemes too (the score might have come with a new lyric track).
+    this.phonemes = [...(score.phonemes || [])].sort((a, b) => a.tSec - b.tSec);
+    // Rewind to t=0 with no carryover state — semantics match a fresh
+    // engine for the new score.
+    this.reset();
+  }
+
+  /** Read + reset telemetry counters. Mirrors LiveSynthEngine.getTelemetryAndReset(). */
+  getTelemetryAndReset(): StreamingTelemetry {
+    const voicesActive = this.voices.filter(v => v.activeNote !== null).length;
+    const peakDbfs =
+      this.peakSampleAccum > 0 ? 20 * Math.log10(this.peakSampleAccum) : -Infinity;
+    const telemetry: StreamingTelemetry = {
+      samplesRendered: this.samplesRenderedAccum,
+      voicesActive,
+      peakDbfs,
+      outputNaNCount: this.outputNaNAccum,
+      growBuffersEvents: this.growBuffersEventsAccum,
+    };
+    this.samplesRenderedAccum = 0;
+    this.peakSampleAccum = 0;
+    this.outputNaNAccum = 0;
+    this.growBuffersEventsAccum = 0;
+    return telemetry;
+  }
+
+  /** FE-004: number of output channels (1 or 2). Public read so WAV writers
+   *  and other downstream consumers can read the channel count from the
+   *  engine instead of from the original config. */
+  get outputChannels(): 1 | 2 {
+    return this.channels;
   }
 }

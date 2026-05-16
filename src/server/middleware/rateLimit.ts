@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
+import { rateLimitDropsTotal } from '../util/metrics.js';
 
 const windowMs = 60_000; // 1 minute
 const maxPerWindow = Number(process.env.RATE_LIMIT_RPM) || 20;
@@ -57,6 +58,7 @@ export function rateLimit(req: Request, res: Response, next: NextFunction) {
     // other error uses so the cockpit can switch on `code`.
     const retryAfterSec = Math.max(1, Math.ceil((entry.resetAt - now) / 1000));
     res.setHeader('Retry-After', String(retryAfterSec));
+    rateLimitDropsTotal.inc();
     res.status(429).json({
       ok: false,
       code: 'RATE_LIMITED',

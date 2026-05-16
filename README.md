@@ -178,6 +178,33 @@ Auth is optional — enabled when `AUTH_TOKEN` is set in the environment. Tokens
 | `/ws` | Live mode — single-user note playback with audio streaming |
 | `/ws/jam` | Jam sessions — multi-user collaboration with recording |
 
+## MCP Server
+
+vocal-synth-engine ships an MCP (Model Context Protocol) server so Claude agents and other MCP clients can call the engine directly — no HTTP scaffolding needed. Boot via the `vocal-synth-engine-mcp` bin entry (stdio transport).
+
+Tools exposed:
+
+| Tool | Purpose |
+|------|---------|
+| `render_score` | Render a VocalScore through a preset → base64 WAV + telemetry |
+| `phonemize_text` | Lyrics text → ARPAbet PhonemeEvents (note-aligned if `notes` provided) |
+| `list_presets` | Enumerate available preset ids (same shape as GET /api/presets) |
+| `validate_score` | Parse + validate VocalScore JSON without rendering |
+| `inspect_preset` | Preset manifest + per-timbre harmonics/energy (same as `vse-inspect --json`) |
+
+Wire it into a Claude Desktop / Code config:
+
+```json
+{
+  "mcpServers": {
+    "vocal-synth-engine": {
+      "command": "npx",
+      "args": ["-y", "@mcptoolshop/vocal-synth-engine", "vocal-synth-engine-mcp"]
+    }
+  }
+}
+```
+
 ## Voice Presets
 
 15 bundled presets with multi-timbre support:

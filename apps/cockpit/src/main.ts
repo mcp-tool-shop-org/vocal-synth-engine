@@ -1,4 +1,43 @@
+  // FS-009: authenticated fetch helpers + FCD-001: waveform rendering.
+// Both modules are local to apps/cockpit/src/ and ship through the Vite bundle.
+import { authFetch, audioBlobUrl, wsTokenSuffix, hasToken, getToken, setToken, clearToken, setOn401 } from './auth.js';
+import { decodeAudioFromUrl, drawStaticWaveform, drawComparisonWaveforms, LiveScope } from './waveform.js';
+
   const DAEMON_URL = '';
+
+  // Per-source blob URL cache for <audio> playback under auth.  When AUTH_TOKEN
+  // is set the daemon's `requireAuth` middleware rejects <audio> requests
+  // because the element cannot send Authorization headers.  We fetch the WAV
+  // via authFetch (which CAN send headers) and hand <audio> a blob: URL
+  // instead.  Cache by source URL so flipping back and forth between Play A
+  // and Play B doesn't re-fetch every click.  Entries are evicted when the
+  // user pins/renames/deletes or when the cockpit reloads.
+  const audioBlobCache = new Map<string, string>();
+
+  /**
+   * Point an <audio> element at the given absolute URL, picking the cheapest
+   * playback method given the auth state.  Returns a Promise that resolves
+   * once .src is set (the caller can then call .play()).
+   */
+  async function setAudioSource(audio: HTMLAudioElement, url: string): Promise<void> {
+    if (!hasToken()) {
+      // No token = unauthenticated daemon = direct URL works.
+      audio.src = url;
+      return;
+    }
+    const cached = audioBlobCache.get(url);
+    if (cached) { audio.src = cached; return; }
+    const blob = await audioBlobUrl(url);
+    if (blob) {
+      audioBlobCache.set(url, blob);
+      audio.src = blob;
+    } else {
+      // Fall back to direct URL even though it'll likely 401 — at least the
+      // <audio> element surfaces "media error" instead of silently doing
+      // nothing.  The on401 handler has already opened the API-Key panel.
+      audio.src = url;
+    }
+  }
 
   // --- State ---
   let score = {
@@ -97,6 +136,107 @@
   const errorDisplayDismiss = document.getElementById('error-display-dismiss')!;
   let activeRenderEventSource: EventSource | null = null;
 
+  // FS-009: API-key panel wiring.
+  const btnAuthSettings = document.getElementById('btn-auth-settings') as HTMLButtonElement;
+  const authStatusLabel = document.getElementById('auth-status-label')!;
+  const authPanel = document.getElementById('auth-panel')!;
+  const authTokenInput = document.getElementById('auth-token-input') as HTMLInputElement;
+  const btnAuthSave = document.getElementById('btn-auth-save') as HTMLButtonElement;
+  const btnAuthClear = document.getElementById('btn-auth-clear') as HTMLButtonElement;
+  const btnAuthClose = document.getElementById('btn-auth-close') as HTMLButtonElement;
+  const authPanelExplain = document.getElementById('auth-panel-explain')!;
+
+  function refreshAuthBadge() {
+    if (hasToken()) {
+      authStatusLabel.textContent = 'logged in';
+      btnAuthSettings.classList.add('has-token');
+      btnAuthSettings.title = 'API key set — click to change';
+    } else {
+      authStatusLabel.textContent = 'No key';
+      btnAuthSettings.classList.remove('has-token');
+      btnAuthSettings.title = 'Set API key (required when daemon AUTH_TOKEN is configured)';
+    }
+  }
+
+  function openAuthPanel(reason?: '401' | 'manual') {
+    authPanel.style.display = 'block';
+    authTokenInput.value = getToken();
+    setTimeout(() => authTokenInput.focus(), 0);
+    if (reason === '401') {
+      authPanelExplain.innerHTML =
+        '<strong style="color:var(--error);">Unauthorized.</strong> ' +
+        "The daemon requires a bearer token but the cockpit didn't have one (or it was wrong). " +
+        'Paste the AUTH_TOKEN value from the server\'s environment below and click Save.';
+    } else {
+      authPanelExplain.innerHTML =
+        "The daemon may require a bearer token (when AUTH_TOKEN is set server-side). " +
+        "The key is stored in your browser's localStorage and sent as " +
+        '<code>Authorization: Bearer …</code> on every API call.';
+    }
+  }
+
+  btnAuthSettings.addEventListener('click', () => {
+    if (authPanel.style.display === 'block') authPanel.style.display = 'none';
+    else openAuthPanel('manual');
+  });
+  btnAuthClose.addEventListener('click', () => { authPanel.style.display = 'none'; });
+  btnAuthSave.addEventListener('click', () => {
+    setToken(authTokenInput.value);
+    refreshAuthBadge();
+    audioBlobCache.clear(); // stale cache for the old token
+    authPanel.style.display = 'none';
+    showToast(hasToken() ? 'API key saved' : 'API key cleared');
+    // Retry the things most likely to have failed under the old token.
+    checkHealth();
+    loadBank();
+    loadPresets();
+  });
+  btnAuthClear.addEventListener('click', () => {
+    clearToken();
+    authTokenInput.value = '';
+    refreshAuthBadge();
+    audioBlobCache.clear();
+    showToast('API key cleared');
+  });
+  // Open the panel automatically when ANY authFetch sees a 401.
+  setOn401((url) => {
+    console.warn(`[auth] 401 from ${url} — opening API-key panel`);
+    openAuthPanel('401');
+  });
+  refreshAuthBadge();
+
+  // FCD-001: render-waveform DOM + draw helper.
+  const waveformRow = document.getElementById('waveform-row')!;
+  const renderWaveformCanvas = document.getElementById('render-waveform') as HTMLCanvasElement;
+  const waveformMeta = document.getElementById('waveform-meta')!;
+  let lastRenderBuffer: AudioBuffer | null = null;
+
+  async function drawRenderWaveform(url: string, durationSec?: number): Promise<void> {
+    waveformRow.style.display = 'block';
+    waveformMeta.textContent = 'Decoding…';
+    // Match canvas backing to its rendered CSS width so peak buckets stay sharp.
+    const rect = renderWaveformCanvas.getBoundingClientRect();
+    renderWaveformCanvas.width = Math.max(200, Math.floor(rect.width));
+    renderWaveformCanvas.height = 80;
+    const buf = await decodeAudioFromUrl(url, authFetch);
+    if (!buf) {
+      waveformMeta.textContent = 'Waveform unavailable';
+      const g = renderWaveformCanvas.getContext('2d');
+      if (g) g.clearRect(0, 0, renderWaveformCanvas.width, renderWaveformCanvas.height);
+      return;
+    }
+    lastRenderBuffer = buf;
+    drawStaticWaveform(renderWaveformCanvas, buf, { color: '#4a90e2', axisColor: '#333' });
+    const sr = buf.sampleRate;
+    const d = durationSec ?? buf.duration;
+    waveformMeta.textContent = `${buf.numberOfChannels}ch · ${sr}Hz · ${d.toFixed(2)}s · ${buf.length.toLocaleString()} samples`;
+  }
+
+  // FCD-001: LiveScope tied to the live worklet output (set up on connect).
+  const liveScopeRow = document.getElementById('live-scope-row')!;
+  const liveScopeCanvas = document.getElementById('live-scope') as HTMLCanvasElement;
+  let liveScope: LiveScope | null = null;
+
   errorDisplayDismiss.addEventListener('click', () => {
     errorDisplay.style.display = 'none';
   });
@@ -157,11 +297,19 @@
    * the visual progress bar.  Returns the EventSource so callers can close
    * it; we also auto-close on done/failed/cancelled per the server contract.
    */
-  function subscribeRenderProgress(jobId: string): EventSource {
+  function subscribeRenderProgress(jobId: string): EventSource | null {
     // Tear down any prior subscription so we never leak SSE handles.
     if (activeRenderEventSource) {
       activeRenderEventSource.close();
       activeRenderEventSource = null;
+    }
+    // FS-009: native EventSource cannot send custom headers, so when the
+    // server requires AUTH_TOKEN the SSE stream is unreachable from a stock
+    // browser.  Skip the progress stream in that case — the HTTP render call
+    // still returns the final result; only the live progress bar is missing.
+    if (hasToken()) {
+      setRenderProgress({ show: true, indeterminate: true, label: 'Rendering…' });
+      return null;
     }
     const url = `${DAEMON_URL}/api/render/events?jobId=${encodeURIComponent(jobId)}`;
     const es = new EventSource(url);
@@ -339,7 +487,7 @@
     btnPhonemize.textContent = '...';
 
     try {
-      const res = await fetch(`${DAEMON_URL}/api/phonemize`, {
+      const res = await authFetch(`${DAEMON_URL}/api/phonemize`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text, notes: score.notes }),
@@ -536,7 +684,7 @@
   // --- Render Bank Logic ---
   async function loadBank() {
     try {
-      const res = await fetch(`${DAEMON_URL}/api/renders`);
+      const res = await authFetch(`${DAEMON_URL}/api/renders`);
       const data = await res.json();
       const renders = data.renders || [];
 
@@ -632,7 +780,7 @@
           const target = e.currentTarget as HTMLElement;
           const id = target.dataset.id;
           const pinned = target.dataset.pinned !== 'true';
-          await fetch(`${DAEMON_URL}/api/renders/${id}`, {
+          await authFetch(`${DAEMON_URL}/api/renders/${id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ pinned })
@@ -644,7 +792,7 @@
       document.querySelectorAll('input.bank-item-name').forEach(inp => {
         inp.addEventListener('change', async (e) => {
           const target = e.target as HTMLInputElement;
-          await fetch(`${DAEMON_URL}/api/renders/${target.dataset.id}`, {
+          await authFetch(`${DAEMON_URL}/api/renders/${target.dataset.id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: target.value })
@@ -654,9 +802,9 @@
       });
 
       document.querySelectorAll('.btn-bank-play').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', async (e) => {
           const id = (e.target as HTMLElement).dataset.id;
-          audioPlayer.src = `${DAEMON_URL}/api/renders/${id}/audio.wav`;
+          await setAudioSource(audioPlayer, `${DAEMON_URL}/api/renders/${id}/audio.wav`);
           audioPlayer.play();
         });
       });
@@ -667,7 +815,7 @@
           const id = target.dataset.id;
           const commit = target.dataset.commit;
           
-          const res = await fetch(`${DAEMON_URL}/api/renders/${id}/score`);
+          const res = await authFetch(`${DAEMON_URL}/api/renders/${id}/score`);
           if (res.ok) {
             const loadedScore = await res.json();
             if (commit && currentDaemonCommit && commit !== currentDaemonCommit.substring(0,7)) {
@@ -686,7 +834,7 @@
       document.querySelectorAll('.btn-bank-del').forEach(btn => {
         btn.addEventListener('click', async (e) => {
           const id = (e.target as HTMLElement).dataset.id;
-          await fetch(`${DAEMON_URL}/api/renders/${id}`, { method: 'DELETE' });
+          await authFetch(`${DAEMON_URL}/api/renders/${id}`, { method: 'DELETE' });
           selectedForCompare = selectedForCompare.filter(x => x !== id);
           btnCompare.textContent = `Compare (${selectedForCompare.length}/2)`;
           btnCompare.disabled = selectedForCompare.length !== 2;
@@ -704,8 +852,8 @@
     
     try {
       const [res1, res2] = await Promise.all([
-        fetch(`${DAEMON_URL}/api/renders/${selectedForCompare[0]}/meta`),
-        fetch(`${DAEMON_URL}/api/renders/${selectedForCompare[1]}/meta`)
+        authFetch(`${DAEMON_URL}/api/renders/${selectedForCompare[0]}/meta`),
+        authFetch(`${DAEMON_URL}/api/renders/${selectedForCompare[1]}/meta`)
       ]);
       
       const m1 = await res1.json();
@@ -714,8 +862,8 @@
       // We need telemetry from the meta. Wait, is telemetry saved in meta?
       // Let's fetch telemetry.json
       const [t1Res, t2Res] = await Promise.all([
-        fetch(`${DAEMON_URL}/api/renders/${selectedForCompare[0]}/telemetry`),
-        fetch(`${DAEMON_URL}/api/renders/${selectedForCompare[1]}/telemetry`)
+        authFetch(`${DAEMON_URL}/api/renders/${selectedForCompare[0]}/telemetry`),
+        authFetch(`${DAEMON_URL}/api/renders/${selectedForCompare[1]}/telemetry`)
       ]);
       
       const t1 = t1Res.ok ? await t1Res.json() : {};
@@ -740,17 +888,37 @@
           <div class="compare-stat"><span>Commit</span> <span class="hash">${m2.commit}</span></div>
           <button class="btn-bank-play" data-id="${m2.id}" style="margin-top: 1rem;">▶ Play B</button>
         </div>
+        <div style="grid-column: 1 / -1;">
+          <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.25rem;">Waveform — A (blue) above, B (amber) below</div>
+          <canvas class="compare-waveform" id="compare-waveform" width="800" height="120"></canvas>
+        </div>
       `;
-      
+
       compareGrid.querySelectorAll('.btn-bank-play').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', async (e) => {
           const id = (e.target as HTMLElement).dataset.id;
-          audioPlayer.src = `${DAEMON_URL}/api/renders/${id}/audio.wav`;
+          await setAudioSource(audioPlayer, `${DAEMON_URL}/api/renders/${id}/audio.wav`);
           audioPlayer.play();
         });
       });
 
       compareModal.style.display = 'flex';
+
+      // FCD-001: stacked A/B waveforms — fire after modal is visible so the
+      // canvas has measured layout.
+      const cwc = document.getElementById('compare-waveform') as HTMLCanvasElement | null;
+      if (cwc) {
+        const rect = cwc.getBoundingClientRect();
+        cwc.width = Math.max(400, Math.floor(rect.width));
+        cwc.height = 120;
+        const [bufA, bufB] = await Promise.all([
+          decodeAudioFromUrl(`${DAEMON_URL}/api/renders/${m1.id}/audio.wav`, authFetch),
+          decodeAudioFromUrl(`${DAEMON_URL}/api/renders/${m2.id}/audio.wav`, authFetch),
+        ]);
+        if (bufA && bufB) {
+          drawComparisonWaveforms(cwc, bufA, bufB);
+        }
+      }
     } catch (e) {
       console.error('Compare failed', e);
       showToast('Failed to load compare data');
@@ -760,7 +928,10 @@
   // --- Daemon Communication ---
   async function checkHealth() {
     try {
-      const res = await fetch(`${DAEMON_URL}/api/health`);
+      // Health endpoint is intentionally open (S-018) — no token needed.
+      // We still use authFetch so a stored token is sent if present, which
+      // means the daemon log shows the same caller on health + render.
+      const res = await authFetch(`${DAEMON_URL}/api/health`);
       if (res.ok) {
         const data = await res.json();
         // S-018: /api/health is now minimal (version + uptime); commit is no
@@ -798,7 +969,7 @@
       defaultTimbre: inpDefaultTimbre.value
     };
 
-    const res = await fetch(`${DAEMON_URL}/api/render`, {
+    const res = await authFetch(`${DAEMON_URL}/api/render`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ score, config })
@@ -878,10 +1049,21 @@
     
     // Audio
     if (currentWavUrl && currentWavUrl.startsWith('blob:')) URL.revokeObjectURL(currentWavUrl);
-    
-    // Add a cache-buster to the URL so the browser fetches the new last render
-    currentWavUrl = `${DAEMON_URL}${data.audioUrl}?t=${Date.now()}`;
+
+    // Add a cache-buster to the URL so the browser fetches the new last render.
+    // Under auth we route the WAV through authFetch → blob URL so <audio> can
+    // play it (the element cannot send Authorization headers itself).
+    const renderUrl = `${DAEMON_URL}${data.audioUrl}?t=${Date.now()}`;
+    if (hasToken()) {
+      const blob = await audioBlobUrl(renderUrl);
+      currentWavUrl = blob ?? renderUrl;
+    } else {
+      currentWavUrl = renderUrl;
+    }
     audioPlayer.src = currentWavUrl;
+
+    // FCD-001: also decode the buffer for the waveform display.
+    drawRenderWaveform(renderUrl, data.telemetry?.durationSec);
     
     btnPlay.disabled = false;
     btnDownload.disabled = false;
@@ -904,7 +1086,7 @@
       return;
     }
 
-    const res = await fetch(`${DAEMON_URL}/api/renders/promote-last`, {
+    const res = await authFetch(`${DAEMON_URL}/api/renders/promote-last`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name })
@@ -956,6 +1138,8 @@
   btnDownload.addEventListener('click', () => {
     if (currentWavUrl) {
       const a = document.createElement('a');
+      // currentWavUrl is already a blob: URL under auth, or a direct /api URL
+      // when open — either way works with the anchor download attribute.
       a.href = currentWavUrl;
       a.download = `render-${Date.now()}.wav`;
       a.click();
@@ -965,7 +1149,7 @@
   // --- Preset Loading ---
   async function loadPresets() {
     try {
-      const res = await fetch(`${DAEMON_URL}/api/presets`);
+      const res = await authFetch(`${DAEMON_URL}/api/presets`);
       if (!res.ok) throw new Error('Failed to fetch presets');
       const data = await res.json();
       serverPresets = data.presets || [];
@@ -1785,6 +1969,18 @@
     liveWorkletNode = new AudioWorkletNode(liveAudioCtx, 'pcm-worklet-processor');
     liveWorkletNode.connect(liveAudioCtx.destination);
 
+    // FCD-001: live scope taps the worklet node — same signal as destination.
+    // Resize canvas to match its CSS box so the scope stays sharp.
+    {
+      const rect = liveScopeCanvas.getBoundingClientRect();
+      liveScopeCanvas.width = Math.max(200, Math.floor(rect.width));
+      liveScopeCanvas.height = 80;
+    }
+    liveScopeRow.style.display = 'block';
+    liveScope = new LiveScope(liveScopeCanvas, liveAudioCtx, { color: '#4a90e2' });
+    liveScope.attach(liveWorkletNode);
+    liveScope.start();
+
     liveWorkletNode.port.onmessage = (e) => {
       if (e.data.type === 'underrun') {
         liveUnderrunCount = e.data.count;
@@ -1798,9 +1994,11 @@
       }
     };
 
-    // WebSocket
+    // WebSocket — the standard browser WebSocket constructor cannot set
+    // custom headers, so the server (index.prod.ts:64) reads the token from
+    // ?token=… for /ws + /ws/jam.  HTTP routes still require Bearer (S-004).
     const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-    liveWs = new WebSocket(`${proto}//${location.host}/ws`);
+    liveWs = new WebSocket(`${proto}//${location.host}/ws${wsTokenSuffix()}`);
     liveWs.binaryType = 'arraybuffer';
 
     liveWs.addEventListener('open', () => {
@@ -1888,6 +2086,8 @@
     metronomeOn = false;
     metroToggle.checked = false;
 
+    if (liveScope) { liveScope.stop(); liveScope = null; }
+    liveScopeRow.style.display = 'none';
     if (liveWs) { liveWs.close(); liveWs = null; }
     if (liveWorkletNode) { liveWorkletNode.disconnect(); liveWorkletNode = null; }
     if (liveAudioCtx) { liveAudioCtx.close(); liveAudioCtx = null; }

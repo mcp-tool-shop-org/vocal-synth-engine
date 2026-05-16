@@ -106,6 +106,16 @@ export class RenderQueue extends EventEmitter {
     return this.currentJob !== null;
   }
 
+  /**
+   * FS-003 — readiness probe: true iff the queue can accept a new submit().
+   * Flips to false the moment `drain()` is called, so /readyz can return
+   * 503 and k8s can stop routing new traffic before the graceful-shutdown
+   * window expires.
+   */
+  isAcceptingJobs(): boolean {
+    return !this.shuttingDown;
+  }
+
   submit(req: RenderJobRequest): { jobId: string; promise: Promise<RenderJobResult> } {
     if (this.shuttingDown) {
       const err: any = new Error('Server is shutting down — render queue closed');
@@ -144,18 +154,38 @@ export class RenderQueue extends EventEmitter {
     return { jobId, promise };
   }
 
-  cancel(jobId: string): boolean {
-    // Cancel a queued (not yet started) job.  An in-flight job will complete
-    // — we don't kill mid-render because the synth state can't be unwound
-    // cleanly.  The caller still gets a `failed` event with CANCELLED so
-    // their loading state can clear.
+  /**
+   * Result of a cancel request.
+   *  - 'queued_removed':  job was waiting and has been removed before start.
+   *  - 'running_flagged': job is in-flight; cancellation flag set, worker
+   *                      will throw CANCELLED at its next per-block check
+   *                      and emit the cancelled event.
+   *  - 'unknown':         no queued or in-flight job matches jobId (already
+   *                      done, never existed, or already cancelled).
+   */
+  cancel(jobId: string): 'queued_removed' | 'running_flagged' | 'unknown' {
+    // Cancel a queued (not-yet-started) job synchronously by splicing it
+    // out of the queue.  No worker has touched it, so we can reject the
+    // promise immediately and emit `cancelled`.
     const idx = this.queue.findIndex((j) => j.jobId === jobId);
-    if (idx === -1) return false;
-    const [job] = this.queue.splice(idx, 1);
-    job.cancelled = true;
-    job.reject(Object.assign(new Error('Job cancelled'), { code: 'CANCELLED' }));
-    this.emit('event', { type: 'cancelled', jobId } satisfies RenderJobEvent);
-    return true;
+    if (idx !== -1) {
+      const [job] = this.queue.splice(idx, 1);
+      job.cancelled = true;
+      job.reject(Object.assign(new Error('Job cancelled'), { code: 'CANCELLED' }));
+      this.emit('event', { type: 'cancelled', jobId } satisfies RenderJobEvent);
+      return 'queued_removed';
+    }
+    // FS-001 — also flag the currently-running job so the worker's per-block
+    // cancellation check (`if (job.cancelled) throw CANCELLED`) stops it at
+    // its next yield point (≤ blockSize / sampleRate seconds — typically a
+    // few ms for blockSize=1024 @ 48 kHz).  The synth state isn't unwound
+    // cleanly but the buffer is discarded; the caller's awaited promise
+    // rejects with CANCELLED and an event fires from the catch/run paths.
+    if (this.currentJob && this.currentJob.jobId === jobId && !this.currentJob.cancelled) {
+      this.currentJob.cancelled = true;
+      return 'running_flagged';
+    }
+    return 'unknown';
   }
 
   /**
@@ -208,13 +238,27 @@ export class RenderQueue extends EventEmitter {
       const code = err?.code || 'RENDER_FAILED';
       const message = err?.message || String(err);
       const hint = err?.hint;
-      logger.error({ code, message }, 'render_job_failed');
-      job.reject(err);
-      this.emit('event', {
-        type: 'failed',
-        jobId: job.jobId,
-        error: { code, message, hint },
-      } satisfies RenderJobEvent);
+      // FS-001 — a mid-render cancellation throws CANCELLED; emit a
+      // `cancelled` event (not `failed`) so SSE subscribers see the same
+      // event type regardless of whether the job was queued-and-removed or
+      // running-and-flagged.  The promise still rejects with CANCELLED so
+      // the HTTP handler turns it into a 499.
+      if (code === 'CANCELLED') {
+        logger.info({ code, message }, 'render_job_cancelled');
+        job.reject(err);
+        this.emit('event', {
+          type: 'cancelled',
+          jobId: job.jobId,
+        } satisfies RenderJobEvent);
+      } else {
+        logger.error({ code, message }, 'render_job_failed');
+        job.reject(err);
+        this.emit('event', {
+          type: 'failed',
+          jobId: job.jobId,
+          error: { code, message, hint },
+        } satisfies RenderJobEvent);
+      }
     } finally {
       this.currentJob = null;
       // Process the next queued job, if any.
@@ -395,6 +439,37 @@ export class RenderQueue extends EventEmitter {
 // Process singleton — the queue holds state across requests.
 let _queue: RenderQueue | null = null;
 export function getRenderQueue(): RenderQueue {
-  if (!_queue) _queue = new RenderQueue();
+  if (!_queue) {
+    _queue = new RenderQueue();
+    // FS-003 — bind metrics observers to the queue's event stream so each
+    // terminal event increments the right Prometheus counter/histogram.
+    // Done here (not in the class constructor) to keep prom-client an
+    // optional concern: importing renderQueue doesn't drag the metrics
+    // module in unless getRenderQueue() is actually invoked at runtime.
+    // Lazy-import is dynamic so the symbol resolution happens only once.
+    import('../util/metrics.js').then(({ renderJobsTotal, renderDurationSeconds, renderRtf }) => {
+      _queue!.on('event', (ev: RenderJobEvent) => {
+        if (ev.type === 'done') {
+          renderJobsTotal.inc({ outcome: 'done' });
+          const dur = ev.result?.durationSec;
+          if (typeof dur === 'number' && Number.isFinite(dur) && dur >= 0) {
+            renderDurationSeconds.observe(dur);
+          }
+          const rtfVal = ev.result?.telemetry?.rtf;
+          if (typeof rtfVal === 'number' && Number.isFinite(rtfVal) && rtfVal >= 0) {
+            renderRtf.observe(rtfVal);
+          }
+        } else if (ev.type === 'failed') {
+          renderJobsTotal.inc({ outcome: 'failed' });
+        } else if (ev.type === 'cancelled') {
+          renderJobsTotal.inc({ outcome: 'cancelled' });
+        }
+      });
+    }).catch(() => {
+      // prom-client unavailable — render queue continues without metrics.
+      // This branch should not occur in practice (prom-client is a dep) but
+      // we keep the queue functional regardless of metrics availability.
+    });
+  }
   return _queue;
 }

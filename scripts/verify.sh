@@ -19,13 +19,19 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-echo "[verify] 1/3 npm test"
+echo "[verify] 1/4 npm test"
 npm test
 
-echo "[verify] 2/3 npm run build:server"
+echo "[verify] 2/4 npm run bench (FTC-004 — informational; gate runs in CI)"
+# Local verify keeps this informational: it confirms the bench targets
+# still execute. The 2x-regression gate runs in CI only (bench-gate job)
+# so a local-noise bench result doesn't block `bash scripts/verify.sh`.
+npm run bench || echo "[verify] bench step exited non-zero — ignored locally; CI gates"
+
+echo "[verify] 3/4 npm run build:server"
 npm run build:server
 
-echo "[verify] 3/3 npm pack --dry-run (size + file count sanity)"
+echo "[verify] 4/4 npm pack --dry-run (size + file count sanity)"
 npm pack --dry-run 2>&1 | tail -20
 
 echo "[verify] PASS"

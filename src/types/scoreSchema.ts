@@ -41,6 +41,10 @@ const VocalNoteSchema = z.object({
   timbre: z.string().min(1).optional(),
   vibrato: VibratoSchema.optional(),
   portamentoSec: FiniteNumber.nonnegative().optional(),
+  // FE-004: per-voice stereo pan in [-1, 1]. Equal-power panning is applied
+  // when the engine is configured for `channels: 2`; on mono renders the
+  // field is accepted but ignored. Default at engine layer is 0 (center).
+  pan: FiniteNumber.min(-1).max(1).optional(),
 });
 
 const PhonemeEventSchema = z.object({

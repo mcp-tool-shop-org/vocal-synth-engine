@@ -52,6 +52,50 @@ function asStringIdOr400(id: string | string[] | undefined, res: any): string | 
 }
 
 /**
+ * FS-002 — read the meta.json for a render and 403 the caller if they're
+ * not the owner (and not an admin).  Returns the meta object on success,
+ * `null` on 4xx/5xx (after writing the response).  Centralises the
+ * per-user gate so every artifact route enforces it identically.
+ *
+ * Renders without a `createdBy` field were written before FS-002 — only
+ * admins can read those directly (the bank listing also hides them from
+ * non-admin scopes).  This preserves the principle that user A can never
+ * read user B's data even via direct id guess.
+ */
+async function authorizeRenderRead(req: any, res: any, dir: string): Promise<boolean> {
+  const principal = req.principal;
+  // Open-access mode (no auth configured) puts principal: { id:'anonymous', admin:true }
+  // so this check is a no-op there.
+  if (!principal || principal.admin) return true;
+  const metaPath = path.join(dir, 'meta.json');
+  try {
+    const raw = await fs.promises.readFile(metaPath, 'utf8');
+    const meta = JSON.parse(raw);
+    // Special-case: the `last` slot is shared globally (legacy behaviour —
+    // every render the cockpit makes overwrites it, regardless of user).
+    // Keeping it open here preserves existing UI flows.
+    if (meta?.id === 'last') return true;
+    const owner = meta?.createdBy;
+    if (typeof owner === 'string' && owner === principal.id) return true;
+    res.status(403).json({
+      ok: false,
+      code: 'FORBIDDEN',
+      message: 'This render belongs to another user',
+      hint: 'Use an admin key, or only access renders you authored',
+      requestId: req.requestId,
+    });
+    return false;
+  } catch (err: any) {
+    if (err?.code === 'ENOENT') {
+      res.status(404).end();
+      return false;
+    }
+    res.status(500).json({ ok: false, code: 'READ_ERROR', error: 'Failed to read meta.json' });
+    return false;
+  }
+}
+
+/**
  * S-015 — read + JSON.parse a file inside the render store, returning typed
  * responses for each failure mode instead of letting a synchronous throw
  * bubble through express:
@@ -92,17 +136,28 @@ async function streamJsonFile(
   }
 }
 
-rendersRouter.get("/", (_req, res) => {
+rendersRouter.get("/", (req, res) => {
   // SB-002 humanization — expose the budget snapshot alongside the list
   // so cockpit UIs can show "3.2 GB / 4 GB used" and warn the user BEFORE
   // they queue another render that would fail.
   const budget = getRenderBudgetSnapshot();
-  res.json({ ok: true, renders: listRenders(), budget });
+  // FS-002 — non-admin keys only see renders they themselves authored.
+  // Renders persisted before FS-002 have no `createdBy`; keep them visible
+  // to the legacy/admin scope but hide them from per-user listings to avoid
+  // accidental cross-user leakage of pre-existing bank entries.
+  const all = listRenders();
+  const principal = req.principal;
+  const filtered =
+    !principal || principal.admin
+      ? all
+      : all.filter((meta) => meta.createdBy === principal.id);
+  res.json({ ok: true, renders: filtered, budget });
 });
 
-rendersRouter.get("/:id/audio.wav", (req, res) => {
+rendersRouter.get("/:id/audio.wav", async (req, res) => {
   const dir = resolveRenderDirOr400(req.params.id, res);
   if (!dir) return;
+  if (!(await authorizeRenderRead(req, res, dir))) return;
   const p = path.join(dir, "audio.wav");
   if (!fs.existsSync(p)) return res.status(404).end();
 
@@ -113,24 +168,28 @@ rendersRouter.get("/:id/audio.wav", (req, res) => {
 rendersRouter.get("/:id/meta", async (req, res) => {
   const dir = resolveRenderDirOr400(req.params.id, res);
   if (!dir) return;
+  if (!(await authorizeRenderRead(req, res, dir))) return;
   await streamJsonFile(path.join(dir, "meta.json"), "meta.json", res);
 });
 
 rendersRouter.get("/:id/score", async (req, res) => {
   const dir = resolveRenderDirOr400(req.params.id, res);
   if (!dir) return;
+  if (!(await authorizeRenderRead(req, res, dir))) return;
   await streamJsonFile(path.join(dir, "score.json"), "score.json", res);
 });
 
 rendersRouter.get("/:id/telemetry", async (req, res) => {
   const dir = resolveRenderDirOr400(req.params.id, res);
   if (!dir) return;
+  if (!(await authorizeRenderRead(req, res, dir))) return;
   await streamJsonFile(path.join(dir, "telemetry.json"), "telemetry.json", res);
 });
 
 rendersRouter.get("/:id/provenance", async (req, res) => {
   const dir = resolveRenderDirOr400(req.params.id, res);
   if (!dir) return;
+  if (!(await authorizeRenderRead(req, res, dir))) return;
   await streamJsonFile(path.join(dir, "provenance.json"), "provenance.json", res);
 });
 
@@ -141,10 +200,12 @@ const renderPatchSchema = z
   })
   .strict();
 
-rendersRouter.patch("/:id", validateBody(renderPatchSchema), (req, res) => {
+rendersRouter.patch("/:id", validateBody(renderPatchSchema), async (req, res) => {
   const id = asStringIdOr400(req.params.id, res);
   if (id === null) return;
   try {
+    const dir = safeRenderDir(id);
+    if (!(await authorizeRenderRead(req, res, dir))) return;
     const { name, pinned } = req.body as z.infer<typeof renderPatchSchema>;
     if (name === undefined && pinned === undefined) {
       return res.status(400).json({ error: "Missing updates" });
@@ -160,10 +221,12 @@ rendersRouter.patch("/:id", validateBody(renderPatchSchema), (req, res) => {
   }
 });
 
-rendersRouter.delete("/:id", (req, res, next) => {
+rendersRouter.delete("/:id", async (req, res, next) => {
   const id = asStringIdOr400(req.params.id, res);
   if (id === null) return;
   try {
+    const dir = safeRenderDir(id);
+    if (!(await authorizeRenderRead(req, res, dir))) return;
     deleteRender(id);
     // SB-002 humanization — return the post-delete budget snapshot so the
     // cockpit can refresh its "store full" banner immediately.
@@ -262,6 +325,9 @@ rendersRouter.post(
         provenance: result.provenance,
         wavBytes: result.wavBytes,
         durationSec: result.durationSec,
+        // FS-002 — attribute the render to the authenticated principal so
+        // the bank listing can filter per-user (admins still see all).
+        createdBy: req.userId,
       });
 
       res.json({ ok: true, jobId: queued.jobId, meta });

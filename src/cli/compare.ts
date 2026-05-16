@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import wavefile from 'wavefile';
 const { WaveFile } = wavefile;
 import { readFile } from 'node:fs/promises';

@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * Generate synthetic vowel calibration WAVs for preset analysis.
  *

@@ -22,6 +22,11 @@ Thumbs.db
 # Logs
 *.log
 
+# Playwright + bench transients
+test-results/
+playwright-report/
+tests/__bench__/last-run.json
+
 # Env / secrets — never commit. .env.example is allowed for documenting required vars.
 .env
 .env.*

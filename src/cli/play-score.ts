@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * Render a score JSON through a voice preset and write the result to WAV.
  *

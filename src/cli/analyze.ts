@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * Analyze a single WAV file into a single-timbre voice preset.
  *

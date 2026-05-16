@@ -215,6 +215,71 @@ renderRouter.post('/', validateBody(renderBodySchema), async (req, res, next) =>
 });
 
 /**
+ * FS-001 — HTTP cancel surface for an in-flight or queued render job.
+ *
+ * The queue has always exposed `cancel(jobId)` internally but it was
+ * unreachable from clients.  This route closes that gap:
+ *   - 200 { ok:true, cancelled:true,  state:'queued_removed'  } — job was
+ *     waiting and has been removed before the worker started.
+ *   - 200 { ok:true, cancelled:true,  state:'running_flagged' } — job is
+ *     in-flight; cancellation flag is set, the worker stops at its next
+ *     per-block check and a `cancelled` SSE event will follow.
+ *   - 404 { code:'JOB_NOT_FOUND' } — no queued or in-flight job matches
+ *     the id (already done, never existed, or already cancelled).
+ *
+ * The jobId path param is bound by the safe-id allowlist used everywhere
+ * else (`/^[A-Za-z0-9_-]{1,80}$/` — slightly looser than render ids since
+ * job ids include a `job_` prefix).
+ */
+const JOB_ID_RE = /^[A-Za-z0-9_-]{1,80}$/;
+
+renderRouter.delete('/jobs/:jobId', (req, res, next) => {
+  try {
+    const jobId = req.params.jobId;
+    if (typeof jobId !== 'string' || !JOB_ID_RE.test(jobId)) {
+      throw new HttpError(400, 'INVALID_JOB_ID', 'Invalid jobId', {
+        hint: 'jobId must match /^[A-Za-z0-9_-]{1,80}$/',
+      });
+    }
+    const queue = getRenderQueue();
+    const outcome = queue.cancel(jobId);
+    if (outcome === 'unknown') {
+      throw new HttpError(404, 'JOB_NOT_FOUND', `No queued or in-flight job matches ${jobId}`, {
+        hint: 'The job may have already finished, been cancelled, or never existed',
+      });
+    }
+    res.json({ ok: true, cancelled: true, jobId, state: outcome });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Aliased POST surface — some clients (and CORS-preflight-averse browsers)
+// prefer POST over DELETE for write operations.  Both routes resolve to the
+// same handler under the hood; this thin wrapper exists so cockpit and
+// future SDKs can choose whichever fits.
+renderRouter.post('/jobs/:jobId/cancel', (req, res, next) => {
+  try {
+    const jobId = req.params.jobId;
+    if (typeof jobId !== 'string' || !JOB_ID_RE.test(jobId)) {
+      throw new HttpError(400, 'INVALID_JOB_ID', 'Invalid jobId', {
+        hint: 'jobId must match /^[A-Za-z0-9_-]{1,80}$/',
+      });
+    }
+    const queue = getRenderQueue();
+    const outcome = queue.cancel(jobId);
+    if (outcome === 'unknown') {
+      throw new HttpError(404, 'JOB_NOT_FOUND', `No queued or in-flight job matches ${jobId}`, {
+        hint: 'The job may have already finished, been cancelled, or never existed',
+      });
+    }
+    res.json({ ok: true, cancelled: true, jobId, state: outcome });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
  * SB-001 humanization — Server-Sent Events stream so clients can render a
  * progress bar instead of staring at a spinner.  The stream lives until the
  * client disconnects or the job emits `done`/`failed`/`cancelled`.

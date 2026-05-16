@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * Inspect a voice preset manifest: print metadata, per-timbre shape,
  * and harmonic energy. Loads + validates the preset through the same

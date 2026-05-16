@@ -82,3 +82,84 @@ jobs:
         # network calls don't differ by OS; one run saves CI minutes).
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == 20
         run: npm audit --audit-level=high --omit=dev
+
+  # ── Cockpit browser smoke tests (FTC-002) ──
+  # Playwright tests live at apps/cockpit/tests/. They spin up the Vite
+  # dev server via playwright.config.ts's webServer block, then load
+  # index.html in chromium. Single OS / single Node — the cockpit ships
+  # vanilla DOM + Web Audio so cross-browser drift isn't load-bearing,
+  # and we want CI cost low.
+  cockpit-tests:
+    name: cockpit-tests (ubuntu-latest / node-20)
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    env:
+      NO_COLOR: '1'
+      FORCE_COLOR: '0'
+      CI: '1'
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install cockpit dependencies
+        run: npm --prefix apps/cockpit ci || npm --prefix apps/cockpit install
+
+      - name: Install Playwright browsers (chromium only)
+        run: npx playwright install --with-deps chromium
+
+      - name: Run cockpit smoke tests
+        run: npm run test:cockpit
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+  # ── Perf regression bench gate (FTC-004) ──
+  # Linux-only; perf variance on shared runners is high enough that
+  # cross-OS bench comparison is noise. Uses tests/__bench__/baseline.json
+  # via scripts/bench-gate.mjs. Threshold is 2x — see scripts/bench-gate.mjs
+  # for rationale.
+  bench-gate:
+    name: bench-gate (ubuntu-latest / node-20)
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    env:
+      NO_COLOR: '1'
+      FORCE_COLOR: '0'
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run benches
+        run: npm run bench
+
+      - name: Compare against baseline (fail on > 2x regression)
+        run: npm run bench:gate
+
+      - name: Upload bench artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: bench-results
+          path: tests/__bench__/last-run.json
+          retention-days: 14

@@ -16,6 +16,16 @@ export default defineConfig({
     include: ['tests/**/*.test.ts'],
     exclude: ['node_modules', 'dist', 'apps/cockpit/**', 'site/**'],
     environment: 'node',
+    // FTC-004 — `vitest bench` discovers *.bench.ts files. Pinning the
+    // include pattern explicitly keeps `npm test` and `npm run bench`
+    // from racing the same files. `npm run bench` invokes the JSON
+    // reporter so scripts/bench-gate.mjs can ingest the results.
+    benchmark: {
+      include: ['tests/**/*.bench.ts'],
+      exclude: ['node_modules', 'dist', 'apps/cockpit/**', 'site/**'],
+      reporters: ['default'],
+      outputJson: 'tests/__bench__/last-run.json',
+    },
     // Server / engine integration tests can take longer than the default
     // 5 s (preset load + spawn + render). Pin a generous-but-bounded ceiling.
     testTimeout: 20_000,
