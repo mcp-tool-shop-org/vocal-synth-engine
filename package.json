@@ -122,7 +122,7 @@
     "@playwright/test": "^1.50.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
-    "@types/node": "^25.8.0",
+    "@types/node": "^26.0.0",
     "@types/ws": "^8.18.1",
     "@vitest/coverage-v8": "^4.1.0",
     "fast-check": "^4.8.0",
