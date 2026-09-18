@@ -10,7 +10,7 @@ export default defineConfig({
       title: 'Vocal Synth Engine',
       description: 'Vocal Synth Engine handbook',
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/mcp-tool-shop-org/vocal-synth-engine' }],
-      sidebar: [{ label: 'Handbook', autogenerate: { directory: 'handbook' } }],
+      sidebar: [{ label: 'Handbook', items: [{ autogenerate: { directory: 'handbook' } }] }],
       customCss: ['./src/styles/starlight-custom.css'],
       disable404Route: true,
     }),
