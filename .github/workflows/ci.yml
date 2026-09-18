@@ -22,6 +22,9 @@ on:
       - 'lib/**'
       - 'tests/**'
       - '.github/workflows/**'
+      - 'site/package.json'
+      - 'site/package-lock.json'
+      - 'site/astro.config.mjs'
   pull_request:
     branches: [main]
     paths:
@@ -31,6 +34,9 @@ on:
       - 'lib/**'
       - 'tests/**'
       - '.github/workflows/**'
+      - 'site/package.json'
+      - 'site/package-lock.json'
+      - 'site/astro.config.mjs'
   schedule:
     # Weekly Monday 06:00 UTC scheduled audit catches new advisories on
     # dormant branches. Severity threshold documented in SECURITY.md.
