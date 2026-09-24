@@ -1,0 +1,4359 @@
+{
+  "boundaries": [
+    {
+      "dynamicReads": 0,
+      "dynamicSpawns": 0,
+      "dynamicSpawnsInTests": 0,
+      "dynamicWrites": 0,
+      "entryPoints": [],
+      "externals": 0,
+      "files": [
+        {
+          "hash": "c3b072b1cd92b1551c12d7196bd1afb4afa033604a9eb7a890eba509cb5009d9",
+          "path": ".github/CODEOWNERS"
+        },
+        {
+          "hash": "fba168a21311867a507004f5dcbefa3b96c2b859cfbef1b533c5bf79db2fbdf1",
+          "path": ".github/ISSUE_TEMPLATE/bug.md"
+        },
+        {
+          "hash": "d8710859581ac582a26f4518e6415bdaf9bde3be9a503af01049fdd9e2143012",
+          "path": ".github/ISSUE_TEMPLATE/feature.md"
+        },
+        {
+          "hash": "9d691fc30536a35382f6907583969bd1bec9a161bcf820a80a4ab7874ceda7a5",
+          "path": ".github/dependabot.yml"
+        },
+        {
+          "hash": "65358a67eb7f7506e79e17eae54ce5ab52aaa3d086fd7642ef657874df5cc344",
+          "path": ".github/pull_request_template.md"
+        },
+        {
+          "hash": "515e87343c3228f1b1249e59573b91120f7e82d8f6adb17dff96a424b5fdd69f",
+          "path": ".github/workflows/ci.yml"
+        },
+        {
+          "hash": "6e429fec1bb9dd8511a6d51006b4f5ae3de3553f3e1d66049d2cb4861cc469d3",
+          "path": ".github/workflows/dogfood.yml"
+        },
+        {
+          "hash": "417a8baf989e22d3c5db6f430811e3be4a44e3123db285be17ae99d37ef4ddc9",
+          "path": ".github/workflows/pages.yml"
+        },
+        {
+          "hash": "cebcbf4110fc0bb7313793e023e5f093f78871360a32220220025f51e41f01e8",
+          "path": ".github/workflows/release.yml"
+        }
+      ],
+      "globs": [
+        ".github/**"
+      ],
+      "importConfidence": "full",
+      "name": ".github",
+      "origin": "authored",
+      "role": "config",
+      "testedBy": 0,
+      "unresolvedSites": 0
+    },
+    {
+      "dynamicReads": 0,
+      "dynamicSpawns": 0,
+      "dynamicSpawnsInTests": 0,
+      "dynamicWrites": 0,
+      "entryPoints": [],
+      "externals": 0,
+      "files": [
+        {
+          "hash": "a3189e211592d9986f6e176f7b7dd08c5a2e4230370332422135fca5eb18902b",
+          "path": "assets/logo.png"
+        }
+      ],
+      "globs": [
+        "assets/**"
+      ],
+      "importConfidence": "full",
+      "name": "assets",
+      "origin": "generated",
+      "role": "data",
+      "testedBy": 0,
+      "unresolvedSites": 0
+    },
+    {
+      "dynamicReads": 0,
+      "dynamicSpawns": 0,
+      "dynamicSpawnsInTests": 0,
+      "dynamicWrites": 0,
+      "entryPoints": [],
+      "externals": 0,
+      "files": [
+        {
+          "hash": "942c5b8440fe97864b69d772c01e515ab73e0dbb1202c9898019a42fc4d6a75a",
+          "path": "apps/cockpit/.gitignore"
+        },
+        {
+          "hash": "28634eca135c2b6dd5c342d0a6bb4acecaacd751287f075073f8a57961a23fbc",
+          "path": "apps/cockpit/.vscode/extensions.json"
+        },
+        {
+          "hash": "6e6dfbc6fd1dbbe9659a7a0a78515c9a47547408f74b7b9b5075b2434984cee8",
+          "path": "apps/cockpit/.vscode/launch.json"
+        },
+        {
+          "hash": "52fbbb7df1e7f34d6f8246f74a5438384a867cdbab87b06bc97ba67c62348070",
+          "path": "apps/cockpit/README.md"
+        },
+        {
+          "hash": "848c226b828334e3d5344f12297210c4f2624750843c72d281c0b955555debf2",
+          "path": "apps/cockpit/index.html"
+        },
+        {
+          "hash": "d017eb00e6775370ae2ce1f7e2d6023e0b4160e45d952adb48fd3b16a3ceba91",
+          "path": "apps/cockpit/package-lock.json"
+        },
+        {
+          "hash": "5d1f589e2e90380de0dc87c36a4f3c709e04545c716c9f48d27ea456132c9271",
+          "path": "apps/cockpit/package.json"
+        },
+        {
+          "hash": "09d2ac08d8cca9b6e1f90221f345a8c4dd0371c64a0dc52b6f96fc589b1e3d67",
+          "path": "apps/cockpit/public/favicon.ico"
+        },
+        {
+          "hash": "77100c0ced694fe08527d75744547ce439ca93f6ee62ee8d44f85522be99f950",
+          "path": "apps/cockpit/public/favicon.svg"
+        },
+        {
+          "hash": "e9b9cf3714c0b98078d05dff5502502c36ff7d0c9326905f57c7e3005aa52717",
+          "path": "apps/cockpit/public/pcm-worklet.js"
+        },
+        {
+          "exports": [
+            "audioBlobUrl",
+            "authFetch",
+            "clearToken",
+            "getToken",
+            "hasToken",
+            "setOn401",
+            "setToken",
+            "wsTokenSuffix"
+          ],
+          "hash": "d9653f0d9d563597088a302a9866919d924b99308f4dbb67e1217a23a01dddf5",
+          "path": "apps/cockpit/src/auth.ts"
+        },
+        {
+          "hash": "bf3e85723f2e055916f2d55f9789b31376e522c06ae252c70c369015f9e2aa9e",
+          "importsFiles": [
+            "apps/cockpit/src/auth.ts",
+            "apps/cockpit/src/waveform.ts"
+          ],
+          "path": "apps/cockpit/src/main.ts"
+        },
+        {
+          "hash": "e8949daa4d483ecbedf7b582f1b25d3d2250b3e7272016677e6563dd6229bca3",
+          "path": "apps/cockpit/src/pages/index.astro"
+        },
+        {
+          "exports": [
+            "decodeAudioFromUrl",
+            "drawComparisonWaveforms",
+            "drawStaticWaveform"
+          ],
+          "hash": "7a7946b3356346210c85460b61bdf296de0c835a9c2d77111cee8265887c75af",
+          "path": "apps/cockpit/src/waveform.ts"
+        },
+        {
+          "hash": "f3b4ecdebd5032236e92c300aae4d6c01a44bb0a672dfd5472edf65b71556da1",
+          "path": "apps/cockpit/tests/smoke.spec.ts"
+        },
+        {
+          "hash": "608e124b051c7f12872890f2651879957b00ee23b4ef6da06689e170d163f150",
+          "path": "apps/cockpit/tsconfig.json"
+        }
+      ],
+      "globs": [
+        "apps/cockpit/**"
+      ],
+      "importConfidence": "full",
+      "name": "cockpit",
+      "origin": "authored",
+      "role": "code",
+      "testedBy": 0,
+      "unresolvedSites": 0
+    },
+    {
+      "dynamicReads": 0,
+      "dynamicSpawns": 0,
+      "dynamicSpawnsInTests": 0,
+      "dynamicWrites": 0,
+      "entryPoints": [],
+      "externals": 0,
+      "files": [
+        {
+          "hash": "88e1580035154a85df8f8870db852f122512cf4b7436a82c46c8ea59f3e04279",
+          "path": "presets/bright-lab/assets/AH_envelope_db.f32"
+        },
+        {
+          "hash": "eb2394aadf56682ecc25693c0c1bace81279b8f5da35173b8368a405dd8c2058",
+          "path": "presets/bright-lab/assets/AH_harmonics_mag.f32"
+        },
+        {
+          "hash": "d90f6f40975e4092f18d0b11c1b567431338fda75122f1985705bf229dc97499",
+          "path": "presets/bright-lab/assets/AH_noise_db.f32"
+        },
+        {
+          "hash": "f5af884eff6621817c77182e83805d8d5bd092584ace06898c003a3ffea5f870",
+          "path": "presets/bright-lab/assets/EE_envelope_db.f32"
+        },
+        {
+          "hash": "04d285d36b7ddb53a2be9754c020169280fab0cc445deb09c913478c7d37d9a7",
+          "path": "presets/bright-lab/assets/EE_harmonics_mag.f32"
+        },
+        {
+          "hash": "01b8d562f380436742d1131adafd99c27582769f937e525e7fb6d58c858ded63",
+          "path": "presets/bright-lab/assets/EE_noise_db.f32"
+        },
+        {
+          "hash": "815603ef8212b7034ad7c30e43a4eb29bdaf6dad444ff82d418dfa71466a0afa",
+          "path": "presets/bright-lab/assets/OO_envelope_db.f32"
+        },
+        {
+          "hash": "a158318dc456f0a9a26b94fb2bfd6478db79f5a829af30f386b709bdf61eac4c",
+          "path": "presets/bright-lab/assets/OO_harmonics_mag.f32"
+        },
+        {
+          "hash": "092a00f5a027ecb1c63552f719b53353ba30819df4a7ffbf3cd11a5693639995",
+          "path": "presets/bright-lab/assets/OO_noise_db.f32"
+        },
+        {
+          "hash": "88cce7b051acedaa65081cfac9e701e62b6ed44e0c03d3118e78b43a26fcb56a",
+          "path": "presets/bright-lab/assets/freq_axis_hz.f32"
+        },
+        {
+          "hash": "c8e1e5bdaaf84748c97dcb2483cb17f71abc6c09aba13c12ea365734c782e846",
+          "path": "presets/bright-lab/meta.json"
+        },
+        {
+          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "path": "presets/bright-lab/voicepreset.json"
+        },
+        {
+          "hash": "88e1580035154a85df8f8870db852f122512cf4b7436a82c46c8ea59f3e04279",
+          "path": "presets/default-voice/assets/AH_envelope_db.f32"
+        },
+        {
+          "hash": "eb2394aadf56682ecc25693c0c1bace81279b8f5da35173b8368a405dd8c2058",
+          "path": "presets/default-voice/assets/AH_harmonics_mag.f32"
+        },
+        {
+          "hash": "d90f6f40975e4092f18d0b11c1b567431338fda75122f1985705bf229dc97499",
+          "path": "presets/default-voice/assets/AH_noise_db.f32"
+        },
+        {
+          "hash": "f5af884eff6621817c77182e83805d8d5bd092584ace06898c003a3ffea5f870",
+          "path": "presets/default-voice/assets/EE_envelope_db.f32"
+        },
+        {
+          "hash": "04d285d36b7ddb53a2be9754c020169280fab0cc445deb09c913478c7d37d9a7",
+          "path": "presets/default-voice/assets/EE_harmonics_mag.f32"
+        },
+        {
+          "hash": "01b8d562f380436742d1131adafd99c27582769f937e525e7fb6d58c858ded63",
+          "path": "presets/default-voice/assets/EE_noise_db.f32"
+        },
+        {
+          "hash": "815603ef8212b7034ad7c30e43a4eb29bdaf6dad444ff82d418dfa71466a0afa",
+          "path": "presets/default-voice/assets/OO_envelope_db.f32"
+        },
+        {
+          "hash": "a158318dc456f0a9a26b94fb2bfd6478db79f5a829af30f386b709bdf61eac4c",
+          "path": "presets/default-voice/assets/OO_harmonics_mag.f32"
+        },
+        {
+          "hash": "092a00f5a027ecb1c63552f719b53353ba30819df4a7ffbf3cd11a5693639995",
+          "path": "presets/default-voice/assets/OO_noise_db.f32"
+        },
+        {
+          "hash": "88cce7b051acedaa65081cfac9e701e62b6ed44e0c03d3118e78b43a26fcb56a",
+          "path": "presets/default-voice/assets/freq_axis_hz.f32"
+        },
+        {
+          "hash": "038c07be926438c13bf8ddf1811896061214c280ffc4dc6f6597952acb7dd504",
+          "path": "presets/default-voice/meta.json"
+        },
+        {
+          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "path": "presets/default-voice/voicepreset.json"
+        },
+        {
+          "hash": "49ecf70a3c41dfd98c8564ac481310fe5f691addbed149795ac63015ecbd1f96",
+          "path": "presets/kokoro-af-aoede/assets/AH_envelope_db.f32"
+        },
+        {
+          "hash": "d1be34c63d007a5d84a1ce610a5b9657f86de2f0474bd1e1664a69ee9e9a473f",
+          "path": "presets/kokoro-af-aoede/assets/AH_harmonics_mag.f32"
+        },
+        {
+          "hash": "8f667ec60446614a88ff29776254fde1ee776ff7344d3add0a7345e77ac01f88",
+          "path": "presets/kokoro-af-aoede/assets/AH_noise_db.f32"
+        },
+        {
+          "hash": "263dc03b63e4210e2c9818b03a091415c0569ecc0caa19d8084092d5d4cdac2b",
+          "path": "presets/kokoro-af-aoede/assets/EE_envelope_db.f32"
+        },
+        {
+          "hash": "82a3b7aca5f113fc7bf0f06a369ed7d13fdfc62886708c6269b9bcb6db57fc74",
+          "path": "presets/kokoro-af-aoede/assets/EE_harmonics_mag.f32"
+        },
+        {
+          "hash": "ba5b56cd2d266d3c382860ad886e69c2cb2586697b7d7badc90f65cab1ad2215",
+          "path": "presets/kokoro-af-aoede/assets/EE_noise_db.f32"
+        },
+        {
+          "hash": "36d4d7f6ca8bcb1d0271ead6e800b796b966aa7a90ee856f3cae0c9b0425c61f",
+          "path": "presets/kokoro-af-aoede/assets/OO_envelope_db.f32"
+        },
+        {
+          "hash": "3da73e63e80b8e4f045195be81572e91493d19f5d2b3717e9065c5f5cde3eb1a",
+          "path": "presets/kokoro-af-aoede/assets/OO_harmonics_mag.f32"
+        },
+        {
+          "hash": "d477e359706ae99cb0b20535c92c1878b36ddf10e5cfc79fc5ff17802a479a3a",
+          "path": "presets/kokoro-af-aoede/assets/OO_noise_db.f32"
+        },
+        {
+          "hash": "88cce7b051acedaa65081cfac9e701e62b6ed44e0c03d3118e78b43a26fcb56a",
+          "path": "presets/kokoro-af-aoede/assets/freq_axis_hz.f32"
+        },
+        {
+          "hash": "a951fcbca4f2db6a8eb64d13813cedf2ede504734fa14bf0b03404a1fbbce64a",
+          "path": "presets/kokoro-af-aoede/meta.json"
+        },
+        {
+          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "path": "presets/kokoro-af-aoede/voicepreset.json"
+        },
+        {
+          "hash": "afa5312f593f6101dc81bb343f092ae0aa591f1802e3c37972234404f3e30046",
+          "path": "presets/kokoro-af-heart/assets/AH_envelope_db.f32"
+        },
+        {
+          "hash": "81d3940fc3682c3379bdd1ba727b248b62aac0a0685521707dbc751f49d4d8ff",
+          "path": "presets/kokoro-af-heart/assets/AH_harmonics_mag.f32"
+        },
+        {
+          "hash": "d8ced7a8ba7eb40f70afc55a2b9961e40aa5832ee612f199a2fca228dc2cfffa",
+          "path": "presets/kokoro-af-heart/assets/AH_noise_db.f32"
+        },
+        {
+          "hash": "a6dd9cbb05c122fd30ae355dc7a075d2d9b24110dd63be938cd4866d8a04e9ca",
+          "path": "presets/kokoro-af-heart/assets/EE_envelope_db.f32"
+        },
+        {
+          "hash": "93a6782f4520bbdac10e0e6f0cd7ddfb065b1654ab5f254fca5838cad2df823e",
+          "path": "presets/kokoro-af-heart/assets/EE_harmonics_mag.f32"
+        },
+        {
+          "hash": "2501dfa95f77911cab19a2c53630433542cf378a44e269b2f0c1602eafd430c1",
+          "path": "presets/kokoro-af-heart/assets/EE_noise_db.f32"
+        },
+        {
+          "hash": "8022f12e27c384526ed03d58e6c0715f0737028410617e262253f460c65f6227",
+          "path": "presets/kokoro-af-heart/assets/OO_envelope_db.f32"
+        },
+        {
+          "hash": "8ac6618f4c2bc15001bc256a86e6a13ccb920cd91a6dd61e100cdeb5a0e8393b",
+          "path": "presets/kokoro-af-heart/assets/OO_harmonics_mag.f32"
+        },
+        {
+          "hash": "d96fa5cc50b8b197058a93652157bfa12276979e6fcf223c44ccd147a83de6b7",
+          "path": "presets/kokoro-af-heart/assets/OO_noise_db.f32"
+        },
+        {
+          "hash": "88cce7b051acedaa65081cfac9e701e62b6ed44e0c03d3118e78b43a26fcb56a",
+          "path": "presets/kokoro-af-heart/assets/freq_axis_hz.f32"
+        },
+        {
+          "hash": "8cffaf51986bab22e895a2def67c7b932eb559bc55c0ff2180a432e39e75c70c",
+          "path": "presets/kokoro-af-heart/meta.json"
+        },
+        {
+          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "path": "presets/kokoro-af-heart/voicepreset.json"
+        },
+        {
+          "hash": "b140b822a080da67976f5dad79ebd63002af8bf0dfef83b9e8b097bc747f755b",
+          "path": "presets/kokoro-af-jessica/assets/AH_envelope_db.f32"
+        },
+        {
+          "hash": "aaf6271d673b38b78cef71850d08d58625b1ab6980b87d2283455b09c3c96014",
+          "path": "presets/kokoro-af-jessica/assets/AH_harmonics_mag.f32"
+        },
+        {
+          "hash": "06dabd8d8b44ac2bf91f95103dfe7b745a68ec1816ab51783d809db273f74392",
+          "path": "presets/kokoro-af-jessica/assets/AH_noise_db.f32"
+        },
+        {
+          "hash": "f4b0719f8d892509dcf925f7e828f3bb0a1c94034951a0974d23d9667f24f14e",
+          "path": "presets/kokoro-af-jessica/assets/EE_envelope_db.f32"
+        },
+        {
+          "hash": "f043f1a87dad386145dfd1a683b9beba84f91b200db6f3b3ad587eaea0d95ec3",
+          "path": "presets/kokoro-af-jessica/assets/EE_harmonics_mag.f32"
+        },
+        {
+          "hash": "1fcb65286ded47d70c121a95d7a98bbdb25b35d56109cd58d597eef4cf2cefe1",
+          "path": "presets/kokoro-af-jessica/assets/EE_noise_db.f32"
+        },
+        {
+          "hash": "dfd19242ec05ae5a71ab8702b8cec5bf899e37335bd302757dc231c758c11c4a",
+          "path": "presets/kokoro-af-jessica/assets/OO_envelope_db.f32"
+        },
+        {
+          "hash": "3d59c4a8206c3ac76e6d5a52455233db9d59228a25862296e24b18e0d462f3a4",
+          "path": "presets/kokoro-af-jessica/assets/OO_harmonics_mag.f32"
+        },
+        {
+          "hash": "a19913de3194c7b67174fd7532dfde0e2af7cb923a73be7a24632ed1586c5782",
+          "path": "presets/kokoro-af-jessica/assets/OO_noise_db.f32"
+        },
+        {
+          "hash": "88cce7b051acedaa65081cfac9e701e62b6ed44e0c03d3118e78b43a26fcb56a",
+          "path": "presets/kokoro-af-jessica/assets/freq_axis_hz.f32"
+        },
+        {
+          "hash": "007436372253719d1c434561ae9746847303a4f3047bd274b69ccffe1592ee15",
+          "path": "presets/kokoro-af-jessica/meta.json"
+        },
+        {
+          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "path": "presets/kokoro-af-jessica/voicepreset.json"
+        },
+        {
+          "hash": "4efce35a031d89b323a4475351c718b48fb12baa65a6717aa2d9526118288c7c",
+          "path": "presets/kokoro-af-sky/assets/AH_envelope_db.f32"
+        },
+        {
+          "hash": "8dcae69010ea8e80fa359014fe24e848b83dc69b87c300d1d191499c872cbd70",
+          "path": "presets/kokoro-af-sky/assets/AH_harmonics_mag.f32"
+        },
+        {
+          "hash": "407406ccb0816e8632b9b43110ff93faccb2440e2ad1fd63743d688d6122719f",
+          "path": "presets/kokoro-af-sky/assets/AH_noise_db.f32"
+        },
+        {
+          "hash": "bc48ac1769261a4f8d385651c90f554069007af737faf6e54dc10ca95f868342",
+          "path": "presets/kokoro-af-sky/assets/EE_envelope_db.f32"
+        },
+        {
+          "hash": "fc8438faef55ccb85b9c708e02d497a8ae9840643d24457328efee93b869713d",
+          "path": "presets/kokoro-af-sky/assets/EE_harmonics_mag.f32"
+        },
+        {
+          "hash": "94fa8bdce87963cf6532bd252257505df7fe178f097834b821e0abc10f488cca",
+          "path": "presets/kokoro-af-sky/assets/EE_noise_db.f32"
+        },
+        {
+          "hash": "a3123adf0ec803a6628da6742ff43e56a6de8b4d90667e18f844a6e37b64b387",
+          "path": "presets/kokoro-af-sky/assets/OO_envelope_db.f32"
+        },
+        {
+          "hash": "e5e10cc65615fdda31186406e55030f8e59cea8e6154611f9055eee37cf47038",
+          "path": "presets/kokoro-af-sky/assets/OO_harmonics_mag.f32"
+        },
+        {
+          "hash": "4be26041ca694b1f97a4b62b317f824eea708515a58b6c7f288bb38672a25ff2",
+          "path": "presets/kokoro-af-sky/assets/OO_noise_db.f32"
+        },
+        {
+          "hash": "88cce7b051acedaa65081cfac9e701e62b6ed44e0c03d3118e78b43a26fcb56a",
+          "path": "presets/kokoro-af-sky/assets/freq_axis_hz.f32"
+        },
+        {
+          "hash": "21f2201109ccc6c38d211b11d42a09b2fff2784aa86954d2506476ce1a07cc26",
+          "path": "presets/kokoro-af-sky/meta.json"
+        },
+        {
+          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "path": "presets/kokoro-af-sky/voicepreset.json"
+        },
+        {
+          "hash": "2e459a3add2ab3ae69cdee8413a38491e08d45f32bb7c3b61f796079fa80b125",
+          "path": "presets/kokoro-am-eric/assets/AH_envelope_db.f32"
+        },
+        {
+          "hash": "031f0aa7fba59df9e162674c857968c1565649cbd6c613b93b09eeba0f18ad5d",
+          "path": "presets/kokoro-am-eric/assets/AH_harmonics_mag.f32"
+        },
+        {
+          "hash": "c48f1973ef7477a5398d2ed6b34e3e7073eacc60a6769d488aa3f3deccaf847f",
+          "path": "presets/kokoro-am-eric/assets/AH_noise_db.f32"
+        },
+        {
+          "hash": "e3c6608d2a9bb4e23cedb7e9d859342250514db6b8059bbcb3d37ae8bfd15284",
+          "path": "presets/kokoro-am-eric/assets/EE_envelope_db.f32"
+        },
+        {
+          "hash": "a3426591b6c8fcac82b42535335b44321020db2321b6ce1507427b7175f258c9",
+          "path": "presets/kokoro-am-eric/assets/EE_harmonics_mag.f32"
+        },
+        {
+          "hash": "28fbda98d266694c41b44826db71803f3f60ce4ae25f5ee86b44831992370f8a",
+          "path": "presets/kokoro-am-eric/assets/EE_noise_db.f32"
+        },
+        {
+          "hash": "63ed248e6400d48bd56576da701a59635701efc5f211ef58d1449e8c388ca2ef",
+          "path": "presets/kokoro-am-eric/assets/OO_envelope_db.f32"
+        },
+        {
+          "hash": "90a86e79386c0911485512da4bf8a637dc728ef9c88234ca1c8429b3f2569797",
+          "path": "presets/kokoro-am-eric/assets/OO_harmonics_mag.f32"
+        },
+        {
+          "hash": "93bf5f1bd401b9c120c702097c9d93960fb54857d06159edb30e0155704e1319",
+          "path": "presets/kokoro-am-eric/assets/OO_noise_db.f32"
+        },
+        {
+          "hash": "88cce7b051acedaa65081cfac9e701e62b6ed44e0c03d3118e78b43a26fcb56a",
+          "path": "presets/kokoro-am-eric/assets/freq_axis_hz.f32"
+        },
+        {
+          "hash": "f6a6e347bd9f3c17260d1f01b2928f0897e032b98e1a98865ad9fe05acb31459",
+          "path": "presets/kokoro-am-eric/meta.json"
+        },
+        {
+          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "path": "presets/kokoro-am-eric/voicepreset.json"
+        },
+        {
+          "hash": "00ef7bfc1c9f30aecdcf75b5edfd81fb6feb0c023d081fc11fd32ea086c46f89",
+          "path": "presets/kokoro-am-fenrir/assets/AH_envelope_db.f32"
+        },
+        {
+          "hash": "f0e2feb0b61a537c4aaa77d23109d4f3648dc5c1b1da4726867d5607e4018238",
+          "path": "presets/kokoro-am-fenrir/assets/AH_harmonics_mag.f32"
+        },
+        {
+          "hash": "533d22c4f73ef158f71f22b5bf8745c4cdb03ba59bd8108cd1715adcc1996c52",
+          "path": "presets/kokoro-am-fenrir/assets/AH_noise_db.f32"
+        },
+        {
+          "hash": "b56ed439fac268aae393226f9fbdb9037781b7c7d52780b7692316b3ce16591c",
+          "path": "presets/kokoro-am-fenrir/assets/EE_envelope_db.f32"
+        },
+        {
+          "hash": "96dc5029c08a4c828b91fd2d1262e7df5d8fa4bdc2af0812a43381d56d56be03",
+          "path": "presets/kokoro-am-fenrir/assets/EE_harmonics_mag.f32"
+        },
+        {
+          "hash": "fffcdfcc8162edcbb094188fdff5dff8b1694b568b30b9bf7f7bd72c245681cc",
+          "path": "presets/kokoro-am-fenrir/assets/EE_noise_db.f32"
+        },
+        {
+          "hash": "4d4c4f6ee72ddff15d594aa8c25e8928038b379639c9bbb24572a375b50b1252",
+          "path": "presets/kokoro-am-fenrir/assets/OO_envelope_db.f32"
+        },
+        {
+          "hash": "f7d4008bceb06e2ae62b81f961e10bcf23ac8caf715747b072f08b45736f8e7a",
+          "path": "presets/kokoro-am-fenrir/assets/OO_harmonics_mag.f32"
+        },
+        {
+          "hash": "54b9e6904cfa11d8e3d5cc2bd3ed47058cfe873540ae6e338bc9dd5f1d7f1371",
+          "path": "presets/kokoro-am-fenrir/assets/OO_noise_db.f32"
+        },
+        {
+          "hash": "88cce7b051acedaa65081cfac9e701e62b6ed44e0c03d3118e78b43a26fcb56a",
+          "path": "presets/kokoro-am-fenrir/assets/freq_axis_hz.f32"
+        },
+        {
+          "hash": "b1d7cb302be37ec2b0b877e7ed662880bfe5ed6b8c89fd58885368e7fd566c11",
+          "path": "presets/kokoro-am-fenrir/meta.json"
+        },
+        {
+          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "path": "presets/kokoro-am-fenrir/voicepreset.json"
+        },
+        {
+          "hash": "d8ffb5fe150c821f14116396e651e1fcc28f7555a1dc9e0bb48d7cb4964f311b",
+          "path": "presets/kokoro-am-liam/assets/AH_envelope_db.f32"
+        },
+        {
+          "hash": "95740ae23c396155503d69aa16d82df24a7bf2e7a63c163ad5c1a2703d5c5426",
+          "path": "presets/kokoro-am-liam/assets/AH_harmonics_mag.f32"
+        },
+        {
+          "hash": "13c6a9620f67b90002d8eeffe9b0ef52fcb0b3c09a24b2b4e2744a96cba16f67",
+          "path": "presets/kokoro-am-liam/assets/AH_noise_db.f32"
+        },
+        {
+          "hash": "70c434c092d7da65f51701211b55c6978699c4dd5b8f3fdb37a32fe6e40a80a1",
+          "path": "presets/kokoro-am-liam/assets/EE_envelope_db.f32"
+        },
+        {
+          "hash": "d38442c8c85a0094a6d0509f3628ab2808d9233b33784350fb3fd66c89828263",
+          "path": "presets/kokoro-am-liam/assets/EE_harmonics_mag.f32"
+        },
+        {
+          "hash": "91dc2f04714b918a4de6a1729222574744ea2dd227d1f89ca0b2407f5bb7245a",
+          "path": "presets/kokoro-am-liam/assets/EE_noise_db.f32"
+        },
+        {
+          "hash": "e48f469248c726f1089e5efa5e7762d85e82aeb10d698a420ddf7a8656c3b670",
+          "path": "presets/kokoro-am-liam/assets/OO_envelope_db.f32"
+        },
+        {
+          "hash": "11bd6272341d09ab438d91d0f0a37e4a744f9b5a2ad822a982aba41b38089af3",
+          "path": "presets/kokoro-am-liam/assets/OO_harmonics_mag.f32"
+        },
+        {
+          "hash": "26904db192baf5fc0971fd650f54107ededb88975497fbb9849375ae76dd4102",
+          "path": "presets/kokoro-am-liam/assets/OO_noise_db.f32"
+        },
+        {
+          "hash": "88cce7b051acedaa65081cfac9e701e62b6ed44e0c03d3118e78b43a26fcb56a",
+          "path": "presets/kokoro-am-liam/assets/freq_axis_hz.f32"
+        },
+        {
+          "hash": "51b0832c2ac18d608e4cbd8f50296a3ce54bfd4b22f589aeeac14bbd2f8d635c",
+          "path": "presets/kokoro-am-liam/meta.json"
+        },
+        {
+          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "path": "presets/kokoro-am-liam/voicepreset.json"
+        },
+        {
+          "hash": "171c190f14df0835201e4b80a0e750e5dc6243a095e7d693c57dd9c52a09e8ba",
+          "path": "presets/kokoro-am-onyx/assets/AH_envelope_db.f32"
+        },
+        {
+          "hash": "ec340526393119778b291c9f5db75d6fb70ba724b833a879847d47fe949ae1df",
+          "path": "presets/kokoro-am-onyx/assets/AH_harmonics_mag.f32"
+        },
+        {
+          "hash": "6693fc988acbfe86c383aab21a42db727e4e42928f3d13b105201515d4ac53e2",
+          "path": "presets/kokoro-am-onyx/assets/AH_noise_db.f32"
+        },
+        {
+          "hash": "10722b06cec26d865cab17106019db1c8806076cd80e928da0c438d37be36f3a",
+          "path": "presets/kokoro-am-onyx/assets/EE_envelope_db.f32"
+        },
+        {
+          "hash": "837c150f2e2ed03f95257d0fcac58a38fbb2365456ec25f1c574970cfe67e07c",
+          "path": "presets/kokoro-am-onyx/assets/EE_harmonics_mag.f32"
+        },
+        {
+          "hash": "cc785414881aa4e302a048b97a075c3b462f79004fc55e9a0ac66555e07f6f53",
+          "path": "presets/kokoro-am-onyx/assets/EE_noise_db.f32"
+        },
+        {
+          "hash": "383015806bf1792ce5b719ffd5ba2d47b0e0dbd86b848895ce42b1a779392006",
+          "path": "presets/kokoro-am-onyx/assets/OO_envelope_db.f32"
+        },
+        {
+          "hash": "4c4ca677aa3721efbb57b5f608d63605def9daa7da76b1c0144d762550b1600e",
+          "path": "presets/kokoro-am-onyx/assets/OO_harmonics_mag.f32"
+        },
+        {
+          "hash": "dece354d4e4ed3d3891d16f6fed5e3fe47f247b64db22df2af7e6868c8e4e357",
+          "path": "presets/kokoro-am-onyx/assets/OO_noise_db.f32"
+        },
+        {
+          "hash": "88cce7b051acedaa65081cfac9e701e62b6ed44e0c03d3118e78b43a26fcb56a",
+          "path": "presets/kokoro-am-onyx/assets/freq_axis_hz.f32"
+        },
+        {
+          "hash": "f2094fcf2821a3b0582acbcf58a632e5e0f637cb28c86003b7650e15f8859101",
+          "path": "presets/kokoro-am-onyx/meta.json"
+        },
+        {
+          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "path": "presets/kokoro-am-onyx/voicepreset.json"
+        },
+        {
+          "hash": "29289b31602ac493da861d77612949b1104f5249a6b65efe25ce39414805fcbc",
+          "path": "presets/kokoro-bf-alice/assets/AH_envelope_db.f32"
+        },
+        {
+          "hash": "d578675ab5b8b49184c1c5f6dfcbc73f2cb17787c4dbc264aa209f3c00752bdc",
+          "path": "presets/kokoro-bf-alice/assets/AH_harmonics_mag.f32"
+        },
+        {
+          "hash": "d9e5a801f3a48e5f9d19cd687185c8623b29f4525c285dc8c73fcc3ab3a4587c",
+          "path": "presets/kokoro-bf-alice/assets/AH_noise_db.f32"
+        },
+        {
+          "hash": "d6fc510d67c40062b50217a91206a356cc667661808965cb15b88fc5557f817a",
+          "path": "presets/kokoro-bf-alice/assets/EE_envelope_db.f32"
+        },
+        {
+          "hash": "fc4874c458e1f86f13bbd698cd8eb81a0f568c79a2bc41676f86f0bb311c4556",
+          "path": "presets/kokoro-bf-alice/assets/EE_harmonics_mag.f32"
+        },
+        {
+          "hash": "18c45fa71b139b3bb377f349d62435bc8e9b6bc3636f9198d24b2d75d23833f9",
+          "path": "presets/kokoro-bf-alice/assets/EE_noise_db.f32"
+        },
+        {
+          "hash": "81857b6260d7d72473c1b31ec2fc70be0baa9cfebc1b369fb0c124e8358d2993",
+          "path": "presets/kokoro-bf-alice/assets/OO_envelope_db.f32"
+        },
+        {
+          "hash": "361c41599760ab6e152880e76e5d7745fe86421180682b9f44505c9faf5bc0e6",
+          "path": "presets/kokoro-bf-alice/assets/OO_harmonics_mag.f32"
+        },
+        {
+          "hash": "942ef2d2efba3bbb8c23d22d452f773c893a161a705ea1b203943d0859ca97e3",
+          "path": "presets/kokoro-bf-alice/assets/OO_noise_db.f32"
+        },
+        {
+          "hash": "88cce7b051acedaa65081cfac9e701e62b6ed44e0c03d3118e78b43a26fcb56a",
+          "path": "presets/kokoro-bf-alice/assets/freq_axis_hz.f32"
+        },
+        {
+          "hash": "79b823bd43efab4ebe8052cac867ee039a446ca9ba0d6e663c4653c2cf80fc0e",
+          "path": "presets/kokoro-bf-alice/meta.json"
+        },
+        {
+          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "path": "presets/kokoro-bf-alice/voicepreset.json"
+        },
+        {
+          "hash": "f1032551022478bf0d2d9fac409177cca4be7ba18da945bac7e80ef92bdf4323",
+          "path": "presets/kokoro-bf-emma/assets/AH_envelope_db.f32"
+        },
+        {
+          "hash": "d8eb70e5f3a3e19ce477532be1857fce7fc4874c8dc2ea2379ef5b7bad52c5d5",
+          "path": "presets/kokoro-bf-emma/assets/AH_harmonics_mag.f32"
+        },
+        {
+          "hash": "2a26910cc9dba63fa1a3ec70e01a2d453cc52959342ff5efd53b161d543610ad",
+          "path": "presets/kokoro-bf-emma/assets/AH_noise_db.f32"
+        },
+        {
+          "hash": "29fd778eeabf9cb8bef0161c303023cac3c8a97a9487eb885c5892c8ec92ef40",
+          "path": "presets/kokoro-bf-emma/assets/EE_envelope_db.f32"
+        },
+        {
+          "hash": "750a27b5cb343fa48a42ef6699677e607c742d27beca90f8cf3cdc70c6cd0093",
+          "path": "presets/kokoro-bf-emma/assets/EE_harmonics_mag.f32"
+        },
+        {
+          "hash": "2152f16dfa80e967023e04762e0b00a0d1a9a9da3ddcebd41da61da70b9e2ff1",
+          "path": "presets/kokoro-bf-emma/assets/EE_noise_db.f32"
+        },
+        {
+          "hash": "9fd091c3f1c4d0210972cc1711f6df5833349a862b7da919005507ea9a9e865c",
+          "path": "presets/kokoro-bf-emma/assets/OO_envelope_db.f32"
+        },
+        {
+          "hash": "085425898fdb889d1139c9f3eb7ab81049a50f6e435513dc3b8df66fc7b52d92",
+          "path": "presets/kokoro-bf-emma/assets/OO_harmonics_mag.f32"
+        },
+        {
+          "hash": "68c31b8e496a3f44622ea58b5b38e2902e2cd63b62f4226f96c2df15ef158517",
+          "path": "presets/kokoro-bf-emma/assets/OO_noise_db.f32"
+        },
+        {
+          "hash": "88cce7b051acedaa65081cfac9e701e62b6ed44e0c03d3118e78b43a26fcb56a",
+          "path": "presets/kokoro-bf-emma/assets/freq_axis_hz.f32"
+        },
+        {
+          "hash": "65b2addfcc241f553fe029242c7c87b805674365e36cf08a9d5d53c0ee794c49",
+          "path": "presets/kokoro-bf-emma/meta.json"
+        },
+        {
+          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "path": "presets/kokoro-bf-emma/voicepreset.json"
+        },
+        {
+          "hash": "88d629eb347e62fede6b2d4903e030d177a8a2119bcc15eda10193f8c32c1ddb",
+          "path": "presets/kokoro-bf-isabella/assets/AH_envelope_db.f32"
+        },
+        {
+          "hash": "21d5a5cbf570283f97f0c8404afb897113a083234ffac22037d2945e814f23af",
+          "path": "presets/kokoro-bf-isabella/assets/AH_harmonics_mag.f32"
+        },
+        {
+          "hash": "43b0d0af7b8d6b95c74c073d4366c602fa5d9eb8e0c3da0a3483bdcf87036f2c",
+          "path": "presets/kokoro-bf-isabella/assets/AH_noise_db.f32"
+        },
+        {
+          "hash": "e5e522a3419b77081c5b8386ace8390ebb242c7cba3e8d8c745722acc7c8c440",
+          "path": "presets/kokoro-bf-isabella/assets/EE_envelope_db.f32"
+        },
+        {
+          "hash": "0cdf539b1b94fa4aa68b98110321670da09228bfdd4a3ed4346d97f0c5e7a714",
+          "path": "presets/kokoro-bf-isabella/assets/EE_harmonics_mag.f32"
+        },
+        {
+          "hash": "d18a20af0f08725a9e6a3d81b910e61dda56e3fce5955525ac7f3cc54aa2dc2d",
+          "path": "presets/kokoro-bf-isabella/assets/EE_noise_db.f32"
+        },
+        {
+          "hash": "f404073697ba0c850d3a8fb3cf5bf6cb5df656bdc710d582d2f2bae6b4eb0711",
+          "path": "presets/kokoro-bf-isabella/assets/OO_envelope_db.f32"
+        },
+        {
+          "hash": "f5b530ba55cc389aa18ba9c50310f978d1600788b08349ff57ac97712339603a",
+          "path": "presets/kokoro-bf-isabella/assets/OO_harmonics_mag.f32"
+        },
+        {
+          "hash": "1197727e83893ee8508b8ea3bf3b1bc911af4d896571fe1091e8833e36573b6a",
+          "path": "presets/kokoro-bf-isabella/assets/OO_noise_db.f32"
+        },
+        {
+          "hash": "88cce7b051acedaa65081cfac9e701e62b6ed44e0c03d3118e78b43a26fcb56a",
+          "path": "presets/kokoro-bf-isabella/assets/freq_axis_hz.f32"
+        },
+        {
+          "hash": "4240a54e63aa56e47281f904562eb18bf9a6c0acf49886c06aae2f3c4fa3f831",
+          "path": "presets/kokoro-bf-isabella/meta.json"
+        },
+        {
+          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "path": "presets/kokoro-bf-isabella/voicepreset.json"
+        },
+        {
+          "hash": "2303ea169cc160ebed9e654d769adb450399cb9a4c0dde6609a076da3100d8e8",
+          "path": "presets/kokoro-bm-george/assets/AH_envelope_db.f32"
+        },
+        {
+          "hash": "1dadf52190c17a8b4b4edc2ee55c780514a8395cf462a36129818e01b44b5a9e",
+          "path": "presets/kokoro-bm-george/assets/AH_harmonics_mag.f32"
+        },
+        {
+          "hash": "1c03d62ee4b924bf5b710c8f2d087772ef9232813679e4528686e8b39a28673f",
+          "path": "presets/kokoro-bm-george/assets/AH_noise_db.f32"
+        },
+        {
+          "hash": "335a32b34dffc1eb853ca8ade35fae29da3da2ab46b5072229e001218ed10f70",
+          "path": "presets/kokoro-bm-george/assets/EE_envelope_db.f32"
+        },
+        {
+          "hash": "b7a3b6357d33f88ddbb81eab950e2025583056eb2aa0e958286582562f6a06be",
+          "path": "presets/kokoro-bm-george/assets/EE_harmonics_mag.f32"
+        },
+        {
+          "hash": "b5b69284b6dd79e96a451c07471f561590ec5f8bcf00a7b2291328943c5a599b",
+          "path": "presets/kokoro-bm-george/assets/EE_noise_db.f32"
+        },
+        {
+          "hash": "d1564f81a7e3bf9066e29dd7eca0c50751d926fa9b356ae20e806aaab222fa1a",
+          "path": "presets/kokoro-bm-george/assets/OO_envelope_db.f32"
+        },
+        {
+          "hash": "bccd27ed387eac81ab5b6df25536f6f40ac6f3943295da0f954d34a1ba835c48",
+          "path": "presets/kokoro-bm-george/assets/OO_harmonics_mag.f32"
+        },
+        {
+          "hash": "d237be308f503fde0949500fa5dc2624d4c0f1e616f52f44e2a15e36cbd5829b",
+          "path": "presets/kokoro-bm-george/assets/OO_noise_db.f32"
+        },
+        {
+          "hash": "88cce7b051acedaa65081cfac9e701e62b6ed44e0c03d3118e78b43a26fcb56a",
+          "path": "presets/kokoro-bm-george/assets/freq_axis_hz.f32"
+        },
+        {
+          "hash": "ff935d12c8fe7991a2530c8f5d978d5bc358c7c7dfdd700d34339e2677873601",
+          "path": "presets/kokoro-bm-george/meta.json"
+        },
+        {
+          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "path": "presets/kokoro-bm-george/voicepreset.json"
+        },
+        {
+          "hash": "c0e73e98c8554973ee62dc47dcee0f9823a25c207006c6fd8a1854959fa55e7d",
+          "path": "presets/kokoro-bm-lewis/assets/AH_envelope_db.f32"
+        },
+        {
+          "hash": "21049e2abc4418a26e99557189e03f9c7d9151c5d7eb3131bf424766e2e69d86",
+          "path": "presets/kokoro-bm-lewis/assets/AH_harmonics_mag.f32"
+        },
+        {
+          "hash": "d7b6d2c623af654bbba58140b2e0b3e807935bea110c0c46fd913331b0eba5d6",
+          "path": "presets/kokoro-bm-lewis/assets/AH_noise_db.f32"
+        },
+        {
+          "hash": "0ec3d39cbaeeaa376b14119f21ed53f9a12eb6015fda7cc87db64427021c9cd2",
+          "path": "presets/kokoro-bm-lewis/assets/EE_envelope_db.f32"
+        },
+        {
+          "hash": "78462fd1305ad45c08a06ce5ad77847b0cd64ac4f098e357f304998cb59899a4",
+          "path": "presets/kokoro-bm-lewis/assets/EE_harmonics_mag.f32"
+        },
+        {
+          "hash": "f0fe70f760f38495a367928b739b593a7dfb305a02443859d908f4732e3e782f",
+          "path": "presets/kokoro-bm-lewis/assets/EE_noise_db.f32"
+        },
+        {
+          "hash": "962ef5b27fc34e2f1bc46e8d9ef2f6090ad1bddd387a1ebf7ab64c3ff0fd397d",
+          "path": "presets/kokoro-bm-lewis/assets/OO_envelope_db.f32"
+        },
+        {
+          "hash": "ef1650cf9cab21c0e417a19f9f7b935b785adb1fc8728724683201ef94a5d987",
+          "path": "presets/kokoro-bm-lewis/assets/OO_harmonics_mag.f32"
+        },
+        {
+          "hash": "a5323367ac98fd85990ff6ef1379639e7ba2861f782ba8e8bcbcdc06918c249a",
+          "path": "presets/kokoro-bm-lewis/assets/OO_noise_db.f32"
+        },
+        {
+          "hash": "88cce7b051acedaa65081cfac9e701e62b6ed44e0c03d3118e78b43a26fcb56a",
+          "path": "presets/kokoro-bm-lewis/assets/freq_axis_hz.f32"
+        },
+        {
+          "hash": "6b65200c5a12788a47c41e37604912d3507e62b1f2aa1700cf0b1cc9fecbaf3f",
+          "path": "presets/kokoro-bm-lewis/meta.json"
+        },
+        {
+          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "path": "presets/kokoro-bm-lewis/voicepreset.json"
+        }
+      ],
+      "globs": [
+        "presets/**"
+      ],
+      "importConfidence": "full",
+      "name": "presets",
+      "origin": "authored",
+      "role": "config",
+      "testedBy": 0,
+      "unresolvedSites": 0
+    },
+    {
+      "dynamicReads": 0,
+      "dynamicSpawns": 0,
+      "dynamicSpawnsInTests": 0,
+      "dynamicWrites": 0,
+      "entryPoints": [],
+      "externals": 0,
+      "files": [
+        {
+          "hash": "a56dfc0eb0514484e70bb3e9a68a13fe7adbb5a4aa6d1d746fc91196bc68f8d0",
+          "path": "ref/ah_sustain.wav"
+        },
+        {
+          "hash": "15dec92cf5dac92aa8238a471ab5e378144823b810410cb4dcbd8577b88aa6af",
+          "path": "ref/out/ah_resynth.wav"
+        },
+        {
+          "hash": "6985c3af928e3cdfb1aa99b026466234b6f76493010194e4ed0577e15f07d4d0",
+          "path": "ref/out/ah_resynth_telemetry.json"
+        },
+        {
+          "hash": "70014fa15240241b16a31132ed2a26f49e9c1160bede5de15475f385b2c0d837",
+          "path": "ref/out/morph_render.wav"
+        },
+        {
+          "hash": "31e94b82dbf81666d5062462c884ee199d000c137f1dd38d23620b8dd256c46e",
+          "path": "ref/out/preset/assets/AH_envelope_db.f32"
+        },
+        {
+          "hash": "4ffc659728ad2df6fd0a1646009e25e91ed4c2279f1534c0a53c75dd80112afe",
+          "path": "ref/out/preset/assets/AH_harmonics_mag.f32"
+        },
+        {
+          "hash": "99fb92aab56bdcb2be60893a9f24957f71d7a130cc549acd6c24ec47f4fb2898",
+          "path": "ref/out/preset/assets/AH_noise_db.f32"
+        },
+        {
+          "hash": "88cce7b051acedaa65081cfac9e701e62b6ed44e0c03d3118e78b43a26fcb56a",
+          "path": "ref/out/preset/assets/freq_axis_hz.f32"
+        },
+        {
+          "hash": "6a2658862f8404835c8d8723945e75f0ae9ba316a0f894506548dc50fac999f3",
+          "path": "ref/out/preset/voicepreset.json"
+        },
+        {
+          "hash": "ba6ef9cfa7876531c77e6dbc61d9997a92a8d15ae7c5670b12e4ec3518a4980a",
+          "path": "ref/out/score_render.wav"
+        }
+      ],
+      "globs": [
+        "ref/**"
+      ],
+      "importConfidence": "full",
+      "name": "ref",
+      "origin": "mixed",
+      "role": "config",
+      "testedBy": 0,
+      "unresolvedSites": 0
+    },
+    {
+      "dynamicReads": 0,
+      "dynamicSpawns": 0,
+      "dynamicSpawnsInTests": 0,
+      "dynamicWrites": 0,
+      "entryPoints": [],
+      "externals": 0,
+      "files": [
+        {
+          "hash": "feb38ee6afe1361501755762aa35af5278994bab7bdb89b446ab4183e9ae62cd",
+          "path": ".dockerignore"
+        },
+        {
+          "hash": "a9d2fd635c8a477e1c2a5f8b04b3007839a93ef71b71ea32b6af706915b982f7",
+          "path": ".gitignore"
+        },
+        {
+          "hash": "8a946a777e5aa77974c726b32f37bdab010523c663d645e56fba7abaa0c9015c",
+          "path": "CHANGELOG.md"
+        },
+        {
+          "hash": "8db4516a3c938a351b99f3ef1a19f755e2d5e352748fda9ab64d0693a3519a28",
+          "path": "CODE_OF_CONDUCT.md"
+        },
+        {
+          "hash": "2ef3f8cc6b6e643d7bc9cae5b1b7e234acac1f4dcd6e6f8c79d69a5b4fc471fb",
+          "path": "CONTRIBUTING.md"
+        },
+        {
+          "hash": "21703907858e206025f628a36578ff2299bc28432ee3ede5d9ae5ee424b6e428",
+          "path": "Dockerfile"
+        },
+        {
+          "hash": "334aa3828b47ec09ddd9e00f2225ea8f89ae5ad699796f00154c84eaa93634ac",
+          "path": "LICENSE"
+        },
+        {
+          "hash": "e9af75ad4a11e507f3423cf03ea914b594824dac8b2013dc4e971949dbf7ae11",
+          "path": "README.es.md"
+        },
+        {
+          "hash": "d2c3309705eba7d5a50712606198de3fac73da9282e58da14e6506962e9cfa80",
+          "path": "README.fr.md"
+        },
+        {
+          "hash": "06dc79866bd1329351968490cd8a70fadc38a9e8ccb67243ddda76b1f1d9cf1b",
+          "path": "README.hi.md"
+        },
+        {
+          "hash": "21ea381428ef6217b2d3c79b61b9cb76140612705159b99d2396cb052805c44a",
+          "path": "README.it.md"
+        },
+        {
+          "hash": "1e20f0ae11b2ac315a30fde3d7211bddb67bb87289c35532ba498fbe2d2eecaa",
+          "path": "README.ja.md"
+        },
+        {
+          "hash": "3debfc689fdf5df4a808386a30548a0ee08c18fdc52967b44b9648e850db97df",
+          "path": "README.md"
+        },
+        {
+          "hash": "d11f9d2ec35c5d5ded8817f05693b8d7df4778c5f8a44ca2c0ec55018d601aeb",
+          "path": "README.pt-BR.md"
+        },
+        {
+          "hash": "78f34798f5ce6031c66193ee00b8d74203d3557e434d8b30581dd480e28a6f47",
+          "path": "README.zh.md"
+        },
+        {
+          "hash": "02acdc2e3fcf3f321b39edb687a84422cd8b2da06aa6ac886e64de69eff6822f",
+          "path": "SCORECARD.md"
+        },
+        {
+          "hash": "854fcdc3141c501b613b2d612443e5ed944d5a5f526198be68b61e0cb9be6cf6",
+          "path": "SECURITY.md"
+        },
+        {
+          "hash": "d6537e2172be2999751faaa3f9e41da7f815b4288b348227b0f3d75c6cbf2b70",
+          "path": "SHIP_GATE.md"
+        },
+        {
+          "hash": "cc833fb837affd48a5f6e8c499210110c73cfa37ba0a383103b761978cd24408",
+          "path": "fly.toml"
+        },
+        {
+          "hash": "8a429d8597e4a295f42464b5a4c646d1752ce85c55054028da0bdeea262183ed",
+          "path": "out-poly.wav"
+        },
+        {
+          "hash": "14d947863f6b3f77d4ddbce72c9cc6fb0578ec895c270b31c501d807a8838406",
+          "path": "out.wav"
+        },
+        {
+          "hash": "d55867cdd0543266c3e592c0932f14f0f41b31694c6e93007783996e3f917be9",
+          "path": "package-lock.json"
+        },
+        {
+          "hash": "eb66c135c064b7d2a08574f42ae052635e3b9379a17a8cb6abb34d7a11af6e3e",
+          "path": "package.json"
+        },
+        {
+          "hash": "4d91e0c385f07e0b7ce2f5d6ca4865fb7bd25ebe72319f9cf49cdd5ad3cd44d4",
+          "path": "passport.json"
+        },
+        {
+          "hash": "d46122bdaa786e4b603313b034e3cc562b961d3d2c6d134a8835af91d298bb16",
+          "path": "playwright.config.ts"
+        },
+        {
+          "hash": "6ef9fb490afd6e7a19db57d85b300678b1fd7839e0d978be383636fad33495a4",
+          "path": "render.yaml"
+        },
+        {
+          "hash": "d1fc250bb6a3449a8823fb23d2df41bb771c4c492a747f332ba490ff5877440b",
+          "path": "test-score-lyrics.json"
+        },
+        {
+          "hash": "a741c227d595780651b11f5f0f28999f7ef32ab040d5b46a8eaa0901e80b98ad",
+          "path": "test-score-morph.json"
+        },
+        {
+          "hash": "c4e338029dab658a549534e2ee4e4413a8fa527f03f1c67e4723dfc143de6750",
+          "path": "test-score-poly.json"
+        },
+        {
+          "hash": "d9ff7d8717c5e85e359f16b80f6815e5ba31ee0cdc653bd7c2211396c232bf2f",
+          "path": "test-score.json"
+        },
+        {
+          "hash": "209b008aa8fe8d1f41136256ce6c7f896401b9f816faa962aeca797498b7f7f1",
+          "path": "tsconfig.json"
+        },
+        {
+          "hash": "fdb393c3336ebff4a8603f38e34573d63b1b412c4f1745aa55dee57eb98fb1b3",
+          "path": "vitest.config.ts"
+        }
+      ],
+      "globs": [
+        "*"
+      ],
+      "importConfidence": "full",
+      "name": "root",
+      "origin": "authored",
+      "role": "config",
+      "testedBy": 0,
+      "unresolvedSites": 0
+    },
+    {
+      "dynamicReads": 1,
+      "dynamicSpawns": 0,
+      "dynamicSpawnsInTests": 0,
+      "dynamicWrites": 0,
+      "entryPoints": [],
+      "externals": 0,
+      "files": [
+        {
+          "entry": "flattenRun",
+          "entryRule": 1,
+          "hash": "6941c0a1524e791ff8c06f1992eb3cda495ae5de14fdb0eaba2c0a10aa69075a",
+          "path": "scripts/bench-gate.mjs",
+          "sequences": []
+        },
+        {
+          "hash": "9e5ae7cf73a25910396d26715cce285ac659cece6738db5c2f2decf4d12e7de0",
+          "path": "scripts/generate-dummy-preset.ts"
+        },
+        {
+          "hash": "18c390031c7b826650593d921f8b0510e547a788267bd6fbf85c35fc0cac94a6",
+          "path": "scripts/generate-ref-wav.ts"
+        },
+        {
+          "hash": "cf3bbe9a599fa4409f74958625968d1a56c3c6371e6baa619636ac165d090eac",
+          "path": "scripts/kokoro/build-voice.sh"
+        },
+        {
+          "exports": [
+            "compute_f0_stats",
+            "find_stable_region",
+            "generate_vowel",
+            "main",
+            "yin_f0"
+          ],
+          "hash": "00d11e87881b458862c452b617a45e3f7c0360ee02d2747cae510a6b263606f8",
+          "path": "scripts/kokoro/generate_vowels.py"
+        },
+        {
+          "hash": "d00c1e07336360b235369e7521690f102dccca7ceaaa0ebbd8c92af0d5002528",
+          "importsFiles": [
+            "src/server/services/renderScoreToWav.ts"
+          ],
+          "path": "scripts/test-consonants.ts"
+        },
+        {
+          "hash": "2bfb1160cca52900a3c5fb7a60e84c130d48d617f521fb56b432b64f75a0ee8a",
+          "importsFiles": [
+            "src/phonemize/index.ts",
+            "src/types/score.ts"
+          ],
+          "path": "scripts/test-g2p.ts"
+        },
+        {
+          "hash": "6bc9aeb4e6ac46107ef2f0b7e6d24240b5422c996a8f0fdb67b63ef97a71b2ff",
+          "path": "scripts/test-jam-collaboration.ts"
+        },
+        {
+          "hash": "990e33b39850ba1edbd62d85c2ffe8603426512039710723ce13c3ee92bd884e",
+          "path": "scripts/test-jam-recording.ts"
+        },
+        {
+          "hash": "ca578abc8966dcdc0a152a91c23bc579b9e656fd83ac5f1f774124afcc57cd69",
+          "path": "scripts/test-jam-session.ts"
+        },
+        {
+          "hash": "f0b2d2c0fefd1f5540a760fdb336256683aa49e9258d688c92f994642d6a6a3f",
+          "importsFiles": [
+            "src/phonemize/index.ts",
+            "src/server/services/renderScoreToWav.ts"
+          ],
+          "path": "scripts/test-lyrics-golden.ts"
+        },
+        {
+          "hash": "0e8aea30ea70b03c7938784a4471353b02da752d43f142ca3b022f224224f792",
+          "importsFiles": [
+            "src/server/services/renderScoreToWav.ts"
+          ],
+          "path": "scripts/test-multi-timbre.ts"
+        },
+        {
+          "hash": "ef5f56b631af7422327dc1743738da14117f3abf4c8c29888849d33df92ebbe0",
+          "importsFiles": [
+            "src/server/services/renderScoreToWav.ts"
+          ],
+          "path": "scripts/test-noise-tail.ts"
+        },
+        {
+          "hash": "8deea5a85402b797b7ca4fcb492b60ceab4ba119f339d50112e900d1cd6dae51",
+          "importsFiles": [
+            "src/engine/StreamingVocalSynthEngine.ts",
+            "src/preset/loader.ts",
+            "src/types/score.ts"
+          ],
+          "path": "scripts/test-score-render.ts"
+        },
+        {
+          "hash": "5bf77466aabd18eb2e7c0c96b50fd0a85381b91e99c6e3aab1eb4a2f818ff9e2",
+          "path": "scripts/verify.sh"
+        }
+      ],
+      "globs": [
+        "scripts/**"
+      ],
+      "importConfidence": "full",
+      "name": "scripts",
+      "origin": "authored",
+      "outsideWrites": 5,
+      "role": "code",
+      "testedBy": 0,
+      "unresolvedSites": 0
+    },
+    {
+      "dynamicReads": 0,
+      "dynamicSpawns": 0,
+      "dynamicSpawnsInTests": 0,
+      "dynamicWrites": 0,
+      "entryPoints": [],
+      "externals": 0,
+      "files": [
+        {
+          "hash": "eece744cedd91d88f7835db98abff8dab923c531e21d242880240fb8184f9d66",
+          "path": "site/astro.config.mjs"
+        },
+        {
+          "hash": "b5578baf42cab82e5e7b451b6992cb929aeb6ff8d02d8e11ab690e6f67fea144",
+          "path": "site/package-lock.json"
+        },
+        {
+          "hash": "cff923d88f356795747a843362ca300b43d09c5715e6356f904b4d5fa06a7fae",
+          "path": "site/package.json"
+        },
+        {
+          "hash": "d7d5956d1e9f91152eb7a9b83a84b20b2881ec482c2b3ab15f3e1786c4183718",
+          "path": "site/src/content.config.ts"
+        },
+        {
+          "hash": "777b02251d5ec69e8da10f6510c47884d1ee1372ea270449efd61d492b0efaa6",
+          "path": "site/src/content/docs/handbook/architecture.md"
+        },
+        {
+          "hash": "c569939fcca7f8ffa62dc0d8cefdfc25d60a61b060975756d6d57d1df7a902d3",
+          "path": "site/src/content/docs/handbook/beginners.md"
+        },
+        {
+          "hash": "876b6a5d8df863596dd984259966c98879216f7c882d3eb6c1814f319efb41e9",
+          "path": "site/src/content/docs/handbook/cli-reference.md"
+        },
+        {
+          "hash": "37816168c192f306b7d6a3dc43f974bf9b02ef6f47e4286d242eca2d8dc83354",
+          "path": "site/src/content/docs/handbook/cockpit-and-jams.md"
+        },
+        {
+          "hash": "a8fdf04744af4bd12dfe96168801324e23f0602e3788c0e9e6d8a8b1b3ebac5e",
+          "path": "site/src/content/docs/handbook/deployment.md"
+        },
+        {
+          "hash": "626a55ab883836cd32b46e1358429cae8b2f6c4420e7ae5f6665c7fb498bd770",
+          "path": "site/src/content/docs/handbook/getting-started.md"
+        },
+        {
+          "hash": "8d131ab31123d66b05462dece0d4e2df60d0a99eeb20af95134cec2ce20f6847",
+          "path": "site/src/content/docs/handbook/index.md"
+        },
+        {
+          "hash": "7e763e6d50cf15fbad39665b40aefd3c8e8f143d9f1976972cf2e9c93d3e504f",
+          "path": "site/src/content/docs/handbook/reference.md"
+        },
+        {
+          "hash": "8a16cc5a86e6466578080cc61f165dcc8dd9654158763dfbfe7f10325260d233",
+          "path": "site/src/content/docs/handbook/score-format.md"
+        },
+        {
+          "hash": "3f499adb36e456818b682d1777a7d8f09456f2aecf37b7bd10fe4a8455bc224d",
+          "path": "site/src/content/docs/handbook/troubleshooting.md"
+        },
+        {
+          "hash": "5620988e5b4af1f0997946b4a33bf85416941b6029b494bc026748e5907d8fdd",
+          "path": "site/src/content/docs/handbook/voice-presets.md"
+        },
+        {
+          "hash": "a699ad78a6d27d6864ccfe4c3a4a01993aca28ecb4a3d20893f37db9f9b1a522",
+          "path": "site/src/pages/index.astro"
+        },
+        {
+          "hash": "4db41e1417035581609948be217b2f75062f220c971a9ed01e692ae86ce33f6d",
+          "path": "site/src/site-config.ts"
+        },
+        {
+          "hash": "5995279a40a9a63426a93feec129006b261cc7200426a398914d0317722ef19b",
+          "path": "site/src/styles/global.css"
+        },
+        {
+          "hash": "b6174dbfd9b109ed7ddd6709db294965d492d472aa384850478e91929394de12",
+          "path": "site/src/styles/starlight-custom.css"
+        },
+        {
+          "hash": "61fc24492db9aef7ec38eb91cfeebaef96155014bb5f22648fd8ed2327c6cae2",
+          "path": "site/tsconfig.json"
+        }
+      ],
+      "globs": [
+        "site/**"
+      ],
+      "importConfidence": "full",
+      "name": "site",
+      "origin": "authored",
+      "role": "site",
+      "testedBy": 0,
+      "unresolvedSites": 0
+    },
+    {
+      "dynamicReads": 8,
+      "dynamicSpawns": 0,
+      "dynamicSpawnsInTests": 0,
+      "dynamicWrites": 4,
+      "entryPoints": [
+        "src/cli/analyze.ts",
+        "src/cli/build-preset.ts",
+        "src/cli/compare.ts",
+        "src/cli/gen-vowel-wav.ts",
+        "src/cli/inspect.ts",
+        "src/cli/phonemize.ts",
+        "src/cli/play-score.ts",
+        "src/cli/resynth.ts",
+        "src/cli/score-from-midi.ts",
+        "src/index.ts",
+        "src/mcp/server.ts"
+      ],
+      "externals": 0,
+      "files": [
+        {
+          "exports": [
+            "parseCommonFlags",
+            "parseFiniteNumber",
+            "runCli"
+          ],
+          "hash": "6570efaa89d6dfb918b5d6356bcc8081f94b64e488d105c2cbec6bccfbf11d7e",
+          "path": "src/cli/_runner.ts"
+        },
+        {
+          "hash": "09f89ef50c6c79187fc2c3f2097e02e1bd67d6b6022bee3535af4341195570a0",
+          "importsFiles": [
+            "src/cli/_runner.ts",
+            "src/dsp/fft.ts",
+            "src/dsp/pitch.ts",
+            "src/preset/loader.ts"
+          ],
+          "path": "src/cli/analyze.ts",
+          "sequences": [
+            {
+              "calls": [
+                {
+                  "line": 40,
+                  "name": "parseCommonFlags",
+                  "target": {
+                    "file": "src/cli/_runner.ts"
+                  }
+                },
+                {
+                  "line": 88,
+                  "name": "findPitchYin",
+                  "target": {
+                    "file": "src/dsp/pitch.ts"
+                  }
+                },
+                {
+                  "line": 91,
+                  "name": "applyHannWindow",
+                  "target": {
+                    "file": "src/dsp/fft.ts"
+                  }
+                },
+                {
+                  "line": 94,
+                  "name": "fft",
+                  "target": {
+                    "file": "src/dsp/fft.ts"
+                  }
+                },
+                {
+                  "line": 165,
+                  "name": "computeAssetsHash",
+                  "target": {
+                    "file": "src/preset/loader.ts"
+                  }
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "main"
+            }
+          ]
+        },
+        {
+          "hash": "335c01d3edce93358f78eb3b42f5b93f23ca8a9cc2154b81ea31b39b76c61a9b",
+          "importsFiles": [
+            "src/cli/_runner.ts",
+            "src/dsp/fft.ts",
+            "src/dsp/pitch.ts",
+            "src/preset/loader.ts"
+          ],
+          "path": "src/cli/build-preset.ts",
+          "sequences": [
+            {
+              "calls": [
+                {
+                  "line": 71,
+                  "name": "findPitchYin",
+                  "target": {
+                    "file": "src/dsp/pitch.ts"
+                  }
+                },
+                {
+                  "line": 73,
+                  "name": "applyHannWindow",
+                  "target": {
+                    "file": "src/dsp/fft.ts"
+                  }
+                },
+                {
+                  "line": 76,
+                  "name": "fft",
+                  "target": {
+                    "file": "src/dsp/fft.ts"
+                  }
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "analyzeWav"
+            },
+            {
+              "calls": [
+                {
+                  "line": 71,
+                  "name": "findPitchYin",
+                  "target": {
+                    "file": "src/dsp/pitch.ts"
+                  },
+                  "via": "analyzeWav"
+                },
+                {
+                  "line": 73,
+                  "name": "applyHannWindow",
+                  "target": {
+                    "file": "src/dsp/fft.ts"
+                  },
+                  "via": "analyzeWav"
+                },
+                {
+                  "line": 76,
+                  "name": "fft",
+                  "target": {
+                    "file": "src/dsp/fft.ts"
+                  },
+                  "via": "analyzeWav"
+                },
+                {
+                  "line": 241,
+                  "name": "computeAssetsHash",
+                  "target": {
+                    "file": "src/preset/loader.ts"
+                  }
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "main"
+            }
+          ]
+        },
+        {
+          "hash": "ca1cff0a9078015af25a9d066a9fccbaead431b7a37f50fb6818da3145408918",
+          "importsFiles": [
+            "src/cli/_runner.ts",
+            "src/dsp/fft.ts",
+            "src/dsp/pitch.ts"
+          ],
+          "path": "src/cli/compare.ts",
+          "sequences": [
+            {
+              "calls": [
+                {
+                  "line": 47,
+                  "name": "parseCommonFlags",
+                  "target": {
+                    "file": "src/cli/_runner.ts"
+                  }
+                },
+                {
+                  "line": 120,
+                  "name": "subarray",
+                  "target": null,
+                  "via": "getCenterFrame"
+                },
+                {
+                  "line": 130,
+                  "name": "applyHannWindow",
+                  "target": {
+                    "file": "src/dsp/fft.ts"
+                  },
+                  "via": "getSpectrum"
+                },
+                {
+                  "line": 133,
+                  "name": "fft",
+                  "target": {
+                    "file": "src/dsp/fft.ts"
+                  },
+                  "via": "getSpectrum"
+                },
+                {
+                  "line": 149,
+                  "name": "findPitchYin",
+                  "target": {
+                    "file": "src/dsp/pitch.ts"
+                  }
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "main"
+            }
+          ]
+        },
+        {
+          "hash": "c5854bf2e88a69ef11c51e83339e5f823afc6c59046e462213fff402c3905997",
+          "importsFiles": [
+            "src/cli/_runner.ts"
+          ],
+          "path": "src/cli/gen-vowel-wav.ts"
+        },
+        {
+          "hash": "ce454167ddb87a0757046a26e66cb6d417da67ff7aacbffef6b2102c412f1d75",
+          "importsFiles": [
+            "src/cli/_runner.ts",
+            "src/preset/loader.ts"
+          ],
+          "path": "src/cli/inspect.ts",
+          "sequences": [
+            {
+              "calls": [
+                {
+                  "line": 36,
+                  "name": "parseCommonFlags",
+                  "target": {
+                    "file": "src/cli/_runner.ts"
+                  }
+                },
+                {
+                  "line": 50,
+                  "name": "loadVoicePreset",
+                  "target": {
+                    "file": "src/preset/loader.ts"
+                  }
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "main"
+            }
+          ]
+        },
+        {
+          "hash": "d9f09e382097401d987b4c57dfe070d5e06e4dd50ae89e8f06b0ddf71d4e45a3",
+          "importsFiles": [
+            "src/cli/_runner.ts",
+            "src/phonemize/index.ts",
+            "src/types/score.ts"
+          ],
+          "path": "src/cli/phonemize.ts",
+          "sequences": [
+            {
+              "calls": [
+                {
+                  "line": 83,
+                  "name": "parseCommonFlags",
+                  "target": {
+                    "file": "src/cli/_runner.ts"
+                  }
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "parseArgs"
+            },
+            {
+              "calls": [
+                {
+                  "line": 83,
+                  "name": "parseCommonFlags",
+                  "target": {
+                    "file": "src/cli/_runner.ts"
+                  },
+                  "via": "parseArgs"
+                },
+                {
+                  "branch": "parsed.scorePath",
+                  "line": 153,
+                  "name": "parseVocalScore",
+                  "target": {
+                    "file": "src/types/score.ts"
+                  }
+                },
+                {
+                  "branch": "parsed.scorePath",
+                  "line": 161,
+                  "name": "phonemizeLyrics",
+                  "target": {
+                    "file": "src/phonemize/index.ts"
+                  }
+                },
+                {
+                  "line": 194,
+                  "name": "textToPhonemes",
+                  "target": {
+                    "file": "src/phonemize/index.ts"
+                  }
+                },
+                {
+                  "line": 200,
+                  "name": "phonemizeLyrics",
+                  "target": {
+                    "file": "src/phonemize/index.ts"
+                  }
+                },
+                {
+                  "line": 214,
+                  "name": "syllabify",
+                  "target": {
+                    "file": "src/phonemize/index.ts"
+                  }
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "main"
+            }
+          ]
+        },
+        {
+          "hash": "cf638a5f85e9e4d3423c6cc70425a175f42ddb6692e57fe04fb2e1a29e3263a4",
+          "importsFiles": [
+            "src/cli/_runner.ts",
+            "src/engine/StreamingVocalSynthEngine.ts",
+            "src/preset/loader.ts",
+            "src/types/score.ts"
+          ],
+          "path": "src/cli/play-score.ts",
+          "sequences": [
+            {
+              "calls": [
+                {
+                  "line": 42,
+                  "name": "parseCommonFlags",
+                  "target": {
+                    "file": "src/cli/_runner.ts"
+                  }
+                },
+                {
+                  "line": 57,
+                  "name": "loadVoicePreset",
+                  "target": {
+                    "file": "src/preset/loader.ts"
+                  }
+                },
+                {
+                  "line": 64,
+                  "name": "parseVocalScore",
+                  "target": {
+                    "file": "src/types/score.ts"
+                  }
+                },
+                {
+                  "line": 110,
+                  "name": "render",
+                  "receiver": "StreamingVocalSynthEngine",
+                  "target": {
+                    "file": "src/engine/StreamingVocalSynthEngine.ts"
+                  }
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "main"
+            }
+          ]
+        },
+        {
+          "hash": "f1709b5a56c35d62996b0e4a2445a7f2e455b3ec64e74097c7a9fd35e943bd56",
+          "importsFiles": [
+            "src/cli/_runner.ts",
+            "src/engine/StreamingVocalSynthEngine.ts",
+            "src/preset/loader.ts"
+          ],
+          "path": "src/cli/realtime-demo.ts"
+        },
+        {
+          "hash": "74d18c3874e9e6465c28b829cf1a9dde986a8eda73506227e5736e694c623d62",
+          "importsFiles": [
+            "src/cli/_runner.ts",
+            "src/preset/loader.ts"
+          ],
+          "path": "src/cli/resynth.ts",
+          "sequences": [
+            {
+              "calls": [
+                {
+                  "line": 73,
+                  "name": "parseFiniteNumber",
+                  "target": {
+                    "file": "src/cli/_runner.ts"
+                  }
+                },
+                {
+                  "line": 84,
+                  "name": "loadVoicePreset",
+                  "target": {
+                    "file": "src/preset/loader.ts"
+                  }
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "main"
+            }
+          ]
+        },
+        {
+          "hash": "1c89f6f70c674fbe2005c983aa25bcc6bc085d9f4b7a92a0c49744768cff4641",
+          "importsFiles": [
+            "src/cli/_runner.ts",
+            "src/types/score.ts"
+          ],
+          "path": "src/cli/score-from-midi.ts",
+          "sequences": [
+            {
+              "calls": [
+                {
+                  "line": 107,
+                  "name": "parseCommonFlags",
+                  "target": {
+                    "file": "src/cli/_runner.ts"
+                  }
+                },
+                {
+                  "line": 117,
+                  "name": "parseFiniteNumber",
+                  "target": {
+                    "file": "src/cli/_runner.ts"
+                  }
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "parseArgs"
+            },
+            {
+              "calls": [
+                {
+                  "line": 107,
+                  "name": "parseCommonFlags",
+                  "target": {
+                    "file": "src/cli/_runner.ts"
+                  },
+                  "via": "parseArgs"
+                },
+                {
+                  "line": 117,
+                  "name": "parseFiniteNumber",
+                  "target": {
+                    "file": "src/cli/_runner.ts"
+                  },
+                  "via": "parseArgs"
+                },
+                {
+                  "line": 320,
+                  "name": "parseVocalScore",
+                  "target": {
+                    "file": "src/types/score.ts"
+                  }
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "main"
+            }
+          ]
+        },
+        {
+          "entry": "fft",
+          "entryRule": 3,
+          "exports": [
+            "applyHannWindow",
+            "fft",
+            "ifft"
+          ],
+          "hash": "a3d7eb46cee6cd6aa0647dbd7806c556ca054893180412c6204b7bf9df6300db",
+          "path": "src/dsp/fft.ts",
+          "sequences": []
+        },
+        {
+          "exports": [
+            "findPitchYin"
+          ],
+          "hash": "0f6db48876f26974cf687b3c01594cb0208de2e2206bc570fb8af67a6ef871a6",
+          "path": "src/dsp/pitch.ts"
+        },
+        {
+          "hash": "1b1fd08edc216cc45159c5ca01c355c04ef50ebd8e6e8e16c5b44c78d5a35817",
+          "importsFiles": [
+            "src/engine/curves.ts",
+            "src/engine/renderer.ts",
+            "src/preset/schema.ts"
+          ],
+          "path": "src/engine/LiveSynthEngine.ts"
+        },
+        {
+          "hash": "28a23375411565e6fa5c95dfc659bb89bc6ee9821201039843c1062bbcc76288",
+          "importsFiles": [
+            "src/engine/consonantProfiles.ts",
+            "src/engine/curves.ts",
+            "src/engine/renderer.ts",
+            "src/phonemize/arpabet.ts",
+            "src/preset/schema.ts",
+            "src/types/score.ts"
+          ],
+          "path": "src/engine/StreamingVocalSynthEngine.ts"
+        },
+        {
+          "exports": [
+            "consonantEnvelope",
+            "getConsonantProfile",
+            "isKnownConsonantKind"
+          ],
+          "hash": "2be8d7bd895af782b1e18222bf5bd53fdab5136d6bc2ce7b8a5254eba6ee20c1",
+          "path": "src/engine/consonantProfiles.ts"
+        },
+        {
+          "exports": [
+            "calculateAdsr",
+            "calculateVibrato",
+            "centsToRatio",
+            "dbToLinear",
+            "fastSin",
+            "hzToMidi",
+            "interpAutomation",
+            "interpLinear",
+            "midiToHz",
+            "xorshift32"
+          ],
+          "hash": "f435f9cbfbaccefb025e9a2ad76494948ae55fc8ef58932dedcc075d2849e55d",
+          "importsFiles": [
+            "src/types/score.ts"
+          ],
+          "path": "src/engine/curves.ts"
+        },
+        {
+          "hash": "179dc489d8c471593aa2b285a39592456077df3a1f802ed3e9eb7522e58dc514",
+          "importsFiles": [
+            "src/engine/curves.ts",
+            "src/preset/schema.ts"
+          ],
+          "path": "src/engine/renderer.ts"
+        },
+        {
+          "hash": "fa2bc694ddaea87e658f8f583608a1dec0afe26ebf1862c2b842938d269e12f3",
+          "importsFiles": [
+            "src/engine/LiveSynthEngine.ts",
+            "src/engine/StreamingVocalSynthEngine.ts",
+            "src/engine/consonantProfiles.ts",
+            "src/engine/curves.ts",
+            "src/engine/renderer.ts",
+            "src/preset/loader.ts",
+            "src/preset/schema.ts",
+            "src/types/score.ts",
+            "src/types/scoreSchema.ts"
+          ],
+          "path": "src/index.ts"
+        },
+        {
+          "entry": "main",
+          "entryRule": 1,
+          "hash": "eb506e402b5f8e09e0725af14e002faa16824dcb6672388b6af8a05827e26494",
+          "importsFiles": [
+            "src/phonemize/index.ts",
+            "src/preset/loader.ts",
+            "src/server/services/renderScoreToWav.ts",
+            "src/types/score.ts"
+          ],
+          "path": "src/mcp/server.ts",
+          "sequences": []
+        },
+        {
+          "exports": [
+            "getTimbreHint",
+            "getVowelBlendWeights",
+            "parsePhoneme",
+            "parsePronunciation",
+            "stripStress"
+          ],
+          "hash": "9a018f253ee28d619be6679e958986d9c8bd041d46d1c611e1398dff8ee1c6fd",
+          "path": "src/phonemize/arpabet.ts"
+        },
+        {
+          "exports": [
+            "fallbackG2P",
+            "lookupWord",
+            "textToPhonemes",
+            "tokenizeLyrics",
+            "wordToPhonemes"
+          ],
+          "hash": "eda80870d4d62f46e2a66382e963659847e599db7a4afdfb46ec71ce4ad92989",
+          "importsFiles": [
+            "src/phonemize/arpabet.ts"
+          ],
+          "path": "src/phonemize/g2p.ts"
+        },
+        {
+          "entry": "phonemizeLyrics",
+          "entryRule": 4,
+          "exports": [
+            "phonemizeLyrics"
+          ],
+          "hash": "b8d84400939cb5a91f2f8497aae7c79132732c419f072726f9d9f8e6a8d29a68",
+          "importsFiles": [
+            "src/phonemize/arpabet.ts",
+            "src/phonemize/g2p.ts",
+            "src/phonemize/syllabify.ts",
+            "src/types/score.ts"
+          ],
+          "path": "src/phonemize/index.ts",
+          "sequences": [
+            {
+              "calls": [
+                {
+                  "line": 75,
+                  "name": "textToPhonemes",
+                  "target": {
+                    "file": "src/phonemize/g2p.ts"
+                  }
+                },
+                {
+                  "line": 100,
+                  "name": "syllabify",
+                  "target": {
+                    "file": "src/phonemize/syllabify.ts"
+                  }
+                },
+                {
+                  "line": 165,
+                  "name": "getTimbreHint",
+                  "target": {
+                    "file": "src/phonemize/arpabet.ts"
+                  },
+                  "via": "distributeSyllable"
+                }
+              ],
+              "exported": true,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "phonemizeLyrics"
+            },
+            {
+              "calls": [
+                {
+                  "line": 165,
+                  "name": "getTimbreHint",
+                  "target": {
+                    "file": "src/phonemize/arpabet.ts"
+                  }
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "distributeSyllable"
+            }
+          ]
+        },
+        {
+          "exports": [
+            "formatSyllables",
+            "splitCluster",
+            "syllabify"
+          ],
+          "hash": "dfa50046f3d569273a6f1838dd47f1b762702364a29a2ef147413a4b640f201d",
+          "importsFiles": [
+            "src/phonemize/arpabet.ts"
+          ],
+          "path": "src/phonemize/syllabify.ts"
+        },
+        {
+          "entry": "loadVoicePreset",
+          "entryRule": 4,
+          "exports": [
+            "computeAssetsHash",
+            "loadVoicePreset"
+          ],
+          "hash": "bc81324c72d8231e9f84e10605e5e20f7f0922737a1969a66002f1319c555b12",
+          "importsFiles": [
+            "src/preset/schema.ts"
+          ],
+          "path": "src/preset/loader.ts",
+          "sequences": [
+            {
+              "calls": [
+                {
+                  "line": 137,
+                  "name": "parse",
+                  "target": {
+                    "file": "src/preset/schema.ts"
+                  }
+                }
+              ],
+              "exported": true,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "loadVoicePreset"
+            }
+          ]
+        },
+        {
+          "hash": "1d28ace62b70f196d89a7c73db67fecf7620595318a37ea0d7a4f1f51ae01fb4",
+          "path": "src/preset/schema.ts"
+        },
+        {
+          "exports": [
+            "createApp"
+          ],
+          "hash": "3f30d90d382de29c75d3b3c1962e0220b6e3daaa4786bb4fde3b3d8d0ec57a33",
+          "importsFiles": [
+            "src/server/middleware/auth.ts",
+            "src/server/middleware/errorHandler.ts",
+            "src/server/middleware/metricsMiddleware.ts",
+            "src/server/middleware/rateLimit.ts",
+            "src/server/middleware/requestId.ts",
+            "src/server/middleware/structuredLog.ts",
+            "src/server/routes/health.ts",
+            "src/server/routes/metrics.ts",
+            "src/server/routes/openapi.ts",
+            "src/server/routes/phonemize.ts",
+            "src/server/routes/presets.ts",
+            "src/server/routes/probes.ts",
+            "src/server/routes/render.ts",
+            "src/server/routes/renders.ts",
+            "src/server/services/renderQueue.ts",
+            "src/server/storage/renderStore.ts",
+            "src/server/util/metrics.ts"
+          ],
+          "path": "src/server/app.ts"
+        },
+        {
+          "hash": "bb1bc87c5ea0db35dc3cb873b4404cf6c91683fdfa5f3134afe6bb6ccfc09091",
+          "importsFiles": [
+            "src/server/app.ts",
+            "src/server/middleware/auth.ts",
+            "src/server/services/JamSessionManager.ts",
+            "src/server/services/LiveSession.ts",
+            "src/server/services/renderQueue.ts",
+            "src/server/services/renderScoreToWav.ts",
+            "src/server/services/wsSchemas.ts",
+            "src/server/util/gracefulShutdown.ts",
+            "src/server/util/logger.ts",
+            "src/server/util/wsHeartbeat.ts",
+            "src/types/jam.ts",
+            "src/types/live.ts"
+          ],
+          "path": "src/server/index.dev.ts"
+        },
+        {
+          "hash": "2b522ebe2f31116632277c01459479e494105d0de086e887b7436de804471870",
+          "importsFiles": [
+            "src/server/app.ts",
+            "src/server/middleware/auth.ts",
+            "src/server/services/JamSessionManager.ts",
+            "src/server/services/LiveSession.ts",
+            "src/server/services/renderQueue.ts",
+            "src/server/services/renderScoreToWav.ts",
+            "src/server/services/wsSchemas.ts",
+            "src/server/util/gracefulShutdown.ts",
+            "src/server/util/logger.ts",
+            "src/server/util/wsHeartbeat.ts",
+            "src/types/jam.ts",
+            "src/types/live.ts"
+          ],
+          "path": "src/server/index.prod.ts"
+        },
+        {
+          "exports": [
+            "getAuthKeyCount",
+            "getAuthMode",
+            "requireAdmin",
+            "requireAuth",
+            "requireWsAuth",
+            "resolveWsPrincipal"
+          ],
+          "hash": "87c89e2f37d27c405ad98a88cd5c1aab110721835958b39b2084664ba1c9dcb2",
+          "importsFiles": [
+            "src/server/util/metrics.ts"
+          ],
+          "path": "src/server/middleware/auth.ts"
+        },
+        {
+          "exports": [
+            "apiNotFoundHandler",
+            "errorHandler"
+          ],
+          "hash": "a572d34e6ef0e60af8b42b0b7d1f67e3fc1b9ecdd9e94db294feece5b16966bc",
+          "importsFiles": [
+            "src/server/util/logger.ts"
+          ],
+          "path": "src/server/middleware/errorHandler.ts"
+        },
+        {
+          "exports": [
+            "metricsMiddleware"
+          ],
+          "hash": "2b8ce85e07c083c44da3a3ebf68f3467672ff59e31e198fbc576d0bd0e22d9a0",
+          "importsFiles": [
+            "src/server/util/metrics.ts"
+          ],
+          "path": "src/server/middleware/metricsMiddleware.ts"
+        },
+        {
+          "exports": [
+            "_resetRateLimitForTests",
+            "rateLimit"
+          ],
+          "hash": "aa64ee590b38bff0e742fe51e42af54cd8b6e1848bada97a05a2ee951b3b1b03",
+          "importsFiles": [
+            "src/server/util/metrics.ts"
+          ],
+          "path": "src/server/middleware/rateLimit.ts"
+        },
+        {
+          "exports": [
+            "requestIdMiddleware"
+          ],
+          "hash": "cc7c4efc95ae6ac44ac214fcdf15e5f36a0922b9074a29c14660eeda94ea8630",
+          "path": "src/server/middleware/requestId.ts"
+        },
+        {
+          "exports": [
+            "structuredLog"
+          ],
+          "hash": "ae2ab0c315383751c58e32ae02884accbd94c56f61a3378a74cd3aa946626bdf",
+          "importsFiles": [
+            "src/server/util/logger.ts"
+          ],
+          "path": "src/server/middleware/structuredLog.ts"
+        },
+        {
+          "exports": [
+            "isSafeId",
+            "validateBody"
+          ],
+          "hash": "9fd28e6c1f55858a4f4424d6929d00fedde2b608efa3ee43fb7a60820a5dc294",
+          "path": "src/server/middleware/validate.ts"
+        },
+        {
+          "hash": "f607ccbad9fa5123bf36a6d69cad88b3ca5e34eba4fc158d10a9ddf5f1a39bbe",
+          "importsFiles": [
+            "src/server/middleware/auth.ts",
+            "src/server/services/renderQueue.ts",
+            "src/server/services/renderScoreToWav.ts",
+            "src/server/storage/renderStore.ts"
+          ],
+          "path": "src/server/routes/health.ts"
+        },
+        {
+          "hash": "fdef40035a81cbf961e52c2c504012b8b6d5842cb21dc7c1d8b30d79a1aff33c",
+          "importsFiles": [
+            "src/server/middleware/auth.ts",
+            "src/server/services/renderQueue.ts",
+            "src/server/storage/renderStore.ts",
+            "src/server/util/metrics.ts"
+          ],
+          "path": "src/server/routes/metrics.ts"
+        },
+        {
+          "exports": [
+            "_resetOpenApiCacheForTests"
+          ],
+          "hash": "f0f765c684b139f22ff621d89f5847365ff8c6103abff16c76c551d4738ab53d",
+          "importsFiles": [
+            "src/server/routes/render.ts"
+          ],
+          "path": "src/server/routes/openapi.ts"
+        },
+        {
+          "hash": "84b971c346269d320174177254b4f1273580fb7ef019965a479c2efd45632904",
+          "importsFiles": [
+            "src/phonemize/index.ts",
+            "src/server/middleware/validate.ts"
+          ],
+          "path": "src/server/routes/phonemize.ts"
+        },
+        {
+          "hash": "8454f64bfd9c56fa461008b94aa9a3dedcc04dfc950c15f021962ed07bca818c",
+          "importsFiles": [
+            "src/server/middleware/errorHandler.ts",
+            "src/server/services/renderScoreToWav.ts"
+          ],
+          "path": "src/server/routes/presets.ts"
+        },
+        {
+          "exports": [
+            "markInitComplete"
+          ],
+          "hash": "97eec6fb716fd695ad04c97d4211784e7a2625eaef379d373d2d7519dc436024",
+          "importsFiles": [
+            "src/server/services/renderQueue.ts"
+          ],
+          "path": "src/server/routes/probes.ts"
+        },
+        {
+          "hash": "ed36349ae164d75624fb8d56b959b9cfe0046796f0cb08043997160765431425",
+          "importsFiles": [
+            "src/server/middleware/errorHandler.ts",
+            "src/server/middleware/validate.ts",
+            "src/server/services/renderQueue.ts",
+            "src/server/storage/renderStore.ts"
+          ],
+          "path": "src/server/routes/render.ts"
+        },
+        {
+          "hash": "d1a9598aa50903c72b1532482be722876e2a0e4e51eeec768705315b69227750",
+          "importsFiles": [
+            "src/server/middleware/errorHandler.ts",
+            "src/server/middleware/validate.ts",
+            "src/server/routes/render.ts",
+            "src/server/services/renderQueue.ts",
+            "src/server/storage/renderStore.ts"
+          ],
+          "path": "src/server/routes/renders.ts"
+        },
+        {
+          "hash": "b80e9d34cc43b655c307c4f08ae1b46eb74ef14b5c21bf5ca80b21a37f149f6d",
+          "importsFiles": [
+            "src/engine/LiveSynthEngine.ts",
+            "src/preset/loader.ts",
+            "src/server/services/jamExport.ts",
+            "src/server/services/renderScoreToWav.ts",
+            "src/server/storage/renderStore.ts",
+            "src/types/jam.ts",
+            "src/types/score.ts"
+          ],
+          "path": "src/server/services/JamSession.ts"
+        },
+        {
+          "hash": "af7aa1384e8ffd55c7203ec28d42561b22cb45b5fd53d29b28d7d8edbecf4d89",
+          "importsFiles": [
+            "src/server/services/JamSession.ts",
+            "src/types/jam.ts"
+          ],
+          "path": "src/server/services/JamSessionManager.ts"
+        },
+        {
+          "hash": "26f268348e6cbddabad897f581dfce9d885c7f51a8130eb7fd2bac83dc6e7c7e",
+          "importsFiles": [
+            "src/engine/LiveSynthEngine.ts",
+            "src/preset/loader.ts",
+            "src/preset/schema.ts",
+            "src/server/services/renderScoreToWav.ts",
+            "src/server/storage/renderStore.ts",
+            "src/server/util/gitCommit.ts",
+            "src/types/live.ts"
+          ],
+          "path": "src/server/services/LiveSession.ts"
+        },
+        {
+          "exports": [
+            "exportEventTapeToWav"
+          ],
+          "hash": "39f3eafdd6bc7da5dcdb9210720236aac650ee79cd52866b84e47b6928b02e10",
+          "importsFiles": [
+            "src/engine/LiveSynthEngine.ts",
+            "src/preset/loader.ts",
+            "src/server/services/renderScoreToWav.ts",
+            "src/server/util/gitCommit.ts",
+            "src/types/jam.ts"
+          ],
+          "path": "src/server/services/jamExport.ts"
+        },
+        {
+          "exports": [
+            "getRenderQueue"
+          ],
+          "hash": "18a23ed8a0fd615eca093805f616cea38c85da0ee7780cbdc8fc160471fa193e",
+          "importsFiles": [
+            "src/engine/StreamingVocalSynthEngine.ts",
+            "src/phonemize/index.ts",
+            "src/preset/loader.ts",
+            "src/server/services/renderScoreToWav.ts",
+            "src/server/util/gitCommit.ts",
+            "src/server/util/logger.ts",
+            "src/server/util/metrics.ts"
+          ],
+          "path": "src/server/services/renderQueue.ts"
+        },
+        {
+          "exports": [
+            "getPresetDirInfo",
+            "isValidPresetId",
+            "listPresetIds",
+            "listPresets",
+            "renderScoreToWav",
+            "resolvePresetPath"
+          ],
+          "hash": "293c29a955dbd59adeaef16c253c345162c5920bc1ae0c99f9648e0ad5ae18b8",
+          "importsFiles": [
+            "src/engine/StreamingVocalSynthEngine.ts",
+            "src/phonemize/index.ts",
+            "src/preset/loader.ts",
+            "src/server/util/gitCommit.ts"
+          ],
+          "path": "src/server/services/renderScoreToWav.ts"
+        },
+        {
+          "hash": "1d00c1fb075b3109b0785d463b4e372413a1805d3a0e89b442b8dd568e34f6db",
+          "path": "src/server/services/wsSchemas.ts"
+        },
+        {
+          "exports": [
+            "assertRenderBudget",
+            "deleteRender",
+            "getRenderBudgetSnapshot",
+            "getRenderDir",
+            "getRenderStoreSizeBytes",
+            "isValidRenderId",
+            "listRenders",
+            "logBudgetIfNotable",
+            "safeRenderDir",
+            "saveLastRender",
+            "saveRender",
+            "updateRenderMeta"
+          ],
+          "hash": "5c4d1248e42846315c9065d0df67f97f4ab2196d6bae59fa08caf90b6ed0846e",
+          "importsFiles": [
+            "src/server/util/logger.ts"
+          ],
+          "path": "src/server/storage/renderStore.ts"
+        },
+        {
+          "exports": [
+            "getGitCommit"
+          ],
+          "hash": "6e67f571386ff78aabec809c6db952d60cd69088866b24240a741f8bbc6ccd24",
+          "path": "src/server/util/gitCommit.ts"
+        },
+        {
+          "exports": [
+            "installGracefulShutdown"
+          ],
+          "hash": "b0ad69ee8891ce304212453f1e45400adf9dd8c9b59ddf2d7f8e2f93e8accd06",
+          "importsFiles": [
+            "src/server/util/logger.ts"
+          ],
+          "path": "src/server/util/gracefulShutdown.ts"
+        },
+        {
+          "exports": [
+            "getLogger"
+          ],
+          "hash": "ffb82e7a51265d1c4a6fd67e4cfaf86071e12f051e7477228c058ab54d055f02",
+          "path": "src/server/util/logger.ts"
+        },
+        {
+          "exports": [
+            "_resetMetricsForTests",
+            "registerSampler",
+            "startSamplers",
+            "stopSamplers"
+          ],
+          "hash": "9593cb778c8cf33a34031dd81289ac71cd77bd67db41049eafb3532fceaf9a21",
+          "path": "src/server/util/metrics.ts"
+        },
+        {
+          "exports": [
+            "attachHeartbeat"
+          ],
+          "hash": "75385769376ef44f696c5786e358b92eeaa984fc1a7c27c6448019a90f7cc635",
+          "importsFiles": [
+            "src/server/util/logger.ts"
+          ],
+          "path": "src/server/util/wsHeartbeat.ts"
+        },
+        {
+          "hash": "de45a0788550f26df6fcaf0f94c86b4e921e7747d3753b46f8d4cd56e4c82627",
+          "importsFiles": [
+            "src/types/score.ts"
+          ],
+          "path": "src/types/jam.ts"
+        },
+        {
+          "hash": "bc70efa43433c696a71478f1b48ee0dc13f50baa45972183a5120f77e8cce293",
+          "path": "src/types/live.ts"
+        },
+        {
+          "hash": "bc4bb3205d115fd8aa04259b84a71a7691987dc07464412ccaf0962939d37832",
+          "importsFiles": [
+            "src/types/scoreSchema.ts"
+          ],
+          "path": "src/types/score.ts"
+        },
+        {
+          "exports": [
+            "parseVocalScore"
+          ],
+          "hash": "f6968694a045ac9496bf34d108ee2bb2dc371caecddedd3cfdad0d3c873fe366",
+          "path": "src/types/scoreSchema.ts"
+        }
+      ],
+      "globs": [
+        "src/**"
+      ],
+      "importConfidence": "full",
+      "name": "src",
+      "origin": "authored",
+      "outsideReads": 50,
+      "outsideWrites": 28,
+      "role": "code",
+      "testedBy": 17,
+      "unresolvedSites": 0
+    },
+    {
+      "dynamicReads": 0,
+      "dynamicSpawns": 1,
+      "dynamicSpawnsInTests": 1,
+      "dynamicWrites": 0,
+      "entryPoints": [],
+      "externals": 0,
+      "files": [
+        {
+          "hash": "be7caf6f59b8f1af1dc76bebcf0dcd3c53bfed228d82dc30e9422af3fd90af36",
+          "path": "tests/__bench__/baseline.json"
+        },
+        {
+          "hash": "a4e1d8fe817f873ea4f280f0c403f3725c555a80965bbda90a46834a9acd52bc",
+          "path": "tests/__snapshots__/score-fixtures.test.ts.snap"
+        },
+        {
+          "hash": "2f288ffa494256d27a3d993c4286d33c6a6be398c5ea14adde189ceb707208d7",
+          "importsFiles": [
+            "src/engine/LiveSynthEngine.ts",
+            "src/preset/loader.ts",
+            "src/preset/schema.ts",
+            "src/server/app.ts",
+            "tests/helpers/index.ts"
+          ],
+          "path": "tests/cross-domain-stage-c.test.ts"
+        },
+        {
+          "hash": "6a75477729abf5fcfa56fdfdde09763bfad0cc409f6e53f0e8cd0a1453abc766",
+          "importsFiles": [
+            "src/engine/curves.ts"
+          ],
+          "path": "tests/curves.test.ts"
+        },
+        {
+          "hash": "7dbd2ddb1a55c5bae619f248f6b390a71933c086aad10d021fac8f84b28f9852",
+          "importsFiles": [
+            "src/engine/LiveSynthEngine.ts",
+            "src/engine/StreamingVocalSynthEngine.ts",
+            "src/preset/loader.ts",
+            "src/preset/schema.ts",
+            "src/types/score.ts",
+            "tests/helpers/index.ts"
+          ],
+          "path": "tests/engine-determinism.test.ts"
+        },
+        {
+          "hash": "dfb02ec5b3bedf3c5fdd2f9bc1d3b52e01347d621a800e0dc6671b3fd25b3e9b",
+          "importsFiles": [
+            "src/dsp/pitch.ts",
+            "src/engine/LiveSynthEngine.ts",
+            "src/engine/consonantProfiles.ts",
+            "src/preset/loader.ts",
+            "src/preset/schema.ts",
+            "tests/helpers/index.ts"
+          ],
+          "path": "tests/engine-medium.test.ts"
+        },
+        {
+          "hash": "0f30b106fe7243e024749c6882f13b74bc4633734ecf30d0c3b4df8fbc803bc0",
+          "importsFiles": [
+            "src/engine/LiveSynthEngine.ts",
+            "src/preset/loader.ts",
+            "src/preset/schema.ts",
+            "tests/helpers/index.ts"
+          ],
+          "path": "tests/envelope.test.ts"
+        },
+        {
+          "hash": "07ff5b50bbb4550fa17564f3e75451a13909993e481439bd7e0e66f45767ac31",
+          "importsFiles": [
+            "src/dsp/fft.ts"
+          ],
+          "path": "tests/fft.test.ts"
+        },
+        {
+          "exports": [
+            "hashFloat32",
+            "startTestServer",
+            "stopTestServer"
+          ],
+          "hash": "fb944dfc8456e627b8d986353508cec68d1e88bf6a80dfc00497b18909d9ff41",
+          "path": "tests/helpers/index.ts"
+        },
+        {
+          "hash": "8f7fcaead9e56c011eaca149baa4c992ddf0366c88d91ac6204dd07f557352f4",
+          "importsFiles": [
+            "src/server/services/JamSession.ts",
+            "src/server/services/JamSessionManager.ts",
+            "src/server/services/LiveSession.ts"
+          ],
+          "path": "tests/jam-session.test.ts"
+        },
+        {
+          "hash": "f58994d930f7a81f95b16979c4c392bcb6511a7996831d7664eb9db22fa972f8",
+          "importsFiles": [
+            "src/dsp/pitch.ts"
+          ],
+          "path": "tests/pitch.test.ts"
+        },
+        {
+          "hash": "dc38309a0c2c29563e4820f83db6749c0a81bfcfe088093548b36a727d62890f",
+          "importsFiles": [
+            "src/preset/loader.ts"
+          ],
+          "path": "tests/preset-integrity.test.ts"
+        },
+        {
+          "hash": "e2a3fda987381c3ebc532c3aed72397cba18d8fc4da2463f972e64561ab86625",
+          "importsFiles": [
+            "src/engine/StreamingVocalSynthEngine.ts",
+            "src/engine/curves.ts",
+            "src/preset/loader.ts",
+            "src/preset/schema.ts",
+            "src/server/services/wsSchemas.ts",
+            "src/types/score.ts",
+            "tests/helpers/index.ts"
+          ],
+          "path": "tests/property-based.test.ts"
+        },
+        {
+          "hash": "4ea494dcf20f7beaf8065c8d40bedf92a8770e03e51594feaab0ac3b44fbe0e3",
+          "importsFiles": [
+            "src/engine/LiveSynthEngine.ts",
+            "src/engine/StreamingVocalSynthEngine.ts",
+            "src/phonemize/index.ts",
+            "src/preset/loader.ts",
+            "src/preset/schema.ts",
+            "src/types/score.ts",
+            "tests/helpers/index.ts"
+          ],
+          "path": "tests/render.bench.ts"
+        },
+        {
+          "hash": "2583b7fb7267c94ba097a9a32d39e5336dedec15ebbe006aa70dee50fcd0e3da",
+          "importsFiles": [
+            "src/engine/StreamingVocalSynthEngine.ts",
+            "src/preset/loader.ts",
+            "src/preset/schema.ts",
+            "src/types/score.ts",
+            "tests/helpers/index.ts"
+          ],
+          "path": "tests/score-fixtures.test.ts"
+        },
+        {
+          "hash": "e79179e507bf464c9cc28fa8944ea2632325e9dc5be0d912ce542fce356dbed0",
+          "importsFiles": [
+            "src/server/app.ts"
+          ],
+          "path": "tests/server-auth.test.ts"
+        },
+        {
+          "hash": "dbdcfe527220c7355c21ccbfc83dc4bb4d015392be630fa455076c2e42b58f02",
+          "importsFiles": [
+            "src/server/app.ts"
+          ],
+          "path": "tests/server-medium.test.ts"
+        },
+        {
+          "hash": "e081d11434ed5404c970938ab00b1ebe170fc1ba0550a20f405185dd3f28fa2d",
+          "importsFiles": [
+            "src/server/app.ts"
+          ],
+          "path": "tests/server-pathtraversal.test.ts"
+        },
+        {
+          "hash": "88b2a8c2d399b21fda07fbc60fff0d640f647d32cb854ec94ad4bb1b4b588c97",
+          "importsFiles": [
+            "src/server/app.ts"
+          ],
+          "path": "tests/server-validation.test.ts"
+        },
+        {
+          "hash": "cd69a2ff94fc145fa37361bbd180302872904b1e6b5d8d3b93a9fc3193e39e7b",
+          "path": "tests/version-alignment.test.ts"
+        },
+        {
+          "hash": "843ad801faf2bb1fc6409262afb3776deaf798c7c3c6af9585f9652ab2372e22",
+          "importsFiles": [
+            "src/server/services/wsSchemas.ts"
+          ],
+          "path": "tests/ws-schema-fuzz.test.ts"
+        }
+      ],
+      "globs": [
+        "tests/**"
+      ],
+      "importConfidence": "full",
+      "name": "tests",
+      "origin": "mixed",
+      "role": "test",
+      "testedBy": 0,
+      "unresolvedSites": 0
+    }
+  ],
+  "doors": [
+    {
+      "checksCount": 1,
+      "commands": [
+        {
+          "job": "lint-and-test",
+          "step": "Atlas check",
+          "text": "npx --yes @dogfood-lab/atlas@1.17.0 check"
+        },
+        {
+          "job": "lint-and-test",
+          "step": "Install dependencies",
+          "text": "npm ci"
+        },
+        {
+          "job": "lint-and-test",
+          "step": "Lint",
+          "text": "npm run lint --if-present"
+        },
+        {
+          "job": "lint-and-test",
+          "step": "Test",
+          "text": "npm test --if-present"
+        },
+        {
+          "job": "lint-and-test",
+          "step": "Build",
+          "text": "npm run build:server"
+        },
+        {
+          "job": "lint-and-test",
+          "step": "Security audit",
+          "text": "npm audit --audit-level=high --omit=dev"
+        },
+        {
+          "job": "cockpit-tests",
+          "step": "Install root dependencies",
+          "text": "npm ci"
+        },
+        {
+          "job": "cockpit-tests",
+          "step": "Install cockpit dependencies",
+          "text": "npm --prefix apps/cockpit ci || npm --prefix apps/cockpit install"
+        },
+        {
+          "job": "cockpit-tests",
+          "step": "Install Playwright browsers (chromium only)",
+          "text": "npx playwright install --with-deps chromium"
+        },
+        {
+          "job": "cockpit-tests",
+          "step": "Run cockpit smoke tests",
+          "text": "npm run test:cockpit"
+        },
+        {
+          "job": "bench-gate",
+          "step": "Install dependencies",
+          "text": "npm ci"
+        },
+        {
+          "job": "bench-gate",
+          "step": "Run benches",
+          "text": "npm run bench"
+        },
+        {
+          "job": "bench-gate",
+          "step": "Compare against baseline (fail on > 2x regression)",
+          "text": "npm run bench:gate"
+        }
+      ],
+      "elsewhere": [],
+      "file": ".github/workflows/ci.yml",
+      "landings": [
+        "tests/__bench__/baseline.json"
+      ],
+      "mentions": [
+        {
+          "job": "lint-and-test",
+          "path": "tsconfig.json"
+        }
+      ],
+      "name": "CI",
+      "permissions": [],
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "scripts",
+          "depth": 0,
+          "files": 1
+        },
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 61
+        },
+        {
+          "boundary": "tests",
+          "depth": 0,
+          "files": 18
+        }
+      ],
+      "readers": [
+        {
+          "by": "scripts/bench-gate.mjs",
+          "call": "existsSync",
+          "confidence": "ast",
+          "target": "tests/__bench__/baseline.json"
+        },
+        {
+          "by": "scripts/bench-gate.mjs",
+          "call": "readFileSync",
+          "confidence": "ast",
+          "target": "tests/__bench__/baseline.json"
+        }
+      ],
+      "runs": [
+        {
+          "job": "bench-gate",
+          "path": "scripts/bench-gate.mjs",
+          "runKind": "executes"
+        },
+        {
+          "directory": true,
+          "job": "lint-and-test",
+          "matched": true,
+          "path": "src/",
+          "runKind": "checks",
+          "via": "tsc tsconfig.json"
+        },
+        {
+          "job": "bench-gate",
+          "matched": true,
+          "path": "tests/cross-domain-stage-c.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "lint-and-test",
+          "matched": true,
+          "path": "tests/cross-domain-stage-c.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "bench-gate",
+          "matched": true,
+          "path": "tests/curves.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "lint-and-test",
+          "matched": true,
+          "path": "tests/curves.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "bench-gate",
+          "matched": true,
+          "path": "tests/engine-determinism.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "lint-and-test",
+          "matched": true,
+          "path": "tests/engine-determinism.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "bench-gate",
+          "matched": true,
+          "path": "tests/engine-medium.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "lint-and-test",
+          "matched": true,
+          "path": "tests/engine-medium.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "bench-gate",
+          "matched": true,
+          "path": "tests/envelope.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "lint-and-test",
+          "matched": true,
+          "path": "tests/envelope.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "bench-gate",
+          "matched": true,
+          "path": "tests/fft.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "lint-and-test",
+          "matched": true,
+          "path": "tests/fft.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "bench-gate",
+          "matched": true,
+          "path": "tests/jam-session.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "lint-and-test",
+          "matched": true,
+          "path": "tests/jam-session.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "bench-gate",
+          "matched": true,
+          "path": "tests/pitch.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "lint-and-test",
+          "matched": true,
+          "path": "tests/pitch.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "bench-gate",
+          "matched": true,
+          "path": "tests/preset-integrity.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "lint-and-test",
+          "matched": true,
+          "path": "tests/preset-integrity.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "bench-gate",
+          "matched": true,
+          "path": "tests/property-based.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "lint-and-test",
+          "matched": true,
+          "path": "tests/property-based.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "bench-gate",
+          "matched": true,
+          "path": "tests/score-fixtures.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "lint-and-test",
+          "matched": true,
+          "path": "tests/score-fixtures.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "bench-gate",
+          "matched": true,
+          "path": "tests/server-auth.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "lint-and-test",
+          "matched": true,
+          "path": "tests/server-auth.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "bench-gate",
+          "matched": true,
+          "path": "tests/server-medium.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "lint-and-test",
+          "matched": true,
+          "path": "tests/server-medium.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "bench-gate",
+          "matched": true,
+          "path": "tests/server-pathtraversal.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "lint-and-test",
+          "matched": true,
+          "path": "tests/server-pathtraversal.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "bench-gate",
+          "matched": true,
+          "path": "tests/server-validation.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "lint-and-test",
+          "matched": true,
+          "path": "tests/server-validation.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "bench-gate",
+          "matched": true,
+          "path": "tests/version-alignment.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "lint-and-test",
+          "matched": true,
+          "path": "tests/version-alignment.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "bench-gate",
+          "matched": true,
+          "path": "tests/ws-schema-fuzz.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "lint-and-test",
+          "matched": true,
+          "path": "tests/ws-schema-fuzz.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        }
+      ],
+      "runsCount": 19,
+      "secrets": [],
+      "sends": {
+        "deploysPages": false,
+        "dispatchesTo": [],
+        "opensIssues": false,
+        "opensIssuesOnFailure": false,
+        "opensPullRequests": false,
+        "publishes": false,
+        "publishesTo": [],
+        "releases": false
+      },
+      "stages": [],
+      "triggers": [
+        {
+          "branches": [
+            "main"
+          ],
+          "event": "pull_request",
+          "paths": [
+            ".github/workflows/**",
+            "atlas/**",
+            "lib/**",
+            "package-lock.json",
+            "package.json",
+            "site/astro.config.mjs",
+            "site/package-lock.json",
+            "site/package.json",
+            "src/**",
+            "tests/**"
+          ]
+        },
+        {
+          "branches": [
+            "main"
+          ],
+          "event": "push",
+          "paths": [
+            ".github/workflows/**",
+            "atlas/**",
+            "lib/**",
+            "package-lock.json",
+            "package.json",
+            "site/astro.config.mjs",
+            "site/package-lock.json",
+            "site/package.json",
+            "src/**",
+            "tests/**"
+          ]
+        },
+        {
+          "cron": "0 6 * * 1",
+          "event": "schedule"
+        },
+        {
+          "event": "workflow_dispatch"
+        }
+      ],
+      "uses": [
+        "actions/checkout",
+        "actions/setup-node",
+        "actions/upload-artifact"
+      ],
+      "usesWorkflowToken": false
+    },
+    {
+      "checksCount": 1,
+      "commands": [
+        {
+          "job": "dogfood",
+          "step": "2",
+          "text": "npm ci"
+        },
+        {
+          "job": "dogfood",
+          "step": "3",
+          "text": "npm run build:server"
+        },
+        {
+          "job": "dogfood",
+          "step": "Run scenario",
+          "text": "set +e\n# Start the server in background\nnode dist/server/index.prod.js &\nSERVER_PID=$!\n\n# Wait for server to be ready\nSTART_OK=fail\nfor i in $(seq 1 20); do\n  if curl -sf http://localhost:4321/api/health > /dev/null 2>&1; then\n    START_OK=pass\n    break\n  fi\n  sleep 1\ndone\necho \"start_status=$START_OK\" >> \"$GITHUB_OUTPUT\"\n\n# Health check\nHEALTH_OK=fail\nif [ \"$START_OK\" = \"pass\" ]; then\n  curl -sf http://localhost:4321/api/health | tee /tmp/health.json\n  if jq -e '.ok == true' /tmp/health.json > /dev/null 2>&1; then\n    HEALTH_OK=pass\n  fi\nfi\necho \"health_status=$HEALTH_OK\" >> \"$GITHUB_OUTPUT\"\n\n# Presets check\nPRESETS_OK=fail\nif [ \"$START_OK\" = \"pass\" ]; then\n  curl -sf http://localhost:4321/api/presets 2>&1 | tee /tmp/presets.json\n  if [ -s /tmp/presets.json ]; then\n    PRESETS_OK=pass\n  fi\nfi\necho \"presets_status=$PRESETS_OK\" >> \"$GITHUB_OUTPUT\"\n\n# Verify output\n# S-018: public /api/health response trimmed to {ok, version, uptimeSec};\n# full details now live behind requireAuth at /api/health/detailed.\n# The verify check only asserts the trimmed public shape.\nVERIFY_OK=fail\nif [ \"$HEALTH_OK\" = \"pass\" ] && jq -e '.ok and .version and (.uptimeSec | type == \"number\")' /tmp/health.json > /dev/null 2>&1; then\n  VERIFY_OK=pass\nfi\necho \"verify_status=$VERIFY_OK\" >> \"$GITHUB_OUTPUT\"\n\n# Stop server\nkill $SERVER_PID 2>/dev/null || true\n"
+        },
+        {
+          "job": "dogfood",
+          "step": "Determine overall verdict",
+          "text": "S=\"${{ steps.scenario.outputs.start_status }}\"\nH=\"${{ steps.scenario.outputs.health_status }}\"\nP=\"${{ steps.scenario.outputs.presets_status }}\"\nV=\"${{ steps.scenario.outputs.verify_status }}\"\nif [ \"$S\" = \"pass\" ] && [ \"$H\" = \"pass\" ] && [ \"$P\" = \"pass\" ] && [ \"$V\" = \"pass\" ]; then\n  echo \"verdict=pass\" >> \"$GITHUB_OUTPUT\"\nelse\n  echo \"verdict=fail\" >> \"$GITHUB_OUTPUT\"\nfi\n"
+        },
+        {
+          "job": "dogfood",
+          "step": "Build submission",
+          "text": "FINISHED_AT=$(date -u +\"%Y-%m-%dT%H:%M:%SZ\")\ncat > /tmp/submission.json << 'INNER_EOF'\n{\n  \"schema_version\": \"1.0.0\",\n  \"run_id\": \"vocal-synth-engine-RUN_ID-ATTEMPT\",\n  \"repo\": \"REPO_SLUG\",\n  \"ref\": {\n    \"branch\": \"REF_NAME\",\n    \"commit_sha\": \"COMMIT_SHA\"\n  },\n  \"source\": {\n    \"provider\": \"github\",\n    \"workflow\": \"dogfood.yml\",\n    \"provider_run_id\": \"PROVIDER_RUN_ID\",\n    \"attempt\": ATTEMPT_NUM,\n    \"run_url\": \"RUN_URL_PLACEHOLDER\",\n    \"actor\": \"ACTOR_NAME\"\n  },\n  \"timing\": {\n    \"started_at\": \"STARTED_PLACEHOLDER\",\n    \"finished_at\": \"FINISHED_PLACEHOLDER\",\n    \"duration_ms\": 0\n  },\n  \"ci_checks\": [],\n  \"scenario_results\": [\n    {\n      \"scenario_id\": \"health-and-presets-roundtrip\",\n      \"scenario_name\": \"Start server, verify health and presets endpoints\",\n      \"scenario_version\": \"1.0.0\",\n      \"product_surface\": \"api\",\n      \"execution_mode\": \"bot\",\n      \"verdict\": \"VERDICT_PLACEHOLDER\",\n      \"step_results\": [\n        { \"step_id\": \"start-server\", \"status\": \"START_STATUS\" },\n        { \"step_id\": \"health-check\", \"status\": \"HEALTH_STATUS\" },\n        { \"step_id\": \"presets-check\", \"status\": \"PRESETS_STATUS\" },\n        { \"step_id\": \"verify-output\", \"status\": \"VERIFY_STATUS\" }\n      ],\n      \"evidence\": [\n        {\n          \"kind\": \"log\",\n          \"url\": \"RUN_URL_PLACEHOLDER\",\n          \"description\": \"CI run log with health + presets response\"\n        }\n      ],\n      \"notes\": \"Bot-driven API health and presets roundtrip\"\n    }\n  ],\n  \"overall_verdict\": \"VERDICT_PLACEHOLDER\",\n  \"notes\": \"Phase 2 rollout: vocal-synth-engine API dogfood.\"\n}\nINNER_EOF\n\nsed -i \"s|REPO_SLUG|${GITHUB_REPOSITORY}|g\" /tmp/submission.json\nsed -i \"s|REF_NAME|${GITHUB_REF_NAME}|g\" /tmp/submission.json\nsed -i \"s|COMMIT_SHA|${GITHUB_SHA}|g\" /tmp/submission.json\nsed -i \"s|PROVIDER_RUN_ID|${GITHUB_RUN_ID}|g\" /tmp/submission.json\nsed -i \"s|ATTEMPT_NUM|${GITHUB_RUN_ATTEMPT}|g\" /tmp/submission.json\nsed -i \"s|RUN_URL_PLACEHOLDER|https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}|g\" /tmp/submission.json\nsed -i \"s|ACTOR_NAME|${GITHUB_ACTOR}|g\" /tmp/submission.json\nsed -i \"s|STARTED_PLACEHOLDER|${{ github.event.head_commit.timestamp || github.event.repository.pushed_at }}|g\" /tmp/submission.json\nsed -i \"s|FINISHED_PLACEHOLDER|${FINISHED_AT}|g\" /tmp/submission.json\nsed -i \"s|vocal-synth-engine-RUN_ID-ATTEMPT|vocal-synth-engine-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}|g\" /tmp/submission.json\nsed -i \"s|VERDICT_PLACEHOLDER|${{ steps.verdict.outputs.verdict }}|g\" /tmp/submission.json\nsed -i \"s|START_STATUS|${{ steps.scenario.outputs.start_status }}|g\" /tmp/submission.json\nsed -i \"s|HEALTH_STATUS|${{ steps.scenario.outputs.health_status }}|g\" /tmp/submission.json\nsed -i \"s|PRESETS_STATUS|${{ steps.scenario.outputs.presets_status }}|g\" /tmp/submission.json\nsed -i \"s|VERIFY_STATUS|${{ steps.scenario.outputs.verify_status }}|g\" /tmp/submission.json\n\njq empty /tmp/submission.json\necho \"Submission built:\"\njq '.run_id, .overall_verdict' /tmp/submission.json\n"
+        },
+        {
+          "job": "dogfood",
+          "step": "Dispatch to dogfood-labs",
+          "text": "SUBMISSION=$(cat /tmp/submission.json)\nRUN_ID=$(echo \"$SUBMISSION\" | jq -r '.run_id')\n\nif [ -z \"$GH_TOKEN\" ]; then\n  echo \"::warning::DOGFOOD_TOKEN not set — skipping dispatch\"\n  exit 0\nfi\n\n# Dispatch is best-effort: the dogfood-labs receiver may not be\n# deployed yet. The scenario verdict above is what actually gates\n# this workflow — so any dispatch failure becomes a warning.\nset +e\nDISPATCH_OUT=$(jq -n --argjson sub \"$SUBMISSION\" \\\n  '{\"event_type\":\"dogfood_submission\",\"client_payload\":{\"submission\":$sub}}' \\\n  | gh api repos/mcp-tool-shop-org/dogfood-labs/dispatches \\\n    --input - --silent 2>&1)\nDISPATCH_RC=$?\nset -e\n\nif [ $DISPATCH_RC -ne 0 ]; then\n  echo \"::warning::Dispatch to mcp-tool-shop-org/dogfood-labs failed (rc=$DISPATCH_RC): $DISPATCH_OUT — scenario verdict above still gates this job\"\n  exit 0\nfi\n\necho \"Dispatched $RUN_ID to dogfood-labs\"\n"
+        }
+      ],
+      "elsewhere": [],
+      "file": ".github/workflows/dogfood.yml",
+      "gated": [
+        {
+          "jobs": [
+            "dogfood"
+          ],
+          "pushes": false,
+          "sends": [
+            "dispatchesTo:mcp-tool-shop-org/dogfood-labs"
+          ],
+          "stages": [],
+          "when": {
+            "branches": [
+              "main"
+            ]
+          }
+        }
+      ],
+      "landings": [],
+      "mentions": [
+        {
+          "job": "dogfood",
+          "path": "tsconfig.json"
+        }
+      ],
+      "name": "Dogfood",
+      "permissions": [],
+      "programs": [
+        "git"
+      ],
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 61
+        }
+      ],
+      "readers": [],
+      "runs": [
+        {
+          "directory": true,
+          "job": "dogfood",
+          "matched": true,
+          "path": "src/",
+          "runKind": "checks",
+          "via": "tsc tsconfig.json",
+          "when": {
+            "branches": [
+              "main"
+            ]
+          }
+        },
+        {
+          "job": "dogfood",
+          "path": "src/server/index.prod.ts",
+          "runKind": "executes",
+          "when": {
+            "branches": [
+              "main"
+            ]
+          }
+        }
+      ],
+      "runsCount": 2,
+      "secrets": [
+        "DOGFOOD_TOKEN"
+      ],
+      "sends": {
+        "deploysPages": false,
+        "dispatchesTo": [],
+        "opensIssues": false,
+        "opensIssuesOnFailure": false,
+        "opensPullRequests": false,
+        "publishes": false,
+        "publishesTo": [],
+        "releases": false
+      },
+      "stages": [],
+      "triggers": [
+        {
+          "branches": [
+            "main"
+          ],
+          "event": "push",
+          "paths": [
+            ".github/workflows/dogfood.yml",
+            "package.json",
+            "src/**"
+          ]
+        },
+        {
+          "event": "workflow_dispatch"
+        }
+      ],
+      "uses": [
+        "actions/checkout",
+        "actions/setup-node"
+      ],
+      "usesWorkflowToken": false
+    },
+    {
+      "checksCount": 0,
+      "commands": [
+        {
+          "job": "build",
+          "step": "Install site dependencies",
+          "text": "npm ci"
+        },
+        {
+          "job": "build",
+          "step": "Build site",
+          "text": "npm run build"
+        }
+      ],
+      "elsewhere": [],
+      "file": ".github/workflows/pages.yml",
+      "landings": [],
+      "mentions": [],
+      "name": "Deploy site to GitHub Pages",
+      "permissions": [
+        "contents:read",
+        "id-token:write",
+        "pages:write"
+      ],
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "site",
+          "depth": 0,
+          "files": 3
+        }
+      ],
+      "readers": [],
+      "runs": [
+        {
+          "job": "build",
+          "matched": true,
+          "path": "site/astro.config.mjs",
+          "runKind": "executes",
+          "via": "astro build"
+        },
+        {
+          "directory": true,
+          "job": "build",
+          "matched": true,
+          "path": "site/src/",
+          "runKind": "executes",
+          "via": "astro build"
+        }
+      ],
+      "runsCount": 2,
+      "secrets": [],
+      "sends": {
+        "deploysPages": true,
+        "dispatchesTo": [],
+        "opensIssues": false,
+        "opensIssuesOnFailure": false,
+        "opensPullRequests": false,
+        "publishes": false,
+        "publishesTo": [],
+        "releases": false
+      },
+      "stages": [],
+      "triggers": [
+        {
+          "branches": [
+            "main"
+          ],
+          "event": "push",
+          "paths": [
+            ".github/workflows/pages.yml",
+            "site/**"
+          ]
+        },
+        {
+          "event": "workflow_dispatch"
+        }
+      ],
+      "uses": [
+        "actions/checkout",
+        "actions/deploy-pages",
+        "actions/setup-node",
+        "actions/upload-pages-artifact"
+      ],
+      "usesWorkflowToken": false
+    },
+    {
+      "checksCount": 1,
+      "commands": [
+        {
+          "job": "verify",
+          "step": "Install dependencies",
+          "text": "npm ci"
+        },
+        {
+          "job": "verify",
+          "step": "Lint",
+          "text": "npm run lint --if-present"
+        },
+        {
+          "job": "verify",
+          "step": "Test",
+          "text": "npm test"
+        },
+        {
+          "job": "verify",
+          "step": "Build",
+          "text": "npm run build:server"
+        },
+        {
+          "job": "verify",
+          "step": "Verify gate",
+          "text": "bash scripts/verify.sh"
+        },
+        {
+          "job": "ship",
+          "step": "Install dependencies",
+          "text": "npm ci"
+        },
+        {
+          "job": "ship",
+          "step": "Build",
+          "text": "npm run build:server"
+        },
+        {
+          "job": "ship",
+          "step": "Tag-vs-package.json version equality",
+          "text": "TAG_REF=\"${GITHUB_REF_NAME}\"\n# Strip leading `v` from tag name\nTAG_VERSION=\"${TAG_REF#v}\"\nPKG_VERSION=$(node -p \"require('./package.json').version\")\necho \"tag_ref=$TAG_REF\"\necho \"tag_version=$TAG_VERSION\"\necho \"pkg_version=$PKG_VERSION\"\nif [ \"$TAG_VERSION\" != \"$PKG_VERSION\" ]; then\n  echo \"::error::Tag $TAG_REF does not match package.json version $PKG_VERSION (expected v$PKG_VERSION)\"\n  exit 1\nfi\necho \"version=$PKG_VERSION\" >> \"$GITHUB_OUTPUT\"\n"
+        },
+        {
+          "job": "ship",
+          "step": "Publish to npm with provenance",
+          "text": "npm publish --provenance --access public"
+        },
+        {
+          "job": "ship",
+          "step": "Extract CHANGELOG entry",
+          "text": "VERSION=\"${{ steps.version-check.outputs.version }}\"\n# awk: when we hit the `## [VERSION]` header, start printing.\n# When we hit the NEXT `## [` header, stop.\nBODY=$(awk -v v=\"$VERSION\" '\n  $0 ~ \"^## \\\\[\" v \"\\\\]\" { found=1; next }\n  found && /^## \\[/      { exit }\n  found                  { print }\n' CHANGELOG.md)\nif [ -z \"$BODY\" ]; then\n  BODY=\"See CHANGELOG.md for v$VERSION details.\"\nfi\n# Write to a tempfile so we don't have to escape newlines for\n# GITHUB_OUTPUT. The release step reads it via --notes-file.\necho \"$BODY\" > /tmp/release-notes.md\necho \"notes_file=/tmp/release-notes.md\" >> \"$GITHUB_OUTPUT\"\necho \"--- extracted release notes ---\"\ncat /tmp/release-notes.md\necho \"--- end ---\"\n"
+        },
+        {
+          "job": "ship",
+          "step": "Create GitHub release",
+          "text": "gh release create \"$GITHUB_REF_NAME\" \\\n  --title \"$GITHUB_REF_NAME\" \\\n  --notes-file \"${{ steps.changelog.outputs.notes_file }}\" \\\n  --verify-tag\n"
+        }
+      ],
+      "elsewhere": [],
+      "file": ".github/workflows/release.yml",
+      "landings": [],
+      "mentions": [
+        {
+          "job": "ship",
+          "path": "CHANGELOG.md"
+        },
+        {
+          "job": "ship",
+          "path": "package.json"
+        },
+        {
+          "job": "ship",
+          "path": "tsconfig.json"
+        },
+        {
+          "job": "verify",
+          "path": "tsconfig.json"
+        }
+      ],
+      "name": "Release",
+      "permissions": [
+        "contents:read",
+        "contents:write",
+        "id-token:write"
+      ],
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "scripts",
+          "depth": 0,
+          "files": 1
+        },
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 61
+        },
+        {
+          "boundary": "tests",
+          "depth": 0,
+          "files": 18
+        }
+      ],
+      "readers": [],
+      "runs": [
+        {
+          "job": "verify",
+          "path": "scripts/verify.sh",
+          "runKind": "executes"
+        },
+        {
+          "directory": true,
+          "job": "ship",
+          "matched": true,
+          "path": "src/",
+          "runKind": "checks",
+          "via": "tsc tsconfig.json"
+        },
+        {
+          "directory": true,
+          "job": "verify",
+          "matched": true,
+          "path": "src/",
+          "runKind": "checks",
+          "via": "tsc tsconfig.json"
+        },
+        {
+          "job": "verify",
+          "matched": true,
+          "path": "tests/cross-domain-stage-c.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "verify",
+          "matched": true,
+          "path": "tests/curves.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "verify",
+          "matched": true,
+          "path": "tests/engine-determinism.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "verify",
+          "matched": true,
+          "path": "tests/engine-medium.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "verify",
+          "matched": true,
+          "path": "tests/envelope.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "verify",
+          "matched": true,
+          "path": "tests/fft.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "verify",
+          "matched": true,
+          "path": "tests/jam-session.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "verify",
+          "matched": true,
+          "path": "tests/pitch.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "verify",
+          "matched": true,
+          "path": "tests/preset-integrity.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "verify",
+          "matched": true,
+          "path": "tests/property-based.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "verify",
+          "matched": true,
+          "path": "tests/score-fixtures.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "verify",
+          "matched": true,
+          "path": "tests/server-auth.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "verify",
+          "matched": true,
+          "path": "tests/server-medium.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "verify",
+          "matched": true,
+          "path": "tests/server-pathtraversal.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "verify",
+          "matched": true,
+          "path": "tests/server-validation.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "verify",
+          "matched": true,
+          "path": "tests/version-alignment.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        },
+        {
+          "job": "verify",
+          "matched": true,
+          "path": "tests/ws-schema-fuzz.test.ts",
+          "runKind": "executes",
+          "via": "vitest vitest.config.ts"
+        }
+      ],
+      "runsCount": 19,
+      "secrets": [
+        "GITHUB_TOKEN",
+        "NPM_TOKEN"
+      ],
+      "sends": {
+        "deploysPages": false,
+        "dispatchesTo": [],
+        "opensIssues": false,
+        "opensIssuesOnFailure": false,
+        "opensPullRequests": false,
+        "packages": [
+          {
+            "dir": "",
+            "name": "@mcptoolshop/vocal-synth-engine",
+            "registry": "npm"
+          }
+        ],
+        "publishes": true,
+        "publishesTo": [
+          "npm"
+        ],
+        "releases": true
+      },
+      "stages": [],
+      "triggers": [
+        {
+          "event": "push",
+          "tags": [
+            "v*"
+          ]
+        }
+      ],
+      "uses": [
+        "actions/checkout",
+        "actions/setup-node"
+      ],
+      "usesWorkflowToken": true
+    },
+    {
+      "checksCount": 0,
+      "commands": [],
+      "elsewhere": [],
+      "entry": "src/index.ts",
+      "file": "package.json",
+      "kind": "package",
+      "landings": [],
+      "mentions": [],
+      "name": "@mcptoolshop/vocal-synth-engine",
+      "permissions": [],
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 46
+        }
+      ],
+      "readers": [],
+      "runs": [
+        {
+          "path": "src/engine/LiveSynthEngine.ts",
+          "runKind": "executes"
+        },
+        {
+          "path": "src/engine/StreamingVocalSynthEngine.ts",
+          "runKind": "executes"
+        },
+        {
+          "path": "src/engine/consonantProfiles.ts",
+          "runKind": "executes"
+        },
+        {
+          "path": "src/engine/curves.ts",
+          "runKind": "executes"
+        },
+        {
+          "path": "src/engine/renderer.ts",
+          "runKind": "executes"
+        },
+        {
+          "path": "src/index.ts",
+          "runKind": "executes"
+        },
+        {
+          "path": "src/preset/loader.ts",
+          "runKind": "executes"
+        },
+        {
+          "path": "src/preset/schema.ts",
+          "runKind": "executes"
+        },
+        {
+          "path": "src/server/index.prod.ts",
+          "runKind": "executes"
+        },
+        {
+          "path": "src/types/score.ts",
+          "runKind": "executes"
+        },
+        {
+          "path": "src/types/scoreSchema.ts",
+          "runKind": "executes"
+        }
+      ],
+      "runsCount": 11,
+      "secrets": [],
+      "sends": {
+        "deploysPages": false,
+        "dispatchesTo": [],
+        "opensIssues": false,
+        "opensIssuesOnFailure": false,
+        "opensPullRequests": false,
+        "publishes": false,
+        "publishesTo": [],
+        "releases": false
+      },
+      "stages": [],
+      "triggers": [],
+      "uses": [],
+      "usesWorkflowToken": false
+    },
+    {
+      "checksCount": 0,
+      "commands": [],
+      "elsewhere": [],
+      "file": "package.json",
+      "kind": "command",
+      "landings": [],
+      "mentions": [],
+      "name": "vocal-synth-engine-mcp",
+      "permissions": [],
+      "programs": [
+        "git"
+      ],
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 15
+        }
+      ],
+      "readers": [],
+      "runs": [
+        {
+          "path": "src/mcp/server.ts",
+          "runKind": "executes"
+        }
+      ],
+      "runsCount": 1,
+      "secrets": [],
+      "sends": {
+        "deploysPages": false,
+        "dispatchesTo": [],
+        "opensIssues": false,
+        "opensIssuesOnFailure": false,
+        "opensPullRequests": false,
+        "publishes": false,
+        "publishesTo": [],
+        "releases": false
+      },
+      "stages": [],
+      "triggers": [],
+      "uses": [],
+      "usesWorkflowToken": false
+    },
+    {
+      "checksCount": 0,
+      "commands": [],
+      "elsewhere": [],
+      "file": "package.json",
+      "kind": "command",
+      "landings": [
+        "assets"
+      ],
+      "mentions": [],
+      "name": "vse-analyze",
+      "permissions": [],
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 6
+        }
+      ],
+      "readers": [],
+      "runs": [
+        {
+          "path": "src/cli/analyze.ts",
+          "runKind": "executes"
+        }
+      ],
+      "runsCount": 1,
+      "secrets": [],
+      "sends": {
+        "deploysPages": false,
+        "dispatchesTo": [],
+        "opensIssues": false,
+        "opensIssuesOnFailure": false,
+        "opensPullRequests": false,
+        "publishes": false,
+        "publishesTo": [],
+        "releases": false
+      },
+      "stages": [],
+      "triggers": [],
+      "uses": [],
+      "usesWorkflowToken": false
+    },
+    {
+      "checksCount": 0,
+      "commands": [],
+      "elsewhere": [],
+      "file": "package.json",
+      "kind": "command",
+      "landings": [],
+      "mentions": [],
+      "name": "vse-build-preset",
+      "permissions": [],
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 6
+        }
+      ],
+      "readers": [],
+      "runs": [
+        {
+          "path": "src/cli/build-preset.ts",
+          "runKind": "executes"
+        }
+      ],
+      "runsCount": 1,
+      "secrets": [],
+      "sends": {
+        "deploysPages": false,
+        "dispatchesTo": [],
+        "opensIssues": false,
+        "opensIssuesOnFailure": false,
+        "opensPullRequests": false,
+        "publishes": false,
+        "publishesTo": [],
+        "releases": false
+      },
+      "stages": [],
+      "triggers": [],
+      "uses": [],
+      "usesWorkflowToken": false
+    },
+    {
+      "checksCount": 0,
+      "commands": [],
+      "elsewhere": [],
+      "file": "package.json",
+      "kind": "command",
+      "landings": [],
+      "mentions": [],
+      "name": "vse-compare",
+      "permissions": [],
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 4
+        }
+      ],
+      "readers": [],
+      "runs": [
+        {
+          "path": "src/cli/compare.ts",
+          "runKind": "executes"
+        }
+      ],
+      "runsCount": 1,
+      "secrets": [],
+      "sends": {
+        "deploysPages": false,
+        "dispatchesTo": [],
+        "opensIssues": false,
+        "opensIssuesOnFailure": false,
+        "opensPullRequests": false,
+        "publishes": false,
+        "publishesTo": [],
+        "releases": false
+      },
+      "stages": [],
+      "triggers": [],
+      "uses": [],
+      "usesWorkflowToken": false
+    },
+    {
+      "checksCount": 0,
+      "commands": [],
+      "elsewhere": [],
+      "file": "package.json",
+      "kind": "command",
+      "landings": [],
+      "mentions": [],
+      "name": "vse-gen-vowel-wav",
+      "permissions": [],
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 2
+        }
+      ],
+      "readers": [],
+      "runs": [
+        {
+          "path": "src/cli/gen-vowel-wav.ts",
+          "runKind": "executes"
+        }
+      ],
+      "runsCount": 1,
+      "secrets": [],
+      "sends": {
+        "deploysPages": false,
+        "dispatchesTo": [],
+        "opensIssues": false,
+        "opensIssuesOnFailure": false,
+        "opensPullRequests": false,
+        "publishes": false,
+        "publishesTo": [],
+        "releases": false
+      },
+      "stages": [],
+      "triggers": [],
+      "uses": [],
+      "usesWorkflowToken": false
+    },
+    {
+      "checksCount": 0,
+      "commands": [],
+      "elsewhere": [],
+      "file": "package.json",
+      "kind": "command",
+      "landings": [],
+      "mentions": [],
+      "name": "vse-inspect",
+      "permissions": [],
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 4
+        }
+      ],
+      "readers": [],
+      "runs": [
+        {
+          "path": "src/cli/inspect.ts",
+          "runKind": "executes"
+        }
+      ],
+      "runsCount": 1,
+      "secrets": [],
+      "sends": {
+        "deploysPages": false,
+        "dispatchesTo": [],
+        "opensIssues": false,
+        "opensIssuesOnFailure": false,
+        "opensPullRequests": false,
+        "publishes": false,
+        "publishesTo": [],
+        "releases": false
+      },
+      "stages": [],
+      "triggers": [],
+      "uses": [],
+      "usesWorkflowToken": false
+    },
+    {
+      "checksCount": 0,
+      "commands": [],
+      "elsewhere": [],
+      "file": "package.json",
+      "kind": "command",
+      "landings": [],
+      "mentions": [],
+      "name": "vse-phonemize",
+      "permissions": [],
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 8
+        }
+      ],
+      "readers": [],
+      "runs": [
+        {
+          "path": "src/cli/phonemize.ts",
+          "runKind": "executes"
+        }
+      ],
+      "runsCount": 1,
+      "secrets": [],
+      "sends": {
+        "deploysPages": false,
+        "dispatchesTo": [],
+        "opensIssues": false,
+        "opensIssuesOnFailure": false,
+        "opensPullRequests": false,
+        "publishes": false,
+        "publishesTo": [],
+        "releases": false
+      },
+      "stages": [],
+      "triggers": [],
+      "uses": [],
+      "usesWorkflowToken": false
+    },
+    {
+      "checksCount": 0,
+      "commands": [],
+      "elsewhere": [],
+      "file": "package.json",
+      "kind": "command",
+      "landings": [],
+      "mentions": [],
+      "name": "vse-play-score",
+      "permissions": [],
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 11
+        }
+      ],
+      "readers": [],
+      "runs": [
+        {
+          "path": "src/cli/play-score.ts",
+          "runKind": "executes"
+        }
+      ],
+      "runsCount": 1,
+      "secrets": [],
+      "sends": {
+        "deploysPages": false,
+        "dispatchesTo": [],
+        "opensIssues": false,
+        "opensIssuesOnFailure": false,
+        "opensPullRequests": false,
+        "publishes": false,
+        "publishesTo": [],
+        "releases": false
+      },
+      "stages": [],
+      "triggers": [],
+      "uses": [],
+      "usesWorkflowToken": false
+    },
+    {
+      "checksCount": 0,
+      "commands": [],
+      "elsewhere": [],
+      "file": "package.json",
+      "kind": "command",
+      "landings": [],
+      "mentions": [],
+      "name": "vse-resynth",
+      "permissions": [],
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 4
+        }
+      ],
+      "readers": [],
+      "runs": [
+        {
+          "path": "src/cli/resynth.ts",
+          "runKind": "executes"
+        }
+      ],
+      "runsCount": 1,
+      "secrets": [],
+      "sends": {
+        "deploysPages": false,
+        "dispatchesTo": [],
+        "opensIssues": false,
+        "opensIssuesOnFailure": false,
+        "opensPullRequests": false,
+        "publishes": false,
+        "publishesTo": [],
+        "releases": false
+      },
+      "stages": [],
+      "triggers": [],
+      "uses": [],
+      "usesWorkflowToken": false
+    },
+    {
+      "checksCount": 0,
+      "commands": [],
+      "elsewhere": [],
+      "file": "package.json",
+      "kind": "command",
+      "landings": [],
+      "mentions": [],
+      "name": "vse-score-from-midi",
+      "permissions": [],
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 4
+        }
+      ],
+      "readers": [],
+      "runs": [
+        {
+          "path": "src/cli/score-from-midi.ts",
+          "runKind": "executes"
+        }
+      ],
+      "runsCount": 1,
+      "secrets": [],
+      "sends": {
+        "deploysPages": false,
+        "dispatchesTo": [],
+        "opensIssues": false,
+        "opensIssuesOnFailure": false,
+        "opensPullRequests": false,
+        "publishes": false,
+        "publishesTo": [],
+        "releases": false
+      },
+      "stages": [],
+      "triggers": [],
+      "uses": [],
+      "usesWorkflowToken": false
+    }
+  ],
+  "edges": [
+    {
+      "from": "scripts",
+      "kind": "file",
+      "to": "src"
+    },
+    {
+      "from": "tests",
+      "fromTests": true,
+      "kind": "file",
+      "to": "src"
+    }
+  ],
+  "generatedFrom": {
+    "commit": "f8fe895f7a07bdf1d2c127e038bfc986b2987c3b",
+    "tracked": 365
+  },
+  "landings": [
+    {
+      "readers": [
+        {
+          "by": ".github/workflows/release.yml"
+        },
+        {
+          "by": "tests/version-alignment.test.ts",
+          "call": "readFileSync",
+          "confidence": "ast",
+          "fromTests": true
+        }
+      ],
+      "target": "CHANGELOG.md",
+      "writers": []
+    },
+    {
+      "readers": [
+        {
+          "by": "playwright.config.ts",
+          "call": "literal",
+          "confidence": "ast"
+        }
+      ],
+      "target": "apps/cockpit/tests",
+      "writers": []
+    },
+    {
+      "readers": [],
+      "target": "assets",
+      "writers": [
+        {
+          "by": "src/cli/analyze.ts",
+          "confidence": "ast"
+        }
+      ]
+    },
+    {
+      "readers": [
+        {
+          "by": ".github/workflows/release.yml"
+        },
+        {
+          "by": "tests/version-alignment.test.ts",
+          "call": "readFileSync",
+          "confidence": "ast",
+          "fromTests": true
+        }
+      ],
+      "target": "package.json",
+      "writers": []
+    },
+    {
+      "readers": [
+        {
+          "by": "site/src/content/docs/handbook/cli-reference.md",
+          "call": "--",
+          "confidence": "text"
+        },
+        {
+          "by": "tests/helpers/index.ts",
+          "call": "literal",
+          "confidence": "ast",
+          "fromTests": true
+        },
+        {
+          "by": "tests/preset-integrity.test.ts",
+          "call": "literal",
+          "confidence": "ast",
+          "fromTests": true
+        },
+        {
+          "by": "tests/server-validation.test.ts",
+          "call": "literal",
+          "confidence": "ast",
+          "fromTests": true
+        }
+      ],
+      "target": "presets/default-voice/voicepreset.json",
+      "writers": []
+    },
+    {
+      "readers": [],
+      "target": "ref/ah_sustain.wav",
+      "writers": [
+        {
+          "by": "scripts/generate-ref-wav.ts",
+          "confidence": "ast"
+        }
+      ]
+    },
+    {
+      "readers": [
+        {
+          "by": "site/astro.config.mjs",
+          "call": "content-collection",
+          "confidence": "ast"
+        }
+      ],
+      "target": "site/src/content/docs",
+      "writers": []
+    },
+    {
+      "readers": [
+        {
+          "by": "site/astro.config.mjs",
+          "call": "autogenerate",
+          "confidence": "ast"
+        }
+      ],
+      "target": "site/src/content/docs/handbook",
+      "writers": []
+    },
+    {
+      "readers": [
+        {
+          "by": "tests/score-fixtures.test.ts",
+          "call": "literal",
+          "confidence": "ast",
+          "fromTests": true
+        }
+      ],
+      "target": "test-score-lyrics.json",
+      "writers": []
+    },
+    {
+      "readers": [
+        {
+          "by": "tests/score-fixtures.test.ts",
+          "call": "literal",
+          "confidence": "ast",
+          "fromTests": true
+        }
+      ],
+      "target": "test-score-morph.json",
+      "writers": []
+    },
+    {
+      "readers": [
+        {
+          "by": "tests/score-fixtures.test.ts",
+          "call": "literal",
+          "confidence": "ast",
+          "fromTests": true
+        }
+      ],
+      "target": "test-score-poly.json",
+      "writers": []
+    },
+    {
+      "readers": [
+        {
+          "by": "tests/score-fixtures.test.ts",
+          "call": "literal",
+          "confidence": "ast",
+          "fromTests": true
+        }
+      ],
+      "target": "test-score.json",
+      "writers": []
+    },
+    {
+      "readers": [
+        {
+          "by": "scripts/bench-gate.mjs",
+          "call": "existsSync",
+          "confidence": "ast"
+        }
+      ],
+      "target": "tests/__bench__",
+      "writers": []
+    },
+    {
+      "readers": [
+        {
+          "by": "scripts/bench-gate.mjs",
+          "call": "existsSync",
+          "confidence": "ast"
+        },
+        {
+          "by": "scripts/bench-gate.mjs",
+          "call": "readFileSync",
+          "confidence": "ast"
+        }
+      ],
+      "target": "tests/__bench__/baseline.json",
+      "writers": [
+        {
+          "by": "scripts/bench-gate.mjs",
+          "confidence": "ast",
+          "stamps": true
+        }
+      ]
+    },
+    {
+      "readers": [
+        {
+          "by": "scripts/bench-gate.mjs",
+          "call": "existsSync",
+          "confidence": "ast"
+        },
+        {
+          "by": "scripts/bench-gate.mjs",
+          "call": "readFileSync",
+          "confidence": "ast"
+        }
+      ],
+      "target": "tests/__bench__/last-run.json",
+      "writers": []
+    },
+    {
+      "readers": [
+        {
+          "by": ".github/workflows/ci.yml"
+        },
+        {
+          "by": ".github/workflows/dogfood.yml"
+        },
+        {
+          "by": ".github/workflows/release.yml"
+        }
+      ],
+      "target": "tsconfig.json",
+      "writers": []
+    }
+  ],
+  "overlaps": [],
+  "submodules": [],
+  "symlinks": [],
+  "testFiles": 22,
+  "unassigned": []
+}

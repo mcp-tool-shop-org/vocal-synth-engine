@@ -22,6 +22,7 @@ on:
       - 'lib/**'
       - 'tests/**'
       - '.github/workflows/**'
+      - 'atlas/**'
       - 'site/package.json'
       - 'site/package-lock.json'
       - 'site/astro.config.mjs'
@@ -34,6 +35,7 @@ on:
       - 'lib/**'
       - 'tests/**'
       - '.github/workflows/**'
+      - 'atlas/**'
       - 'site/package.json'
       - 'site/package-lock.json'
       - 'site/astro.config.mjs'
@@ -77,6 +79,12 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
+
+      # Atlas requires Node 22 or later, so the check runs on the Node 22
+      # cell only, and on Linux only: the map is the same on every host.
+      - name: Atlas check
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == 22
+        run: npx --yes @dogfood-lab/atlas@1.17.0 check
 
       - name: Install dependencies
         run: npm ci

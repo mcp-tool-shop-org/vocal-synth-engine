@@ -1,0 +1,2101 @@
+{
+  "authorship": {
+    "parts": [],
+    "places": []
+  },
+  "boundaries": [
+    {
+      "breakage": {
+        "coChangesOnly": [],
+        "collapsed": false,
+        "confidence": "low",
+        "importsAndCoChanges": [],
+        "importsOnly": []
+      },
+      "cohesion": null,
+      "cohesionDropped": false,
+      "confidence": "low",
+      "highWater": null,
+      "name": ".github",
+      "qualifyingSourceCommits": 0,
+      "rebaseline": null
+    },
+    {
+      "breakage": {
+        "coChangesOnly": [],
+        "collapsed": false,
+        "confidence": "low",
+        "importsAndCoChanges": [],
+        "importsOnly": []
+      },
+      "cohesion": null,
+      "cohesionDropped": false,
+      "confidence": "low",
+      "highWater": null,
+      "name": "assets",
+      "qualifyingSourceCommits": 0,
+      "rebaseline": null
+    },
+    {
+      "breakage": {
+        "coChangesOnly": [],
+        "collapsed": false,
+        "confidence": "low",
+        "importsAndCoChanges": [],
+        "importsOnly": []
+      },
+      "cohesion": null,
+      "cohesionDropped": false,
+      "confidence": "low",
+      "highWater": null,
+      "name": "cockpit",
+      "qualifyingSourceCommits": 3,
+      "rebaseline": null
+    },
+    {
+      "breakage": {
+        "coChangesOnly": [],
+        "collapsed": false,
+        "confidence": "low",
+        "importsAndCoChanges": [],
+        "importsOnly": []
+      },
+      "cohesion": null,
+      "cohesionDropped": false,
+      "confidence": "low",
+      "highWater": null,
+      "name": "presets",
+      "qualifyingSourceCommits": 0,
+      "rebaseline": null
+    },
+    {
+      "breakage": {
+        "coChangesOnly": [],
+        "collapsed": false,
+        "confidence": "low",
+        "importsAndCoChanges": [],
+        "importsOnly": []
+      },
+      "cohesion": null,
+      "cohesionDropped": false,
+      "confidence": "low",
+      "highWater": null,
+      "name": "ref",
+      "qualifyingSourceCommits": 0,
+      "rebaseline": null
+    },
+    {
+      "breakage": {
+        "coChangesOnly": [],
+        "collapsed": false,
+        "confidence": "low",
+        "importsAndCoChanges": [],
+        "importsOnly": []
+      },
+      "cohesion": null,
+      "cohesionDropped": false,
+      "confidence": "low",
+      "highWater": null,
+      "name": "root",
+      "qualifyingSourceCommits": 2,
+      "rebaseline": null
+    },
+    {
+      "breakage": {
+        "coChangesOnly": [],
+        "collapsed": false,
+        "confidence": "low",
+        "importsAndCoChanges": [],
+        "importsOnly": []
+      },
+      "cohesion": null,
+      "cohesionDropped": false,
+      "confidence": "low",
+      "highWater": null,
+      "name": "scripts",
+      "qualifyingSourceCommits": 1,
+      "rebaseline": null
+    },
+    {
+      "breakage": {
+        "coChangesOnly": [],
+        "collapsed": false,
+        "confidence": "low",
+        "importsAndCoChanges": [],
+        "importsOnly": []
+      },
+      "cohesion": null,
+      "cohesionDropped": false,
+      "confidence": "low",
+      "highWater": null,
+      "name": "site",
+      "qualifyingSourceCommits": 1,
+      "rebaseline": null
+    },
+    {
+      "breakage": {
+        "coChangesOnly": [],
+        "collapsed": false,
+        "confidence": "low",
+        "importsAndCoChanges": [],
+        "importsOnly": [
+          "scripts",
+          "tests"
+        ]
+      },
+      "cohesion": null,
+      "cohesionDropped": false,
+      "confidence": "low",
+      "highWater": null,
+      "name": "src",
+      "qualifyingSourceCommits": 4,
+      "rebaseline": null
+    },
+    {
+      "breakage": {
+        "coChangesOnly": [],
+        "collapsed": false,
+        "confidence": "low",
+        "importsAndCoChanges": [],
+        "importsOnly": []
+      },
+      "cohesion": null,
+      "cohesionDropped": false,
+      "confidence": "low",
+      "highWater": null,
+      "name": "tests",
+      "qualifyingSourceCommits": 3,
+      "rebaseline": null
+    }
+  ],
+  "churn": {
+    "definition": "commits is how many commits in the window touch the file, including merges and commits dropped from coupling. lines is added plus deleted in those commits.",
+    "files": [
+      {
+        "commits": 1,
+        "lines": 7,
+        "path": ".dockerignore"
+      },
+      {
+        "commits": 1,
+        "lines": 19,
+        "path": ".github/CODEOWNERS"
+      },
+      {
+        "commits": 1,
+        "lines": 36,
+        "path": ".github/ISSUE_TEMPLATE/bug.md"
+      },
+      {
+        "commits": 1,
+        "lines": 29,
+        "path": ".github/ISSUE_TEMPLATE/feature.md"
+      },
+      {
+        "commits": 3,
+        "lines": 73,
+        "path": ".github/dependabot.yml"
+      },
+      {
+        "commits": 1,
+        "lines": 28,
+        "path": ".github/pull_request_template.md"
+      },
+      {
+        "commits": 11,
+        "lines": 223,
+        "path": ".github/workflows/ci.yml"
+      },
+      {
+        "commits": 8,
+        "lines": 242,
+        "path": ".github/workflows/dogfood.yml"
+      },
+      {
+        "commits": 7,
+        "lines": 64,
+        "path": ".github/workflows/pages.yml"
+      },
+      {
+        "commits": 4,
+        "lines": 169,
+        "path": ".github/workflows/release.yml"
+      },
+      {
+        "commits": 4,
+        "lines": 36,
+        "path": ".gitignore"
+      },
+      {
+        "commits": 2,
+        "lines": 167,
+        "path": "CHANGELOG.md"
+      },
+      {
+        "commits": 1,
+        "lines": 36,
+        "path": "CODE_OF_CONDUCT.md"
+      },
+      {
+        "commits": 1,
+        "lines": 78,
+        "path": "CONTRIBUTING.md"
+      },
+      {
+        "commits": 5,
+        "lines": 86,
+        "path": "Dockerfile"
+      },
+      {
+        "commits": 1,
+        "lines": 21,
+        "path": "LICENSE"
+      },
+      {
+        "commits": 2,
+        "lines": 466,
+        "path": "README.es.md"
+      },
+      {
+        "commits": 2,
+        "lines": 460,
+        "path": "README.fr.md"
+      },
+      {
+        "commits": 2,
+        "lines": 484,
+        "path": "README.hi.md"
+      },
+      {
+        "commits": 2,
+        "lines": 470,
+        "path": "README.it.md"
+      },
+      {
+        "commits": 2,
+        "lines": 470,
+        "path": "README.ja.md"
+      },
+      {
+        "commits": 5,
+        "lines": 326,
+        "path": "README.md"
+      },
+      {
+        "commits": 2,
+        "lines": 474,
+        "path": "README.pt-BR.md"
+      },
+      {
+        "commits": 2,
+        "lines": 472,
+        "path": "README.zh.md"
+      },
+      {
+        "commits": 2,
+        "lines": 72,
+        "path": "SCORECARD.md"
+      },
+      {
+        "commits": 2,
+        "lines": 40,
+        "path": "SECURITY.md"
+      },
+      {
+        "commits": 3,
+        "lines": 92,
+        "path": "SHIP_GATE.md"
+      },
+      {
+        "commits": 1,
+        "lines": 24,
+        "path": "apps/cockpit/.gitignore"
+      },
+      {
+        "commits": 1,
+        "lines": 4,
+        "path": "apps/cockpit/.vscode/extensions.json"
+      },
+      {
+        "commits": 1,
+        "lines": 11,
+        "path": "apps/cockpit/.vscode/launch.json"
+      },
+      {
+        "commits": 2,
+        "lines": 115,
+        "path": "apps/cockpit/README.md"
+      },
+      {
+        "commits": 3,
+        "lines": 1610,
+        "path": "apps/cockpit/index.html"
+      },
+      {
+        "commits": 2,
+        "lines": 2124,
+        "path": "apps/cockpit/package-lock.json"
+      },
+      {
+        "commits": 2,
+        "lines": 15,
+        "path": "apps/cockpit/package.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "apps/cockpit/public/favicon.ico"
+      },
+      {
+        "commits": 1,
+        "lines": 9,
+        "path": "apps/cockpit/public/favicon.svg"
+      },
+      {
+        "commits": 1,
+        "lines": 99,
+        "path": "apps/cockpit/public/pcm-worklet.js"
+      },
+      {
+        "commits": 1,
+        "lines": 118,
+        "path": "apps/cockpit/src/auth.ts"
+      },
+      {
+        "commits": 4,
+        "lines": 2303,
+        "path": "apps/cockpit/src/main.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 1105,
+        "path": "apps/cockpit/src/pages/index.astro"
+      },
+      {
+        "commits": 1,
+        "lines": 316,
+        "path": "apps/cockpit/src/waveform.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 173,
+        "path": "apps/cockpit/tests/smoke.spec.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 11,
+        "path": "apps/cockpit/tsconfig.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "assets/logo.png"
+      },
+      {
+        "commits": 3,
+        "lines": 37,
+        "path": "fly.toml"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "out-poly.wav"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "out.wav"
+      },
+      {
+        "commits": 8,
+        "lines": 12533,
+        "path": "package-lock.json"
+      },
+      {
+        "commits": 7,
+        "lines": 185,
+        "path": "package.json"
+      },
+      {
+        "commits": 2,
+        "lines": 143,
+        "path": "passport.json"
+      },
+      {
+        "commits": 1,
+        "lines": 53,
+        "path": "playwright.config.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/bright-lab/assets/AH_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/bright-lab/assets/AH_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/bright-lab/assets/AH_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/bright-lab/assets/EE_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 3,
+        "path": "presets/bright-lab/assets/EE_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/bright-lab/assets/EE_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/bright-lab/assets/OO_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/bright-lab/assets/OO_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/bright-lab/assets/OO_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/bright-lab/assets/freq_axis_hz.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 7,
+        "path": "presets/bright-lab/meta.json"
+      },
+      {
+        "commits": 1,
+        "lines": 82,
+        "path": "presets/bright-lab/voicepreset.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/default-voice/assets/AH_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/default-voice/assets/AH_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/default-voice/assets/AH_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/default-voice/assets/EE_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 3,
+        "path": "presets/default-voice/assets/EE_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/default-voice/assets/EE_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/default-voice/assets/OO_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/default-voice/assets/OO_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/default-voice/assets/OO_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/default-voice/assets/freq_axis_hz.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 7,
+        "path": "presets/default-voice/meta.json"
+      },
+      {
+        "commits": 1,
+        "lines": 82,
+        "path": "presets/default-voice/voicepreset.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-aoede/assets/AH_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-aoede/assets/AH_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-aoede/assets/AH_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-aoede/assets/EE_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-aoede/assets/EE_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-aoede/assets/EE_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-aoede/assets/OO_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-aoede/assets/OO_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-aoede/assets/OO_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-aoede/assets/freq_axis_hz.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 7,
+        "path": "presets/kokoro-af-aoede/meta.json"
+      },
+      {
+        "commits": 1,
+        "lines": 82,
+        "path": "presets/kokoro-af-aoede/voicepreset.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-heart/assets/AH_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 1,
+        "path": "presets/kokoro-af-heart/assets/AH_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-heart/assets/AH_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-heart/assets/EE_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-heart/assets/EE_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-heart/assets/EE_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-heart/assets/OO_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-heart/assets/OO_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-heart/assets/OO_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-heart/assets/freq_axis_hz.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 7,
+        "path": "presets/kokoro-af-heart/meta.json"
+      },
+      {
+        "commits": 1,
+        "lines": 82,
+        "path": "presets/kokoro-af-heart/voicepreset.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-jessica/assets/AH_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-jessica/assets/AH_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-jessica/assets/AH_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-jessica/assets/EE_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-jessica/assets/EE_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-jessica/assets/EE_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-jessica/assets/OO_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-jessica/assets/OO_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-jessica/assets/OO_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-jessica/assets/freq_axis_hz.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 7,
+        "path": "presets/kokoro-af-jessica/meta.json"
+      },
+      {
+        "commits": 1,
+        "lines": 82,
+        "path": "presets/kokoro-af-jessica/voicepreset.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-sky/assets/AH_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-sky/assets/AH_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-sky/assets/AH_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-sky/assets/EE_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-sky/assets/EE_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-sky/assets/EE_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-sky/assets/OO_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 1,
+        "path": "presets/kokoro-af-sky/assets/OO_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-sky/assets/OO_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-af-sky/assets/freq_axis_hz.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 7,
+        "path": "presets/kokoro-af-sky/meta.json"
+      },
+      {
+        "commits": 1,
+        "lines": 82,
+        "path": "presets/kokoro-af-sky/voicepreset.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-eric/assets/AH_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-eric/assets/AH_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-eric/assets/AH_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-eric/assets/EE_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-eric/assets/EE_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-eric/assets/EE_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-eric/assets/OO_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-eric/assets/OO_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-eric/assets/OO_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-eric/assets/freq_axis_hz.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 7,
+        "path": "presets/kokoro-am-eric/meta.json"
+      },
+      {
+        "commits": 1,
+        "lines": 82,
+        "path": "presets/kokoro-am-eric/voicepreset.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-fenrir/assets/AH_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-fenrir/assets/AH_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-fenrir/assets/AH_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-fenrir/assets/EE_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-fenrir/assets/EE_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-fenrir/assets/EE_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-fenrir/assets/OO_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 3,
+        "path": "presets/kokoro-am-fenrir/assets/OO_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-fenrir/assets/OO_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-fenrir/assets/freq_axis_hz.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 7,
+        "path": "presets/kokoro-am-fenrir/meta.json"
+      },
+      {
+        "commits": 1,
+        "lines": 82,
+        "path": "presets/kokoro-am-fenrir/voicepreset.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-liam/assets/AH_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 2,
+        "path": "presets/kokoro-am-liam/assets/AH_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-liam/assets/AH_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-liam/assets/EE_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-liam/assets/EE_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-liam/assets/EE_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-liam/assets/OO_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-liam/assets/OO_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-liam/assets/OO_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-liam/assets/freq_axis_hz.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 7,
+        "path": "presets/kokoro-am-liam/meta.json"
+      },
+      {
+        "commits": 1,
+        "lines": 82,
+        "path": "presets/kokoro-am-liam/voicepreset.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-onyx/assets/AH_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-onyx/assets/AH_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-onyx/assets/AH_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-onyx/assets/EE_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 1,
+        "path": "presets/kokoro-am-onyx/assets/EE_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-onyx/assets/EE_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-onyx/assets/OO_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 2,
+        "path": "presets/kokoro-am-onyx/assets/OO_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-onyx/assets/OO_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-am-onyx/assets/freq_axis_hz.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 7,
+        "path": "presets/kokoro-am-onyx/meta.json"
+      },
+      {
+        "commits": 1,
+        "lines": 82,
+        "path": "presets/kokoro-am-onyx/voicepreset.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bf-alice/assets/AH_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bf-alice/assets/AH_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bf-alice/assets/AH_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bf-alice/assets/EE_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bf-alice/assets/EE_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bf-alice/assets/EE_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bf-alice/assets/OO_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bf-alice/assets/OO_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bf-alice/assets/OO_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bf-alice/assets/freq_axis_hz.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 7,
+        "path": "presets/kokoro-bf-alice/meta.json"
+      },
+      {
+        "commits": 1,
+        "lines": 82,
+        "path": "presets/kokoro-bf-alice/voicepreset.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bf-emma/assets/AH_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bf-emma/assets/AH_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bf-emma/assets/AH_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bf-emma/assets/EE_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bf-emma/assets/EE_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bf-emma/assets/EE_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bf-emma/assets/OO_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bf-emma/assets/OO_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bf-emma/assets/OO_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bf-emma/assets/freq_axis_hz.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 7,
+        "path": "presets/kokoro-bf-emma/meta.json"
+      },
+      {
+        "commits": 1,
+        "lines": 82,
+        "path": "presets/kokoro-bf-emma/voicepreset.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bf-isabella/assets/AH_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bf-isabella/assets/AH_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bf-isabella/assets/AH_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bf-isabella/assets/EE_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 2,
+        "path": "presets/kokoro-bf-isabella/assets/EE_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bf-isabella/assets/EE_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bf-isabella/assets/OO_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 1,
+        "path": "presets/kokoro-bf-isabella/assets/OO_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bf-isabella/assets/OO_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bf-isabella/assets/freq_axis_hz.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 7,
+        "path": "presets/kokoro-bf-isabella/meta.json"
+      },
+      {
+        "commits": 1,
+        "lines": 82,
+        "path": "presets/kokoro-bf-isabella/voicepreset.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bm-george/assets/AH_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bm-george/assets/AH_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bm-george/assets/AH_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bm-george/assets/EE_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bm-george/assets/EE_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bm-george/assets/EE_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bm-george/assets/OO_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bm-george/assets/OO_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bm-george/assets/OO_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bm-george/assets/freq_axis_hz.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 7,
+        "path": "presets/kokoro-bm-george/meta.json"
+      },
+      {
+        "commits": 1,
+        "lines": 82,
+        "path": "presets/kokoro-bm-george/voicepreset.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bm-lewis/assets/AH_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 1,
+        "path": "presets/kokoro-bm-lewis/assets/AH_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bm-lewis/assets/AH_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bm-lewis/assets/EE_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bm-lewis/assets/EE_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bm-lewis/assets/EE_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bm-lewis/assets/OO_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bm-lewis/assets/OO_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bm-lewis/assets/OO_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "presets/kokoro-bm-lewis/assets/freq_axis_hz.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 7,
+        "path": "presets/kokoro-bm-lewis/meta.json"
+      },
+      {
+        "commits": 1,
+        "lines": 82,
+        "path": "presets/kokoro-bm-lewis/voicepreset.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "ref/ah_sustain.wav"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "ref/out/ah_resynth.wav"
+      },
+      {
+        "commits": 1,
+        "lines": 6,
+        "path": "ref/out/ah_resynth_telemetry.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "ref/out/morph_render.wav"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "ref/out/preset/assets/AH_envelope_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "ref/out/preset/assets/AH_harmonics_mag.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "ref/out/preset/assets/AH_noise_db.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "ref/out/preset/assets/freq_axis_hz.f32"
+      },
+      {
+        "commits": 1,
+        "lines": 44,
+        "path": "ref/out/preset/voicepreset.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "ref/out/score_render.wav"
+      },
+      {
+        "commits": 3,
+        "lines": 30,
+        "path": "render.yaml"
+      },
+      {
+        "commits": 1,
+        "lines": 139,
+        "path": "scripts/bench-gate.mjs"
+      },
+      {
+        "commits": 1,
+        "lines": 108,
+        "path": "scripts/generate-dummy-preset.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 48,
+        "path": "scripts/generate-ref-wav.ts"
+      },
+      {
+        "commits": 2,
+        "lines": 197,
+        "path": "scripts/kokoro/build-voice.sh"
+      },
+      {
+        "commits": 1,
+        "lines": 394,
+        "path": "scripts/kokoro/generate_vowels.py"
+      },
+      {
+        "commits": 2,
+        "lines": 43,
+        "path": "scripts/verify.sh"
+      },
+      {
+        "commits": 1,
+        "lines": 8,
+        "path": "scripts}/test-consonants.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 10,
+        "path": "scripts}/test-g2p.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "scripts}/test-jam-collaboration.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "scripts}/test-jam-recording.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "scripts}/test-jam-session.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 8,
+        "path": "scripts}/test-lyrics-golden.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 10,
+        "path": "scripts}/test-multi-timbre.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 6,
+        "path": "scripts}/test-noise-tail.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 15,
+        "path": "scripts}/test-score-render.ts"
+      },
+      {
+        "commits": 2,
+        "lines": 21,
+        "path": "site/astro.config.mjs"
+      },
+      {
+        "commits": 2,
+        "lines": 13590,
+        "path": "site/package-lock.json"
+      },
+      {
+        "commits": 2,
+        "lines": 24,
+        "path": "site/package.json"
+      },
+      {
+        "commits": 1,
+        "lines": 6,
+        "path": "site/src/content.config.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 74,
+        "path": "site/src/content/docs/handbook/architecture.md"
+      },
+      {
+        "commits": 1,
+        "lines": 222,
+        "path": "site/src/content/docs/handbook/beginners.md"
+      },
+      {
+        "commits": 1,
+        "lines": 182,
+        "path": "site/src/content/docs/handbook/cli-reference.md"
+      },
+      {
+        "commits": 1,
+        "lines": 87,
+        "path": "site/src/content/docs/handbook/cockpit-and-jams.md"
+      },
+      {
+        "commits": 1,
+        "lines": 172,
+        "path": "site/src/content/docs/handbook/deployment.md"
+      },
+      {
+        "commits": 1,
+        "lines": 75,
+        "path": "site/src/content/docs/handbook/getting-started.md"
+      },
+      {
+        "commits": 1,
+        "lines": 36,
+        "path": "site/src/content/docs/handbook/index.md"
+      },
+      {
+        "commits": 1,
+        "lines": 223,
+        "path": "site/src/content/docs/handbook/reference.md"
+      },
+      {
+        "commits": 1,
+        "lines": 167,
+        "path": "site/src/content/docs/handbook/score-format.md"
+      },
+      {
+        "commits": 1,
+        "lines": 180,
+        "path": "site/src/content/docs/handbook/troubleshooting.md"
+      },
+      {
+        "commits": 1,
+        "lines": 109,
+        "path": "site/src/content/docs/handbook/voice-presets.md"
+      },
+      {
+        "commits": 1,
+        "lines": 33,
+        "path": "site/src/pages/index.astro"
+      },
+      {
+        "commits": 1,
+        "lines": 98,
+        "path": "site/src/site-config.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 3,
+        "path": "site/src/styles/global.css"
+      },
+      {
+        "commits": 1,
+        "lines": 28,
+        "path": "site/src/styles/starlight-custom.css"
+      },
+      {
+        "commits": 1,
+        "lines": 5,
+        "path": "site/tsconfig.json"
+      },
+      {
+        "commits": 1,
+        "lines": 94,
+        "path": "src/cli/_runner.ts"
+      },
+      {
+        "commits": 5,
+        "lines": 295,
+        "path": "src/cli/analyze.ts"
+      },
+      {
+        "commits": 5,
+        "lines": 370,
+        "path": "src/cli/build-preset.ts"
+      },
+      {
+        "commits": 5,
+        "lines": 275,
+        "path": "src/cli/compare.ts"
+      },
+      {
+        "commits": 4,
+        "lines": 161,
+        "path": "src/cli/gen-vowel-wav.ts"
+      },
+      {
+        "commits": 4,
+        "lines": 272,
+        "path": "src/cli/inspect.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 255,
+        "path": "src/cli/phonemize.ts"
+      },
+      {
+        "commits": 5,
+        "lines": 237,
+        "path": "src/cli/play-score.ts"
+      },
+      {
+        "commits": 2,
+        "lines": 178,
+        "path": "src/cli/realtime-demo.ts"
+      },
+      {
+        "commits": 4,
+        "lines": 222,
+        "path": "src/cli/resynth.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 362,
+        "path": "src/cli/score-from-midi.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 211,
+        "path": "src/cli/test-consonants.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 126,
+        "path": "src/cli/test-g2p.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 315,
+        "path": "src/cli/test-jam-collaboration.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 269,
+        "path": "src/cli/test-jam-recording.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 265,
+        "path": "src/cli/test-jam-session.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 213,
+        "path": "src/cli/test-lyrics-golden.ts"
+      },
+      {
+        "commits": 2,
+        "lines": 149,
+        "path": "src/cli/test-multi-timbre.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 109,
+        "path": "src/cli/test-noise-tail.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 91,
+        "path": "src/cli/test-score-render.ts"
+      },
+      {
+        "commits": 2,
+        "lines": 61,
+        "path": "src/dsp/fft.ts"
+      },
+      {
+        "commits": 2,
+        "lines": 109,
+        "path": "src/dsp/pitch.ts"
+      },
+      {
+        "commits": 4,
+        "lines": 980,
+        "path": "src/engine/LiveSynthEngine.ts"
+      },
+      {
+        "commits": 4,
+        "lines": 1032,
+        "path": "src/engine/StreamingVocalSynthEngine.ts"
+      },
+      {
+        "commits": 3,
+        "lines": 272,
+        "path": "src/engine/consonantProfiles.ts"
+      },
+      {
+        "commits": 4,
+        "lines": 264,
+        "path": "src/engine/curves.ts"
+      },
+      {
+        "commits": 3,
+        "lines": 326,
+        "path": "src/engine/renderer.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 91,
+        "path": "src/index.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 409,
+        "path": "src/mcp/server.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 115,
+        "path": "src/phonemize/arpabet.ts"
+      },
+      {
+        "commits": 2,
+        "lines": 125,
+        "path": "src/phonemize/g2p.ts"
+      },
+      {
+        "commits": 2,
+        "lines": 184,
+        "path": "src/phonemize/index.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 110,
+        "path": "src/phonemize/syllabify.ts"
+      },
+      {
+        "commits": 3,
+        "lines": 278,
+        "path": "src/preset/loader.ts"
+      },
+      {
+        "commits": 3,
+        "lines": 105,
+        "path": "src/preset/schema.ts"
+      },
+      {
+        "commits": 4,
+        "lines": 175,
+        "path": "src/server/app.ts"
+      },
+      {
+        "commits": 4,
+        "lines": 274,
+        "path": "src/server/index.dev.ts"
+      },
+      {
+        "commits": 3,
+        "lines": 240,
+        "path": "src/server/index.prod.ts"
+      },
+      {
+        "commits": 4,
+        "lines": 312,
+        "path": "src/server/middleware/auth.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 155,
+        "path": "src/server/middleware/errorHandler.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 55,
+        "path": "src/server/middleware/metricsMiddleware.ts"
+      },
+      {
+        "commits": 4,
+        "lines": 89,
+        "path": "src/server/middleware/rateLimit.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 41,
+        "path": "src/server/middleware/requestId.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 42,
+        "path": "src/server/middleware/structuredLog.ts"
+      },
+      {
+        "commits": 2,
+        "lines": 53,
+        "path": "src/server/middleware/validate.ts"
+      },
+      {
+        "commits": 3,
+        "lines": 79,
+        "path": "src/server/routes/health.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 54,
+        "path": "src/server/routes/metrics.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 376,
+        "path": "src/server/routes/openapi.ts"
+      },
+      {
+        "commits": 3,
+        "lines": 73,
+        "path": "src/server/routes/phonemize.ts"
+      },
+      {
+        "commits": 2,
+        "lines": 33,
+        "path": "src/server/routes/presets.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 103,
+        "path": "src/server/routes/probes.ts"
+      },
+      {
+        "commits": 5,
+        "lines": 386,
+        "path": "src/server/routes/render.ts"
+      },
+      {
+        "commits": 6,
+        "lines": 501,
+        "path": "src/server/routes/renders.ts"
+      },
+      {
+        "commits": 2,
+        "lines": 945,
+        "path": "src/server/services/JamSession.ts"
+      },
+      {
+        "commits": 2,
+        "lines": 524,
+        "path": "src/server/services/JamSessionManager.ts"
+      },
+      {
+        "commits": 3,
+        "lines": 698,
+        "path": "src/server/services/LiveSession.ts"
+      },
+      {
+        "commits": 2,
+        "lines": 186,
+        "path": "src/server/services/jamExport.ts"
+      },
+      {
+        "commits": 2,
+        "lines": 513,
+        "path": "src/server/services/renderQueue.ts"
+      },
+      {
+        "commits": 3,
+        "lines": 251,
+        "path": "src/server/services/renderScoreToWav.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 287,
+        "path": "src/server/services/wsSchemas.ts"
+      },
+      {
+        "commits": 5,
+        "lines": 581,
+        "path": "src/server/storage/renderStore.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 39,
+        "path": "src/server/util/gitCommit.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 142,
+        "path": "src/server/util/gracefulShutdown.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 107,
+        "path": "src/server/util/logger.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 172,
+        "path": "src/server/util/metrics.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 90,
+        "path": "src/server/util/wsHeartbeat.ts"
+      },
+      {
+        "commits": 2,
+        "lines": 391,
+        "path": "src/types/jam.ts"
+      },
+      {
+        "commits": 2,
+        "lines": 159,
+        "path": "src/types/live.ts"
+      },
+      {
+        "commits": 4,
+        "lines": 62,
+        "path": "src/types/score.ts"
+      },
+      {
+        "commits": 3,
+        "lines": 137,
+        "path": "src/types/scoreSchema.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 12,
+        "path": "test-score-lyrics.json"
+      },
+      {
+        "commits": 1,
+        "lines": 33,
+        "path": "test-score-morph.json"
+      },
+      {
+        "commits": 2,
+        "lines": 35,
+        "path": "test-score-poly.json"
+      },
+      {
+        "commits": 1,
+        "lines": 44,
+        "path": "test-score.json"
+      },
+      {
+        "commits": 1,
+        "lines": 8,
+        "path": "tests/__bench__/baseline.json"
+      },
+      {
+        "commits": 1,
+        "lines": 9,
+        "path": "tests/__snapshots__/score-fixtures.test.ts.snap"
+      },
+      {
+        "commits": 1,
+        "lines": 202,
+        "path": "tests/cross-domain-stage-c.test.ts"
+      },
+      {
+        "commits": 2,
+        "lines": 323,
+        "path": "tests/curves.test.ts"
+      },
+      {
+        "commits": 2,
+        "lines": 192,
+        "path": "tests/engine-determinism.test.ts"
+      },
+      {
+        "commits": 2,
+        "lines": 249,
+        "path": "tests/engine-medium.test.ts"
+      },
+      {
+        "commits": 2,
+        "lines": 132,
+        "path": "tests/envelope.test.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 78,
+        "path": "tests/fft.test.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 76,
+        "path": "tests/helpers/index.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 352,
+        "path": "tests/jam-session.test.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 77,
+        "path": "tests/pitch.test.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 201,
+        "path": "tests/preset-integrity.test.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 250,
+        "path": "tests/property-based.test.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 120,
+        "path": "tests/render.bench.ts"
+      },
+      {
+        "commits": 2,
+        "lines": 236,
+        "path": "tests/score-fixtures.test.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 174,
+        "path": "tests/server-auth.test.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 219,
+        "path": "tests/server-medium.test.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 121,
+        "path": "tests/server-pathtraversal.test.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 135,
+        "path": "tests/server-validation.test.ts"
+      },
+      {
+        "commits": 2,
+        "lines": 52,
+        "path": "tests/version-alignment.test.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 343,
+        "path": "tests/ws-schema-fuzz.test.ts"
+      },
+      {
+        "commits": 2,
+        "lines": 18,
+        "path": "tsconfig.json"
+      },
+      {
+        "commits": 3,
+        "lines": 78,
+        "path": "vitest.config.ts"
+      }
+    ]
+  },
+  "confidence": {
+    "level": "low",
+    "reason": "fewer than 30 qualifying commits in the window, and fewer than 20 source files reach 10 revisions"
+  },
+  "generatedAt": "2026-09-24T08:29:57.961Z",
+  "generatedFrom": {
+    "commit": "f8fe895f7a07bdf1d2c127e038bfc986b2987c3b"
+  },
+  "pairs": [
+    {
+      "a": "package-lock.json",
+      "b": "package.json",
+      "either": 6,
+      "shared": 5,
+      "strength": 0.833333
+    }
+  ],
+  "parameters": {
+    "appliedChangesetLimit": 50,
+    "changeset": 50,
+    "changesetFraction": 0.25,
+    "cohesionDrop": 0.2,
+    "couplingPopulation": "source",
+    "fallenShared": 3,
+    "floor": "fallen",
+    "floorHeld": false,
+    "floorTrigger": "both",
+    "headDate": "2026-09-17T18:45:36-07:00",
+    "inScopeFiles": 370,
+    "pinnedStart": null,
+    "priorFloor": null,
+    "qualifyingCommits": 19,
+    "qualifyingMinimum": 30,
+    "revisions": 5,
+    "shared": 10,
+    "sharedFloorUsed": 3,
+    "since": "2026-03-22T01:45:36.000Z",
+    "sourceExtensions": [
+      ".js",
+      ".mjs",
+      ".cjs",
+      ".jsx",
+      ".ts",
+      ".tsx",
+      ".mts",
+      ".cts",
+      ".py"
+    ],
+    "sourceFileReach": 20,
+    "sourceFileRise": 25,
+    "sourceFilesReachingStrongFloor": 0,
+    "strength": 0.5,
+    "windowDays": 180
+  },
+  "strengthDefinition": "strength is the shared qualifying commits divided by either. either is the number of qualifying commits that touch either file."
+}
