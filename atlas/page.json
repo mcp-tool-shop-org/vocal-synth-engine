@@ -1,0 +1,620 @@
+{
+  "authored": [
+    ".github/",
+    "presets/",
+    "root",
+    "site/"
+  ],
+  "breaks": [
+    {
+      "doors": 14,
+      "importedBy": [
+        "scripts"
+      ],
+      "importedByTests": [
+        "tests"
+      ],
+      "kind": "part",
+      "name": "src",
+      "partLabel": "src"
+    },
+    {
+      "doors": 2,
+      "importedBy": [],
+      "importedByTests": [],
+      "kind": "part",
+      "name": "scripts",
+      "partLabel": "scripts"
+    },
+    {
+      "doors": 2,
+      "importedBy": [],
+      "importedByTests": [],
+      "kind": "part",
+      "name": "tests",
+      "partLabel": "tests"
+    }
+  ],
+  "changes": {
+    "first": true
+  },
+  "changesTogether": [],
+  "changesTogetherNote": [
+    "Window: 180 days; a pair counts from 3 shared commits, since the window holds fewer than 30 qualifying commits."
+  ],
+  "changesTogetherWithTests": 0,
+  "commit": "f8fe895f7a07bdf1d2c127e038bfc986b2987c3b",
+  "defaultBranch": "main",
+  "derived": "10 parts, mostly TypeScript (99 files). Work enters through 15 doors; CI and Release each reach 3 parts, and CI is followed because a pull request goes through it. It publishes to npm. People run vocal-synth-engine-mcp, vse-analyze, vse-build-preset, vse-compare, vse-gen-vowel-wav, vse-inspect, vse-phonemize, vse-play-score, vse-resynth and vse-score-from-midi. People import @mcptoolshop/vocal-synth-engine.",
+  "doors": [
+    {
+      "checks": [
+        "src/"
+      ],
+      "checksCount": 1,
+      "file": ".github/workflows/ci.yml",
+      "id": ".github/workflows/ci.yml",
+      "landings": [
+        "tests/__bench__/baseline.json"
+      ],
+      "name": "CI",
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "scripts",
+          "depth": 0,
+          "files": 1
+        },
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 61
+        },
+        {
+          "boundary": "tests",
+          "depth": 0,
+          "files": 18
+        }
+      ],
+      "runs": [
+        "scripts/bench-gate.mjs",
+        "tests/cross-domain-stage-c.test.ts",
+        "tests/curves.test.ts",
+        "tests/engine-determinism.test.ts",
+        "tests/engine-medium.test.ts",
+        "tests/envelope.test.ts",
+        "tests/fft.test.ts",
+        "tests/jam-session.test.ts",
+        "tests/pitch.test.ts",
+        "tests/preset-integrity.test.ts",
+        "tests/property-based.test.ts",
+        "tests/score-fixtures.test.ts",
+        "tests/server-auth.test.ts",
+        "tests/server-medium.test.ts",
+        "tests/server-pathtraversal.test.ts",
+        "tests/server-validation.test.ts",
+        "tests/version-alignment.test.ts",
+        "tests/ws-schema-fuzz.test.ts"
+      ],
+      "runsCount": 18,
+      "sends": [],
+      "stages": [],
+      "triggers": [
+        "on a pull request touching 10 paths",
+        "on a push to main touching 10 paths",
+        "on a schedule (`0 6 * * 1`), Monday at 06:00 UTC",
+        "or by hand"
+      ]
+    },
+    {
+      "checks": [
+        "src/"
+      ],
+      "checksCount": 1,
+      "file": ".github/workflows/release.yml",
+      "id": ".github/workflows/release.yml",
+      "landings": [],
+      "name": "Release",
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "scripts",
+          "depth": 0,
+          "files": 1
+        },
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 61
+        },
+        {
+          "boundary": "tests",
+          "depth": 0,
+          "files": 18
+        }
+      ],
+      "runs": [
+        "scripts/verify.sh",
+        "tests/cross-domain-stage-c.test.ts",
+        "tests/curves.test.ts",
+        "tests/engine-determinism.test.ts",
+        "tests/engine-medium.test.ts",
+        "tests/envelope.test.ts",
+        "tests/fft.test.ts",
+        "tests/jam-session.test.ts",
+        "tests/pitch.test.ts",
+        "tests/preset-integrity.test.ts",
+        "tests/property-based.test.ts",
+        "tests/score-fixtures.test.ts",
+        "tests/server-auth.test.ts",
+        "tests/server-medium.test.ts",
+        "tests/server-pathtraversal.test.ts",
+        "tests/server-validation.test.ts",
+        "tests/version-alignment.test.ts",
+        "tests/ws-schema-fuzz.test.ts"
+      ],
+      "runsCount": 18,
+      "sends": [
+        "publishes to npm",
+        "creates a GitHub release"
+      ],
+      "stages": [],
+      "triggers": [
+        "when a tag matching `v*` is pushed"
+      ]
+    },
+    {
+      "checks": [],
+      "checksCount": 0,
+      "file": ".github/workflows/pages.yml",
+      "id": ".github/workflows/pages.yml",
+      "landings": [],
+      "name": "Deploy site to GitHub Pages",
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "site",
+          "depth": 0,
+          "files": 3
+        }
+      ],
+      "runs": [
+        "site/astro.config.mjs",
+        "site/src/"
+      ],
+      "runsCount": 2,
+      "sends": [
+        "deploys the site"
+      ],
+      "stages": [],
+      "triggers": [
+        "on a push to main touching 2 paths",
+        "or by hand"
+      ]
+    },
+    {
+      "checks": [],
+      "checksCount": 0,
+      "file": ".github/workflows/dogfood.yml",
+      "held": [
+        {
+          "checks": [
+            "src/"
+          ],
+          "lead": "on main",
+          "runs": [
+            "src/server/index.prod.ts"
+          ],
+          "when": "on main"
+        }
+      ],
+      "id": ".github/workflows/dogfood.yml",
+      "landings": [],
+      "name": "Dogfood",
+      "programs": [
+        "git"
+      ],
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 61
+        }
+      ],
+      "runs": [],
+      "runsCount": 0,
+      "sends": [
+        "sends a dispatch to mcp-tool-shop-org/dogfood-labs on main"
+      ],
+      "stages": [],
+      "triggers": [
+        "on a push to main touching 3 paths",
+        "or by hand"
+      ]
+    },
+    {
+      "checks": [],
+      "checksCount": 0,
+      "file": "package.json",
+      "id": "package.json#@mcptoolshop/vocal-synth-engine",
+      "kind": "package",
+      "landings": [],
+      "name": "@mcptoolshop/vocal-synth-engine",
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 46
+        }
+      ],
+      "runs": [
+        "src/index.ts",
+        "src/engine/LiveSynthEngine.ts",
+        "src/engine/StreamingVocalSynthEngine.ts",
+        "src/engine/consonantProfiles.ts",
+        "src/engine/curves.ts",
+        "src/engine/renderer.ts",
+        "src/preset/loader.ts",
+        "src/preset/schema.ts",
+        "src/server/index.prod.ts",
+        "src/types/score.ts",
+        "src/types/scoreSchema.ts"
+      ],
+      "runsCount": 11,
+      "sends": [],
+      "stages": [],
+      "triggers": []
+    },
+    {
+      "checks": [],
+      "checksCount": 0,
+      "file": "package.json",
+      "id": "package.json#vocal-synth-engine-mcp",
+      "kind": "command",
+      "landings": [],
+      "name": "vocal-synth-engine-mcp",
+      "programs": [
+        "git"
+      ],
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 15
+        }
+      ],
+      "runs": [
+        "src/mcp/server.ts"
+      ],
+      "runsCount": 1,
+      "sends": [],
+      "stages": [],
+      "triggers": []
+    },
+    {
+      "checks": [],
+      "checksCount": 0,
+      "file": "package.json",
+      "id": "package.json#vse-analyze",
+      "kind": "command",
+      "landings": [
+        "assets/"
+      ],
+      "name": "vse-analyze",
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 6
+        }
+      ],
+      "runs": [
+        "src/cli/analyze.ts"
+      ],
+      "runsCount": 1,
+      "sends": [],
+      "stages": [],
+      "triggers": []
+    },
+    {
+      "checks": [],
+      "checksCount": 0,
+      "file": "package.json",
+      "id": "package.json#vse-build-preset",
+      "kind": "command",
+      "landings": [],
+      "name": "vse-build-preset",
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 6
+        }
+      ],
+      "runs": [
+        "src/cli/build-preset.ts"
+      ],
+      "runsCount": 1,
+      "sends": [],
+      "stages": [],
+      "triggers": []
+    },
+    {
+      "checks": [],
+      "checksCount": 0,
+      "file": "package.json",
+      "id": "package.json#vse-compare",
+      "kind": "command",
+      "landings": [],
+      "name": "vse-compare",
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 4
+        }
+      ],
+      "runs": [
+        "src/cli/compare.ts"
+      ],
+      "runsCount": 1,
+      "sends": [],
+      "stages": [],
+      "triggers": []
+    },
+    {
+      "checks": [],
+      "checksCount": 0,
+      "file": "package.json",
+      "id": "package.json#vse-gen-vowel-wav",
+      "kind": "command",
+      "landings": [],
+      "name": "vse-gen-vowel-wav",
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 2
+        }
+      ],
+      "runs": [
+        "src/cli/gen-vowel-wav.ts"
+      ],
+      "runsCount": 1,
+      "sends": [],
+      "stages": [],
+      "triggers": []
+    },
+    {
+      "checks": [],
+      "checksCount": 0,
+      "file": "package.json",
+      "id": "package.json#vse-inspect",
+      "kind": "command",
+      "landings": [],
+      "name": "vse-inspect",
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 4
+        }
+      ],
+      "runs": [
+        "src/cli/inspect.ts"
+      ],
+      "runsCount": 1,
+      "sends": [],
+      "stages": [],
+      "triggers": []
+    },
+    {
+      "checks": [],
+      "checksCount": 0,
+      "file": "package.json",
+      "id": "package.json#vse-phonemize",
+      "kind": "command",
+      "landings": [],
+      "name": "vse-phonemize",
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 8
+        }
+      ],
+      "runs": [
+        "src/cli/phonemize.ts"
+      ],
+      "runsCount": 1,
+      "sends": [],
+      "stages": [],
+      "triggers": []
+    },
+    {
+      "checks": [],
+      "checksCount": 0,
+      "file": "package.json",
+      "id": "package.json#vse-play-score",
+      "kind": "command",
+      "landings": [],
+      "name": "vse-play-score",
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 11
+        }
+      ],
+      "runs": [
+        "src/cli/play-score.ts"
+      ],
+      "runsCount": 1,
+      "sends": [],
+      "stages": [],
+      "triggers": []
+    },
+    {
+      "checks": [],
+      "checksCount": 0,
+      "file": "package.json",
+      "id": "package.json#vse-resynth",
+      "kind": "command",
+      "landings": [],
+      "name": "vse-resynth",
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 4
+        }
+      ],
+      "runs": [
+        "src/cli/resynth.ts"
+      ],
+      "runsCount": 1,
+      "sends": [],
+      "stages": [],
+      "triggers": []
+    },
+    {
+      "checks": [],
+      "checksCount": 0,
+      "file": "package.json",
+      "id": "package.json#vse-score-from-midi",
+      "kind": "command",
+      "landings": [],
+      "name": "vse-score-from-midi",
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 4
+        }
+      ],
+      "runs": [
+        "src/cli/score-from-midi.ts"
+      ],
+      "runsCount": 1,
+      "sends": [],
+      "stages": [],
+      "triggers": []
+    }
+  ],
+  "duplicates": [],
+  "duplicatesLead": null,
+  "duplicatesNote": [],
+  "edges": [
+    {
+      "from": "scripts",
+      "fromTests": false,
+      "to": "src"
+    },
+    {
+      "from": "tests",
+      "fromTests": true,
+      "to": "src"
+    }
+  ],
+  "generated": [
+    {
+      "place": "assets/",
+      "writers": [
+        "src/cli/analyze.ts"
+      ]
+    },
+    {
+      "place": "ref/ah_sustain.wav",
+      "writers": [
+        "scripts/generate-ref-wav.ts"
+      ]
+    },
+    {
+      "block": true,
+      "place": "tests/__bench__/baseline.json",
+      "writers": [
+        "scripts/bench-gate.mjs"
+      ]
+    }
+  ],
+  "generatedAt": "2026-09-24T08:29:57.961Z",
+  "limits": [
+    "4 writes and 9 reads use paths built at run time and are not named here.",
+    "33 writes and 50 reads go to the directory the command is run in, the home directory or a path its caller passes, not to this repository.",
+    "1 command is built at run time and not followed, and it is in tests.",
+    "Statistics confidence is low: fewer than 30 qualifying commits in the window, and fewer than 20 source files reach 10 revisions."
+  ],
+  "mainDoor": ".github/workflows/ci.yml",
+  "partLabels": {
+    ".github": ".github",
+    "assets": "assets",
+    "cockpit": "cockpit",
+    "presets": "presets",
+    "ref": "ref",
+    "root": "the repository root",
+    "scripts": "scripts",
+    "site": "the site",
+    "src": "src",
+    "tests": "tests"
+  },
+  "parts": 10,
+  "readers": [],
+  "repo": "mcp-tool-shop-org/vocal-synth-engine",
+  "sequences": [],
+  "startDoor": ".github/workflows/ci.yml",
+  "startHere": [
+    ".github/workflows/ci.yml",
+    "src/index.ts"
+  ],
+  "summary": null,
+  "summaryFrom": null,
+  "testFiles": 22,
+  "testedBy": {
+    "cockpit": 0,
+    "scripts": 0,
+    "src": 17
+  },
+  "unnamedWrites": 4,
+  "unread": [
+    {
+      "place": "assets/",
+      "writers": [
+        "src/cli/analyze.ts"
+      ]
+    },
+    {
+      "place": "ref/ah_sustain.wav",
+      "writers": [
+        "scripts/generate-ref-wav.ts"
+      ]
+    }
+  ],
+  "unreadFiles": 0,
+  "unreadNote": [],
+  "untested": [
+    {
+      "part": "cockpit",
+      "partLabel": "cockpit",
+      "testedBy": 0
+    },
+    {
+      "part": "scripts",
+      "partLabel": "scripts",
+      "testedBy": 0
+    }
+  ],
+  "untestedNote": [],
+  "written": 3
+}
