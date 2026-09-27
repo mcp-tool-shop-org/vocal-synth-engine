@@ -26,6 +26,8 @@ on:
       - 'site/package.json'
       - 'site/package-lock.json'
       - 'site/astro.config.mjs'
+      # Codecov reads its status and comment settings from this file.
+      - 'codecov.yml'
   pull_request:
     branches: [main]
     paths:
@@ -39,6 +41,8 @@ on:
       - 'site/package.json'
       - 'site/package-lock.json'
       - 'site/astro.config.mjs'
+      # Codecov reads its status and comment settings from this file.
+      - 'codecov.yml'
   schedule:
     # Weekly Monday 06:00 UTC scheduled audit catches new advisories on
     # dormant branches. Severity threshold documented in SECURITY.md.
@@ -69,6 +73,9 @@ jobs:
     env:
       NO_COLOR: '1'
       FORCE_COLOR: '0'
+      # 'true' on the one leg whose coverage and test results go to Codecov,
+      # on a pull request or a push to the default branch.
+      COVERAGE_LEG: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 20 && (github.event_name == 'pull_request' || github.ref == format('refs/heads/{0}', github.event.repository.default_branch)) }}
     defaults:
       run:
         shell: bash
@@ -97,7 +104,34 @@ jobs:
         run: npm run lint --if-present
 
       - name: Test
-        run: npm test --if-present
+        id: tests
+        run: npm test --if-present -- --coverage.enabled=${{ env.COVERAGE_LEG == 'true' }} --coverage.reporter=text --coverage.reporter=json-summary --coverage.reporter=html --coverage.reporter=lcov --reporter=default --reporter=junit --outputFile.junit=junit.xml
+
+      # The codecov job below uploads what these two steps save; this job
+      # never holds an OIDC token. Coverage is saved when the tests passed,
+      # and test results whenever they ran, failures included, because a
+      # failing test is what that report exists to show. A save step with no
+      # file to save fails the job. overwrite lets a re-run of this job
+      # replace the artifact its earlier attempt saved.
+      - name: Save coverage for Codecov
+        if: ${{ env.COVERAGE_LEG == 'true' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: codecov-coverage
+          path: coverage/lcov.info
+          if-no-files-found: error
+          retention-days: 3
+          overwrite: true
+
+      - name: Save test results for Codecov
+        if: ${{ !cancelled() && env.COVERAGE_LEG == 'true' && steps.tests.outcome != 'skipped' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: codecov-test-results
+          path: junit.xml
+          if-no-files-found: error
+          retention-days: 3
+          overwrite: true
 
       - name: Build
         run: npm run build:server
@@ -108,6 +142,68 @@ jobs:
         # network calls don't differ by OS; one run saves CI minutes).
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == 20
         run: npm audit --audit-level=high --omit=dev
+
+  codecov:
+    # Uploads what the test job saved, from a job of its own, so the OIDC
+    # token that signs in to Codecov never exists beside the install and the
+    # tests. The checkout, which keeps no token, is there only so Codecov can
+    # match report paths to files: the job installs nothing and runs none of
+    # the repository's code. It runs whenever the test job ran, failures
+    # included, so failing tests still reach Codecov, and only on the events
+    # that collect coverage. A run the concurrency group cancels uploads
+    # nothing, and each run reads only its own artifacts.
+    needs: lint-and-test
+    if: ${{ !cancelled() && needs.lint-and-test.result != 'cancelled' && needs.lint-and-test.result != 'skipped' && (github.event_name == 'pull_request' || github.ref == format('refs/heads/{0}', github.event.repository.default_branch)) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Each artifact unpacks where the test job wrote its files. A pattern
+      # that matches nothing, unlike a name, does not fail: a failing test
+      # run saves test results and no coverage.
+      - name: Download coverage
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: codecov-coverage
+          path: coverage
+
+      - name: Download test results
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: codecov-test-results
+          path: .
+
+      # After a passing test job both artifacts exist, so each upload runs,
+      # and fails the job if its files are missing; after a failing one each
+      # runs when its files arrived. Both sign in with OIDC, fail the job when
+      # Codecov refuses the report, and run the Codecov CLI at a fixed version
+      # rather than whichever is newest.
+      - name: Upload coverage to Codecov
+        if: ${{ needs.lint-and-test.result == 'success' || hashFiles('coverage/lcov.info') != '' }}
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          version: v11.3.1
+          use_oidc: true
+          fail_ci_if_error: true
+          disable_search: true
+          files: ./coverage/lcov.info
+
+      - name: Upload test results to Codecov
+        if: ${{ needs.lint-and-test.result == 'success' || hashFiles('junit.xml') != '' }}
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          version: v11.3.1
+          use_oidc: true
+          fail_ci_if_error: true
+          report_type: test_results
+          disable_search: true
+          files: ./junit.xml
 
   # ── Cockpit browser smoke tests (FTC-002) ──
   # Playwright tests live at apps/cockpit/tests/. They spin up the Vite
