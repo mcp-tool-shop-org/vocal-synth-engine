@@ -139,6 +139,7 @@
         "confidence": "low",
         "importsAndCoChanges": [],
         "importsOnly": [
+          "cockpit",
           "scripts",
           "tests"
         ]
@@ -202,8 +203,8 @@
         "path": ".github/pull_request_template.md"
       },
       {
-        "commits": 11,
-        "lines": 223,
+        "commits": 15,
+        "lines": 435,
         "path": ".github/workflows/ci.yml"
       },
       {
@@ -212,8 +213,8 @@
         "path": ".github/workflows/dogfood.yml"
       },
       {
-        "commits": 7,
-        "lines": 64,
+        "commits": 9,
+        "lines": 68,
         "path": ".github/workflows/pages.yml"
       },
       {
@@ -390,6 +391,36 @@
         "commits": 1,
         "lines": 0,
         "path": "assets/logo.png"
+      },
+      {
+        "commits": 2,
+        "lines": 238,
+        "path": "atlas/README.md"
+      },
+      {
+        "commits": 2,
+        "lines": 84,
+        "path": "atlas/boundaries.yaml"
+      },
+      {
+        "commits": 2,
+        "lines": 1240,
+        "path": "atlas/page.json"
+      },
+      {
+        "commits": 2,
+        "lines": 4202,
+        "path": "atlas/statistics.json"
+      },
+      {
+        "commits": 2,
+        "lines": 8718,
+        "path": "atlas/structure.json"
+      },
+      {
+        "commits": 2,
+        "lines": 36,
+        "path": "codecov.yml"
       },
       {
         "commits": 3,
@@ -2045,11 +2076,11 @@
   },
   "confidence": {
     "level": "low",
-    "reason": "fewer than 30 qualifying commits in the window, and fewer than 20 source files reach 10 revisions"
+    "reason": "fewer than 30 qualifying commits in the window, and fewer than 25 source files reach 10 revisions"
   },
-  "generatedAt": "2026-09-24T08:29:57.961Z",
+  "generatedAt": "2026-09-30T20:14:20.747Z",
   "generatedFrom": {
-    "commit": "f8fe895f7a07bdf1d2c127e038bfc986b2987c3b"
+    "commit": "231081dbbac002788a8e6f41e3fd214d839a6da5"
   },
   "pairs": [
     {
@@ -2070,16 +2101,16 @@
     "floor": "fallen",
     "floorHeld": false,
     "floorTrigger": "both",
-    "headDate": "2026-09-17T18:45:36-07:00",
-    "inScopeFiles": 370,
+    "headDate": "2026-09-30T08:25:46-07:00",
+    "inScopeFiles": 371,
     "pinnedStart": null,
-    "priorFloor": null,
-    "qualifyingCommits": 19,
+    "priorFloor": "fallen",
+    "qualifyingCommits": 22,
     "qualifyingMinimum": 30,
     "revisions": 5,
     "shared": 10,
     "sharedFloorUsed": 3,
-    "since": "2026-03-22T01:45:36.000Z",
+    "since": "2026-04-03T15:25:46.000Z",
     "sourceExtensions": [
       ".js",
       ".mjs",
@@ -2089,7 +2120,9 @@
       ".tsx",
       ".mts",
       ".cts",
-      ".py"
+      ".py",
+      ".rs",
+      ".gd"
     ],
     "sourceFileReach": 20,
     "sourceFileRise": 25,
