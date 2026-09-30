@@ -9,39 +9,39 @@
       "externals": 0,
       "files": [
         {
-          "hash": "c3b072b1cd92b1551c12d7196bd1afb4afa033604a9eb7a890eba509cb5009d9",
+          "hash": "9949ba5388f963ec094b4d450bf67d0ba3ab3ec893db209a6ccd4cfb0f1a6401",
           "path": ".github/CODEOWNERS"
         },
         {
-          "hash": "fba168a21311867a507004f5dcbefa3b96c2b859cfbef1b533c5bf79db2fbdf1",
+          "hash": "9ee997c01170d220623ca807f51566b58a432afe6870344bac57ca86e4c206d8",
           "path": ".github/ISSUE_TEMPLATE/bug.md"
         },
         {
-          "hash": "d8710859581ac582a26f4518e6415bdaf9bde3be9a503af01049fdd9e2143012",
+          "hash": "5105c3778d50738dd089c82b64c41619d05fc36d5fb6b15e1875be9e8c061f75",
           "path": ".github/ISSUE_TEMPLATE/feature.md"
         },
         {
-          "hash": "9d691fc30536a35382f6907583969bd1bec9a161bcf820a80a4ab7874ceda7a5",
+          "hash": "0fa50a2646495203220d1cb7d9bb9d2cbdacc9efdf0e630f86f10ad47a8da065",
           "path": ".github/dependabot.yml"
         },
         {
-          "hash": "65358a67eb7f7506e79e17eae54ce5ab52aaa3d086fd7642ef657874df5cc344",
+          "hash": "b6532ed36cd5b4fe59cbe64b91714ed6dd67ff99033a8bc3c5fb04d98e80e45c",
           "path": ".github/pull_request_template.md"
         },
         {
-          "hash": "515e87343c3228f1b1249e59573b91120f7e82d8f6adb17dff96a424b5fdd69f",
+          "hash": "2f670984f9eaf708c42c82764094c69d7ceb58c2912c0d313059fecddb670880",
           "path": ".github/workflows/ci.yml"
         },
         {
-          "hash": "6e429fec1bb9dd8511a6d51006b4f5ae3de3553f3e1d66049d2cb4861cc469d3",
+          "hash": "a57c5664265b6642740e0bf100894b6449bb628280709016eadb26599c1504c6",
           "path": ".github/workflows/dogfood.yml"
         },
         {
-          "hash": "417a8baf989e22d3c5db6f430811e3be4a44e3123db285be17ae99d37ef4ddc9",
+          "hash": "b4c7389d36e2dfa750909d9f29eadadf535a0539eeeeb3f501e0cb23f09564b2",
           "path": ".github/workflows/pages.yml"
         },
         {
-          "hash": "cebcbf4110fc0bb7313793e023e5f093f78871360a32220220025f51e41f01e8",
+          "hash": "91f8c2f186c1bda265c2eab9efe37144f892cfa3d910023f87aa65844b2a72bc",
           "path": ".github/workflows/release.yml"
         }
       ],
@@ -73,7 +73,7 @@
       ],
       "importConfidence": "full",
       "name": "assets",
-      "origin": "generated",
+      "origin": "authored",
       "role": "data",
       "testedBy": 0,
       "unresolvedSites": 0
@@ -87,31 +87,31 @@
       "externals": 0,
       "files": [
         {
-          "hash": "942c5b8440fe97864b69d772c01e515ab73e0dbb1202c9898019a42fc4d6a75a",
+          "hash": "12dc4676e70590a75488b85502453e80ceb15c200ea5eee70d69458719c7a44c",
           "path": "apps/cockpit/.gitignore"
         },
         {
-          "hash": "28634eca135c2b6dd5c342d0a6bb4acecaacd751287f075073f8a57961a23fbc",
+          "hash": "cc8f4bcdc3c31be539aa67fbdacaaac4c9fcccb55b02048acf02f56e623ef682",
           "path": "apps/cockpit/.vscode/extensions.json"
         },
         {
-          "hash": "6e6dfbc6fd1dbbe9659a7a0a78515c9a47547408f74b7b9b5075b2434984cee8",
+          "hash": "461accad2f8d7604a8470fb4705b84768bcf24791b0974d49cba0d96c3fea857",
           "path": "apps/cockpit/.vscode/launch.json"
         },
         {
-          "hash": "52fbbb7df1e7f34d6f8246f74a5438384a867cdbab87b06bc97ba67c62348070",
+          "hash": "e422f498e1f8995947946af170bc5a020fef24d2adae429390e588fddf9ee8d6",
           "path": "apps/cockpit/README.md"
         },
         {
-          "hash": "848c226b828334e3d5344f12297210c4f2624750843c72d281c0b955555debf2",
+          "hash": "ad85f76f5d786983b8db8a2486ff60024ba54e7a73dc87530b8baa34f8f8f636",
           "path": "apps/cockpit/index.html"
         },
         {
-          "hash": "d017eb00e6775370ae2ce1f7e2d6023e0b4160e45d952adb48fd3b16a3ceba91",
+          "hash": "71e96480607c434ae2e9e5a5615f33dcc6e5aa13b05ca80cd175f7fc9b6b1bbc",
           "path": "apps/cockpit/package-lock.json"
         },
         {
-          "hash": "5d1f589e2e90380de0dc87c36a4f3c709e04545c716c9f48d27ea456132c9271",
+          "hash": "1ac7eba67cf19f0a49a3fe1a8fe308c39e05bfd54a0003adb1ae2ea1cae14fdc",
           "path": "apps/cockpit/package.json"
         },
         {
@@ -119,11 +119,11 @@
           "path": "apps/cockpit/public/favicon.ico"
         },
         {
-          "hash": "77100c0ced694fe08527d75744547ce439ca93f6ee62ee8d44f85522be99f950",
+          "hash": "2d7a310283d6f9cc753210d83224cd6db6348cb82a5536348884e5831d46203f",
           "path": "apps/cockpit/public/favicon.svg"
         },
         {
-          "hash": "e9b9cf3714c0b98078d05dff5502502c36ff7d0c9326905f57c7e3005aa52717",
+          "hash": "10b4b82a3436b30f2870a8d67449b034c0802114eab2b7611a3b7ea73ee0a245",
           "path": "apps/cockpit/public/pcm-worklet.js"
         },
         {
@@ -137,11 +137,129 @@
             "setToken",
             "wsTokenSuffix"
           ],
-          "hash": "d9653f0d9d563597088a302a9866919d924b99308f4dbb67e1217a23a01dddf5",
+          "failurePaths": [
+            {
+              "kind": "catch",
+              "line": 35
+            },
+            {
+              "in": "setToken",
+              "kind": "catch",
+              "line": 55
+            },
+            {
+              "in": "authFetch",
+              "kind": "catch",
+              "line": 88
+            }
+          ],
+          "hash": "cb975cc0251284bb22258ab39ccaf334d5cf94af0b786edcf4fb4a2510c2402a",
           "path": "apps/cockpit/src/auth.ts"
         },
         {
-          "hash": "bf3e85723f2e055916f2d55f9789b31376e522c06ae252c70c369015f9e2aa9e",
+          "failurePaths": [
+            {
+              "in": "subscribeRenderProgress",
+              "kind": "catch",
+              "line": 324
+            },
+            {
+              "in": "subscribeRenderProgress",
+              "kind": "catch",
+              "line": 334
+            },
+            {
+              "in": "doPhonemize",
+              "kind": "throw",
+              "line": 498
+            },
+            {
+              "in": "doPhonemize",
+              "kind": "catch",
+              "line": 511
+            },
+            {
+              "kind": "catch",
+              "line": 681
+            },
+            {
+              "in": "loadBank",
+              "kind": "catch",
+              "line": 845
+            },
+            {
+              "kind": "catch",
+              "line": 922
+            },
+            {
+              "in": "checkHealth",
+              "kind": "throw",
+              "line": 947
+            },
+            {
+              "in": "checkHealth",
+              "kind": "catch",
+              "line": 948
+            },
+            {
+              "in": "doRender",
+              "kind": "catch",
+              "line": 988
+            },
+            {
+              "in": "doRender",
+              "kind": "throw",
+              "line": 998
+            },
+            {
+              "in": "doRender",
+              "kind": "throw",
+              "line": 1006
+            },
+            {
+              "in": "doRender",
+              "kind": "throw",
+              "line": 1013
+            },
+            {
+              "in": "doSaveRender",
+              "kind": "throw",
+              "line": 1097
+            },
+            {
+              "kind": "catch",
+              "line": 1109
+            },
+            {
+              "kind": "catch",
+              "line": 1118
+            },
+            {
+              "kind": "catch",
+              "line": 1124
+            },
+            {
+              "in": "loadPresets",
+              "kind": "throw",
+              "line": 1153
+            },
+            {
+              "in": "loadPresets",
+              "kind": "catch",
+              "line": 1176
+            },
+            {
+              "in": "connectLive",
+              "kind": "catch",
+              "line": 1961
+            },
+            {
+              "in": "connectLive",
+              "kind": "catch",
+              "line": 2048
+            }
+          ],
+          "hash": "30e51b8778e7e396efaca42267cc3a68137725ff700bd8d43cbfc3a09722a192",
           "importsFiles": [
             "apps/cockpit/src/auth.ts",
             "apps/cockpit/src/waveform.ts"
@@ -149,7 +267,8 @@
           "path": "apps/cockpit/src/main.ts"
         },
         {
-          "hash": "e8949daa4d483ecbedf7b582f1b25d3d2250b3e7272016677e6563dd6229bca3",
+          "hash": "e45110a1fc92d3e68d2e79ecea17b1c5bba63134f535af7222e7cb7f6d6b1c5c",
+          "noStatements": true,
           "path": "apps/cockpit/src/pages/index.astro"
         },
         {
@@ -158,15 +277,28 @@
             "drawComparisonWaveforms",
             "drawStaticWaveform"
           ],
-          "hash": "7a7946b3356346210c85460b61bdf296de0c835a9c2d77111cee8265887c75af",
+          "failurePaths": [
+            {
+              "in": "decodeAudioFromUrl",
+              "kind": "catch",
+              "line": 64
+            },
+            {
+              "in": "detach",
+              "kind": "catch",
+              "line": 264
+            }
+          ],
+          "hash": "8fc076edfa1b80699a2cf2147fa6db7f8ce69544657bfc2bf3559b439747776d",
           "path": "apps/cockpit/src/waveform.ts"
         },
         {
-          "hash": "f3b4ecdebd5032236e92c300aae4d6c01a44bb0a672dfd5472edf65b71556da1",
-          "path": "apps/cockpit/tests/smoke.spec.ts"
+          "hash": "6a4422f832cf33ab1396f94d0223a535ea8ce689ef95cfffb006d387ea4cfb97",
+          "path": "apps/cockpit/tests/smoke.spec.ts",
+          "testFramework": "playwright test"
         },
         {
-          "hash": "608e124b051c7f12872890f2651879957b00ee23b4ef6da06689e170d163f150",
+          "hash": "e8d7f38033cd1d1377e296661cc2beb09a7a412f3f10729558415e1d3daa99ad",
           "path": "apps/cockpit/tsconfig.json"
         }
       ],
@@ -229,11 +361,11 @@
           "path": "presets/bright-lab/assets/freq_axis_hz.f32"
         },
         {
-          "hash": "c8e1e5bdaaf84748c97dcb2483cb17f71abc6c09aba13c12ea365734c782e846",
+          "hash": "3f8192e1cfb0d0af0fdc7e32f203837ae23afd3d51675e67ad497d3c11324b4f",
           "path": "presets/bright-lab/meta.json"
         },
         {
-          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "hash": "92efb82b21375693585c1b3fd4962f9792cc5c27ca8e4723f52e3d46860cb295",
           "path": "presets/bright-lab/voicepreset.json"
         },
         {
@@ -277,11 +409,11 @@
           "path": "presets/default-voice/assets/freq_axis_hz.f32"
         },
         {
-          "hash": "038c07be926438c13bf8ddf1811896061214c280ffc4dc6f6597952acb7dd504",
+          "hash": "5a781b6a0a98e86b94600f1996a3d9a6eb8ef35a5e893b45f2feb5b2900c6d07",
           "path": "presets/default-voice/meta.json"
         },
         {
-          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "hash": "92efb82b21375693585c1b3fd4962f9792cc5c27ca8e4723f52e3d46860cb295",
           "path": "presets/default-voice/voicepreset.json"
         },
         {
@@ -325,11 +457,11 @@
           "path": "presets/kokoro-af-aoede/assets/freq_axis_hz.f32"
         },
         {
-          "hash": "a951fcbca4f2db6a8eb64d13813cedf2ede504734fa14bf0b03404a1fbbce64a",
+          "hash": "94046aaad7e04c8603868dd141c1a78acdb1dda156529d036fda017fafe27f5b",
           "path": "presets/kokoro-af-aoede/meta.json"
         },
         {
-          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "hash": "92efb82b21375693585c1b3fd4962f9792cc5c27ca8e4723f52e3d46860cb295",
           "path": "presets/kokoro-af-aoede/voicepreset.json"
         },
         {
@@ -373,11 +505,11 @@
           "path": "presets/kokoro-af-heart/assets/freq_axis_hz.f32"
         },
         {
-          "hash": "8cffaf51986bab22e895a2def67c7b932eb559bc55c0ff2180a432e39e75c70c",
+          "hash": "5f724e650cf12619c348b33324b09f0d3f396f0605d9eddadcedf4acc88019c2",
           "path": "presets/kokoro-af-heart/meta.json"
         },
         {
-          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "hash": "92efb82b21375693585c1b3fd4962f9792cc5c27ca8e4723f52e3d46860cb295",
           "path": "presets/kokoro-af-heart/voicepreset.json"
         },
         {
@@ -421,11 +553,11 @@
           "path": "presets/kokoro-af-jessica/assets/freq_axis_hz.f32"
         },
         {
-          "hash": "007436372253719d1c434561ae9746847303a4f3047bd274b69ccffe1592ee15",
+          "hash": "be111bd095a2ad98cc5e10f6189591377b205a93c9c392c6077ee7804a199433",
           "path": "presets/kokoro-af-jessica/meta.json"
         },
         {
-          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "hash": "92efb82b21375693585c1b3fd4962f9792cc5c27ca8e4723f52e3d46860cb295",
           "path": "presets/kokoro-af-jessica/voicepreset.json"
         },
         {
@@ -469,11 +601,11 @@
           "path": "presets/kokoro-af-sky/assets/freq_axis_hz.f32"
         },
         {
-          "hash": "21f2201109ccc6c38d211b11d42a09b2fff2784aa86954d2506476ce1a07cc26",
+          "hash": "9ebfc0d7ca43fcab9d09f155a5e674696a265255d90ced967d92e397d0874268",
           "path": "presets/kokoro-af-sky/meta.json"
         },
         {
-          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "hash": "92efb82b21375693585c1b3fd4962f9792cc5c27ca8e4723f52e3d46860cb295",
           "path": "presets/kokoro-af-sky/voicepreset.json"
         },
         {
@@ -517,11 +649,11 @@
           "path": "presets/kokoro-am-eric/assets/freq_axis_hz.f32"
         },
         {
-          "hash": "f6a6e347bd9f3c17260d1f01b2928f0897e032b98e1a98865ad9fe05acb31459",
+          "hash": "72ebdc05f011b4ce88005aa2430ee7ef3befb63f3df4d0e1abe99fa0569c9c85",
           "path": "presets/kokoro-am-eric/meta.json"
         },
         {
-          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "hash": "92efb82b21375693585c1b3fd4962f9792cc5c27ca8e4723f52e3d46860cb295",
           "path": "presets/kokoro-am-eric/voicepreset.json"
         },
         {
@@ -565,11 +697,11 @@
           "path": "presets/kokoro-am-fenrir/assets/freq_axis_hz.f32"
         },
         {
-          "hash": "b1d7cb302be37ec2b0b877e7ed662880bfe5ed6b8c89fd58885368e7fd566c11",
+          "hash": "3f044c34551f2925bc73d6e093ddd4d8c3fa5a7f0e650481f1d622dca1b57cae",
           "path": "presets/kokoro-am-fenrir/meta.json"
         },
         {
-          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "hash": "92efb82b21375693585c1b3fd4962f9792cc5c27ca8e4723f52e3d46860cb295",
           "path": "presets/kokoro-am-fenrir/voicepreset.json"
         },
         {
@@ -613,11 +745,11 @@
           "path": "presets/kokoro-am-liam/assets/freq_axis_hz.f32"
         },
         {
-          "hash": "51b0832c2ac18d608e4cbd8f50296a3ce54bfd4b22f589aeeac14bbd2f8d635c",
+          "hash": "05819cd43d28da1c4e635e98a31a7228c9768195cd17075850809f5d555503e8",
           "path": "presets/kokoro-am-liam/meta.json"
         },
         {
-          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "hash": "92efb82b21375693585c1b3fd4962f9792cc5c27ca8e4723f52e3d46860cb295",
           "path": "presets/kokoro-am-liam/voicepreset.json"
         },
         {
@@ -661,11 +793,11 @@
           "path": "presets/kokoro-am-onyx/assets/freq_axis_hz.f32"
         },
         {
-          "hash": "f2094fcf2821a3b0582acbcf58a632e5e0f637cb28c86003b7650e15f8859101",
+          "hash": "9ab5240acb3a6aa566952eb480a81ee6b54d98d82879ba4951c8952f8d2e10e3",
           "path": "presets/kokoro-am-onyx/meta.json"
         },
         {
-          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "hash": "92efb82b21375693585c1b3fd4962f9792cc5c27ca8e4723f52e3d46860cb295",
           "path": "presets/kokoro-am-onyx/voicepreset.json"
         },
         {
@@ -709,11 +841,11 @@
           "path": "presets/kokoro-bf-alice/assets/freq_axis_hz.f32"
         },
         {
-          "hash": "79b823bd43efab4ebe8052cac867ee039a446ca9ba0d6e663c4653c2cf80fc0e",
+          "hash": "c8906b072c9c5ec20a5b8aa8f951adb8e95e56b11a72ffbad63dcf00889c71fe",
           "path": "presets/kokoro-bf-alice/meta.json"
         },
         {
-          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "hash": "92efb82b21375693585c1b3fd4962f9792cc5c27ca8e4723f52e3d46860cb295",
           "path": "presets/kokoro-bf-alice/voicepreset.json"
         },
         {
@@ -757,11 +889,11 @@
           "path": "presets/kokoro-bf-emma/assets/freq_axis_hz.f32"
         },
         {
-          "hash": "65b2addfcc241f553fe029242c7c87b805674365e36cf08a9d5d53c0ee794c49",
+          "hash": "5ebc3658b0ff0814d1c88c5457bad33d2b39deab4c9f88e13b87308764771b87",
           "path": "presets/kokoro-bf-emma/meta.json"
         },
         {
-          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "hash": "92efb82b21375693585c1b3fd4962f9792cc5c27ca8e4723f52e3d46860cb295",
           "path": "presets/kokoro-bf-emma/voicepreset.json"
         },
         {
@@ -805,11 +937,11 @@
           "path": "presets/kokoro-bf-isabella/assets/freq_axis_hz.f32"
         },
         {
-          "hash": "4240a54e63aa56e47281f904562eb18bf9a6c0acf49886c06aae2f3c4fa3f831",
+          "hash": "ee73b6c73e218f9f377a8a61a11702c574e3bdfbb50a97b390df429d1a96ef03",
           "path": "presets/kokoro-bf-isabella/meta.json"
         },
         {
-          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "hash": "92efb82b21375693585c1b3fd4962f9792cc5c27ca8e4723f52e3d46860cb295",
           "path": "presets/kokoro-bf-isabella/voicepreset.json"
         },
         {
@@ -853,11 +985,11 @@
           "path": "presets/kokoro-bm-george/assets/freq_axis_hz.f32"
         },
         {
-          "hash": "ff935d12c8fe7991a2530c8f5d978d5bc358c7c7dfdd700d34339e2677873601",
+          "hash": "764d0623729ec02cc6de04a8385d0ae3f663b9a342cb3cfb31e0c9881a27fabc",
           "path": "presets/kokoro-bm-george/meta.json"
         },
         {
-          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "hash": "92efb82b21375693585c1b3fd4962f9792cc5c27ca8e4723f52e3d46860cb295",
           "path": "presets/kokoro-bm-george/voicepreset.json"
         },
         {
@@ -901,11 +1033,11 @@
           "path": "presets/kokoro-bm-lewis/assets/freq_axis_hz.f32"
         },
         {
-          "hash": "6b65200c5a12788a47c41e37604912d3507e62b1f2aa1700cf0b1cc9fecbaf3f",
+          "hash": "772ab79b6e303f086895a15c23409c94f8ec0ba4fc07536a1b291bacdb141167",
           "path": "presets/kokoro-bm-lewis/meta.json"
         },
         {
-          "hash": "f7f70855639389ff59da601ffa1d847735acf3815780689a0e179e1b17a93eba",
+          "hash": "92efb82b21375693585c1b3fd4962f9792cc5c27ca8e4723f52e3d46860cb295",
           "path": "presets/kokoro-bm-lewis/voicepreset.json"
         }
       ],
@@ -936,7 +1068,7 @@
           "path": "ref/out/ah_resynth.wav"
         },
         {
-          "hash": "6985c3af928e3cdfb1aa99b026466234b6f76493010194e4ed0577e15f07d4d0",
+          "hash": "c412a62c6668f2da7fb731ac8d4eb0e920a0ae2b78a1fa6b98ba8163b7075b94",
           "path": "ref/out/ah_resynth_telemetry.json"
         },
         {
@@ -960,7 +1092,7 @@
           "path": "ref/out/preset/assets/freq_axis_hz.f32"
         },
         {
-          "hash": "6a2658862f8404835c8d8723945e75f0ae9ba316a0f894506548dc50fac999f3",
+          "hash": "9640effdaf544d862942c6a036328f1dbd0628d188de985e2e562b5590b7f377",
           "path": "ref/out/preset/voicepreset.json"
         },
         {
@@ -987,79 +1119,83 @@
       "externals": 0,
       "files": [
         {
-          "hash": "feb38ee6afe1361501755762aa35af5278994bab7bdb89b446ab4183e9ae62cd",
+          "hash": "552eb9b26dcfbe086eb3c9c1dc6f1c63e67756ad831968949fafee383c6d1846",
           "path": ".dockerignore"
         },
         {
-          "hash": "a9d2fd635c8a477e1c2a5f8b04b3007839a93ef71b71ea32b6af706915b982f7",
+          "hash": "b7e10a544e28caaac2515d4e8eaf480fd5e8ba1e5c50dfe1aad2d2bc762c7eb8",
           "path": ".gitignore"
         },
         {
-          "hash": "8a946a777e5aa77974c726b32f37bdab010523c663d645e56fba7abaa0c9015c",
+          "hash": "798d5b7cd59f03ed2b4143355d85f766d4833c5f10502ab8a1df9ba0d4957ebc",
           "path": "CHANGELOG.md"
         },
         {
-          "hash": "8db4516a3c938a351b99f3ef1a19f755e2d5e352748fda9ab64d0693a3519a28",
+          "hash": "81b1a7eac3af1346c82b5993078a290fbb0ce702954b9d1e3068a233a5328be9",
           "path": "CODE_OF_CONDUCT.md"
         },
         {
-          "hash": "2ef3f8cc6b6e643d7bc9cae5b1b7e234acac1f4dcd6e6f8c79d69a5b4fc471fb",
+          "hash": "ac225e7064f48164916fa3ba1436b5152142d24ce1ec229d04250cbbc16dbedb",
           "path": "CONTRIBUTING.md"
         },
         {
-          "hash": "21703907858e206025f628a36578ff2299bc28432ee3ede5d9ae5ee424b6e428",
+          "hash": "2df224b6f89d537c1a64246bf036541ff868a5c70d24e99b98780a743e5c9348",
           "path": "Dockerfile"
         },
         {
-          "hash": "334aa3828b47ec09ddd9e00f2225ea8f89ae5ad699796f00154c84eaa93634ac",
+          "hash": "c0b27e5c00795ce1c2f6866bcd4c9235468646cc2a2a4bbdd61cc6928bb24949",
           "path": "LICENSE"
         },
         {
-          "hash": "e9af75ad4a11e507f3423cf03ea914b594824dac8b2013dc4e971949dbf7ae11",
+          "hash": "f258b734a1b13b0e711278ce3686c8da6fbcf2ebdf4256119e58f748da0f2c2d",
           "path": "README.es.md"
         },
         {
-          "hash": "d2c3309705eba7d5a50712606198de3fac73da9282e58da14e6506962e9cfa80",
+          "hash": "9180bdac6400a0e927dfe6f228ae91b077063a5f6397a894823a2b91b9fd2008",
           "path": "README.fr.md"
         },
         {
-          "hash": "06dc79866bd1329351968490cd8a70fadc38a9e8ccb67243ddda76b1f1d9cf1b",
+          "hash": "2a14077655162f1cf96dbb16421576c88a405d57e052fce2dc702443b23f2c53",
           "path": "README.hi.md"
         },
         {
-          "hash": "21ea381428ef6217b2d3c79b61b9cb76140612705159b99d2396cb052805c44a",
+          "hash": "9e6242e1840157cd6e5cceb9f4a0cbfb7e668432990456f110abe9de693c996e",
           "path": "README.it.md"
         },
         {
-          "hash": "1e20f0ae11b2ac315a30fde3d7211bddb67bb87289c35532ba498fbe2d2eecaa",
+          "hash": "54c7abef51523e698699e7ff53cc830234a6f7077d60edd8dda9c31dea48a8e6",
           "path": "README.ja.md"
         },
         {
-          "hash": "3debfc689fdf5df4a808386a30548a0ee08c18fdc52967b44b9648e850db97df",
+          "hash": "268c0baf4eecb0d33a66eb177ca0647de71b7428f34260c2ad5e109538a3333e",
           "path": "README.md"
         },
         {
-          "hash": "d11f9d2ec35c5d5ded8817f05693b8d7df4778c5f8a44ca2c0ec55018d601aeb",
+          "hash": "cf495ef1f1b2be678332a9576b42566fa793b15c264de5ad799588ebb44184ff",
           "path": "README.pt-BR.md"
         },
         {
-          "hash": "78f34798f5ce6031c66193ee00b8d74203d3557e434d8b30581dd480e28a6f47",
+          "hash": "addbac869a7b1d4d67fa7862d5217f4963cbc0ed29acacba35d14d00da3bbfe3",
           "path": "README.zh.md"
         },
         {
-          "hash": "02acdc2e3fcf3f321b39edb687a84422cd8b2da06aa6ac886e64de69eff6822f",
+          "hash": "984749ac8536e329f6ad4fcf4144c7ffee61f87b2eeacbc39d75946835d81695",
           "path": "SCORECARD.md"
         },
         {
-          "hash": "854fcdc3141c501b613b2d612443e5ed944d5a5f526198be68b61e0cb9be6cf6",
+          "hash": "c0e862964f51d74a2ade9e72b7f612829aca6b633c9246511f388202c9c63f29",
           "path": "SECURITY.md"
         },
         {
-          "hash": "d6537e2172be2999751faaa3f9e41da7f815b4288b348227b0f3d75c6cbf2b70",
+          "hash": "9378b118d66596c11c62994510a1e23a1f7d82abeec58e6bf4e0c2ca071b8449",
           "path": "SHIP_GATE.md"
         },
         {
-          "hash": "cc833fb837affd48a5f6e8c499210110c73cfa37ba0a383103b761978cd24408",
+          "hash": "59ca3f6a5be96b80fee73bebf2b778211208d17cd3fb82e2134608dff0729c76",
+          "path": "codecov.yml"
+        },
+        {
+          "hash": "78d30de24ca4f268aa66ff01f095587f8639dc4949bbc93036767bdb386422cf",
           "path": "fly.toml"
         },
         {
@@ -1071,47 +1207,47 @@
           "path": "out.wav"
         },
         {
-          "hash": "d55867cdd0543266c3e592c0932f14f0f41b31694c6e93007783996e3f917be9",
+          "hash": "2da1f475b58eb23ef5f67ca4bec641b486cfef57e766e54d05fb10e94603216c",
           "path": "package-lock.json"
         },
         {
-          "hash": "eb66c135c064b7d2a08574f42ae052635e3b9379a17a8cb6abb34d7a11af6e3e",
+          "hash": "c1a38eb5eebcae9f2fc38257289782c28eae2dafd7dd39498b26400d7929a3c9",
           "path": "package.json"
         },
         {
-          "hash": "4d91e0c385f07e0b7ce2f5d6ca4865fb7bd25ebe72319f9cf49cdd5ad3cd44d4",
+          "hash": "5729078cb0132495da460890422925a3ffd18d91875997afd11762e31b1377a6",
           "path": "passport.json"
         },
         {
-          "hash": "d46122bdaa786e4b603313b034e3cc562b961d3d2c6d134a8835af91d298bb16",
+          "hash": "37ccaba22cf2e1f2ecd89daf3d420eb4dbfa3d3c24eaff91ecd54b304870575a",
           "path": "playwright.config.ts"
         },
         {
-          "hash": "6ef9fb490afd6e7a19db57d85b300678b1fd7839e0d978be383636fad33495a4",
+          "hash": "f292c3897278ed6f693850c67a4c35df0621e02cf21da3dac798a823e97a4433",
           "path": "render.yaml"
         },
         {
-          "hash": "d1fc250bb6a3449a8823fb23d2df41bb771c4c492a747f332ba490ff5877440b",
+          "hash": "6f25d0fe87636d37d99524e743dd36a5c15014297e0529071c935b30b9386e55",
           "path": "test-score-lyrics.json"
         },
         {
-          "hash": "a741c227d595780651b11f5f0f28999f7ef32ab040d5b46a8eaa0901e80b98ad",
+          "hash": "a25f0b53a32783da5c876d8ff15cfc21a73ab3f1d25d3513700ac5348d47dbc1",
           "path": "test-score-morph.json"
         },
         {
-          "hash": "c4e338029dab658a549534e2ee4e4413a8fa527f03f1c67e4723dfc143de6750",
+          "hash": "e8aca0e95b450670f029617ef2164d8f7f5792e662169ae1c0bbd78a1274ff88",
           "path": "test-score-poly.json"
         },
         {
-          "hash": "d9ff7d8717c5e85e359f16b80f6815e5ba31ee0cdc653bd7c2211396c232bf2f",
+          "hash": "e375b3da6c1cce2a91f5e85357fb1971c991a2c13e7375e62b10a4d9666671d4",
           "path": "test-score.json"
         },
         {
-          "hash": "209b008aa8fe8d1f41136256ce6c7f896401b9f816faa962aeca797498b7f7f1",
+          "hash": "e4286378db07fff4568cb22bccc4925f85ec4c83ad6cdfb238afab67c9a1dbc0",
           "path": "tsconfig.json"
         },
         {
-          "hash": "fdb393c3336ebff4a8603f38e34573d63b1b412c4f1745aa55dee57eb98fb1b3",
+          "hash": "c4611b22f32ae26fa62d5708201a8faff51368c95863af382b186a71b6b6b7fe",
           "path": "vitest.config.ts"
         }
       ],
@@ -1122,11 +1258,12 @@
       "name": "root",
       "origin": "authored",
       "role": "config",
-      "testedBy": 0,
+      "testedBy": 1,
+      "testedByScript": true,
       "unresolvedSites": 0
     },
     {
-      "dynamicReads": 1,
+      "dynamicReads": 0,
       "dynamicSpawns": 0,
       "dynamicSpawnsInTests": 0,
       "dynamicWrites": 0,
@@ -1136,20 +1273,20 @@
         {
           "entry": "flattenRun",
           "entryRule": 1,
-          "hash": "6941c0a1524e791ff8c06f1992eb3cda495ae5de14fdb0eaba2c0a10aa69075a",
+          "hash": "72274ba994be43221d1b23573c7c3447d13c4863514c2d176aa3a5224d85c0ac",
           "path": "scripts/bench-gate.mjs",
           "sequences": []
         },
         {
-          "hash": "9e5ae7cf73a25910396d26715cce285ac659cece6738db5c2f2decf4d12e7de0",
+          "hash": "c710d3c8478f8bf6ab116e54788f8c7676081a8276b7e423c21227627b648749",
           "path": "scripts/generate-dummy-preset.ts"
         },
         {
-          "hash": "18c390031c7b826650593d921f8b0510e547a788267bd6fbf85c35fc0cac94a6",
+          "hash": "d5efe83839febc87b4ab27a16b3842b682e2ca59bb4e38e737a756b744f172fc",
           "path": "scripts/generate-ref-wav.ts"
         },
         {
-          "hash": "cf3bbe9a599fa4409f74958625968d1a56c3c6371e6baa619636ac165d090eac",
+          "hash": "2f7f87fc56c292fab9c7996cb7412d3ee286dc0b97df90f361c48fb98c6d265b",
           "path": "scripts/kokoro/build-voice.sh"
         },
         {
@@ -1160,18 +1297,25 @@
             "main",
             "yin_f0"
           ],
-          "hash": "00d11e87881b458862c452b617a45e3f7c0360ee02d2747cae510a6b263606f8",
+          "failurePaths": [
+            {
+              "in": "generate_vowel",
+              "kind": "raise",
+              "line": 224
+            }
+          ],
+          "hash": "16984e233b25c9aac73c2ce147481c6de0924ff879c47e4acd90d168a962f6a1",
           "path": "scripts/kokoro/generate_vowels.py"
         },
         {
-          "hash": "d00c1e07336360b235369e7521690f102dccca7ceaaa0ebbd8c92af0d5002528",
+          "hash": "a2cae5e12a819f4a99ed6b675d80cfc9fa0c26688cf19781e227f4b1c7a92e68",
           "importsFiles": [
             "src/server/services/renderScoreToWav.ts"
           ],
           "path": "scripts/test-consonants.ts"
         },
         {
-          "hash": "2bfb1160cca52900a3c5fb7a60e84c130d48d617f521fb56b432b64f75a0ee8a",
+          "hash": "9d2566d90338ad6a83c8964acf2fdadd78b0636bdbd87ca6472aaac8cdda19fe",
           "importsFiles": [
             "src/phonemize/index.ts",
             "src/types/score.ts"
@@ -1179,19 +1323,79 @@
           "path": "scripts/test-g2p.ts"
         },
         {
-          "hash": "6bc9aeb4e6ac46107ef2f0b7e6d24240b5422c996a8f0fdb67b63ef97a71b2ff",
+          "failurePaths": [
+            {
+              "in": "assert",
+              "kind": "throw",
+              "line": 36
+            },
+            {
+              "in": "handler",
+              "kind": "catch",
+              "line": 66
+            },
+            {
+              "in": "handler",
+              "kind": "catch",
+              "line": 89
+            },
+            {
+              "in": "httpGet",
+              "kind": "catch",
+              "line": 109
+            }
+          ],
+          "hash": "b389b04b9ac5db0cf034521269f879c57f71b325f8dc6944e07d54397c832397",
           "path": "scripts/test-jam-collaboration.ts"
         },
         {
-          "hash": "990e33b39850ba1edbd62d85c2ffe8603426512039710723ce13c3ee92bd884e",
+          "failurePaths": [
+            {
+              "in": "assert",
+              "kind": "throw",
+              "line": 34
+            },
+            {
+              "in": "handler",
+              "kind": "catch",
+              "line": 64
+            },
+            {
+              "in": "handler",
+              "kind": "catch",
+              "line": 87
+            },
+            {
+              "in": "httpGet",
+              "kind": "catch",
+              "line": 107
+            }
+          ],
+          "hash": "559fc24770fab4352ed75963c540c26a2002917deeb643764c543b3c4c445f0a",
           "path": "scripts/test-jam-recording.ts"
         },
         {
-          "hash": "ca578abc8966dcdc0a152a91c23bc579b9e656fd83ac5f1f774124afcc57cd69",
+          "failurePaths": [
+            {
+              "in": "assert",
+              "kind": "throw",
+              "line": 35
+            },
+            {
+              "in": "handler",
+              "kind": "catch",
+              "line": 66
+            }
+          ],
+          "hash": "e039e7e3ea4f7760f8ae585fdf04c1647d922d1d139ecb69c25df3d3c94f24a0",
           "path": "scripts/test-jam-session.ts"
         },
         {
-          "hash": "f0b2d2c0fefd1f5540a760fdb336256683aa49e9258d688c92f994642d6a6a3f",
+          "hash": "223a2d852d55d85828357d086efd64b5904514386a1f1ef1fd1d3b995b56f021",
+          "importOrder": [
+            "src/server/services/renderScoreToWav.ts",
+            "src/phonemize/index.ts"
+          ],
           "importsFiles": [
             "src/phonemize/index.ts",
             "src/server/services/renderScoreToWav.ts"
@@ -1199,21 +1403,26 @@
           "path": "scripts/test-lyrics-golden.ts"
         },
         {
-          "hash": "0e8aea30ea70b03c7938784a4471353b02da752d43f142ca3b022f224224f792",
+          "hash": "74b4aa04d93a5d68d7362ff658964d2aae7c01ec035e8a4fcbc0a320663c9a3b",
           "importsFiles": [
             "src/server/services/renderScoreToWav.ts"
           ],
           "path": "scripts/test-multi-timbre.ts"
         },
         {
-          "hash": "ef5f56b631af7422327dc1743738da14117f3abf4c8c29888849d33df92ebbe0",
+          "hash": "aca469fbc75ea4b4165e56b627bc819e7c58bde47d0b5ecf25cb095abb086f94",
           "importsFiles": [
             "src/server/services/renderScoreToWav.ts"
           ],
           "path": "scripts/test-noise-tail.ts"
         },
         {
-          "hash": "8deea5a85402b797b7ca4fcb492b60ceab4ba119f339d50112e900d1cd6dae51",
+          "hash": "c6fa7a053f32149509c57c1d0b66814f770345b090f8859e04ed2b9a2645fd6a",
+          "importOrder": [
+            "src/preset/loader.ts",
+            "src/engine/StreamingVocalSynthEngine.ts",
+            "src/types/score.ts"
+          ],
           "importsFiles": [
             "src/engine/StreamingVocalSynthEngine.ts",
             "src/preset/loader.ts",
@@ -1222,7 +1431,7 @@
           "path": "scripts/test-score-render.ts"
         },
         {
-          "hash": "5bf77466aabd18eb2e7c0c96b50fd0a85381b91e99c6e3aab1eb4a2f818ff9e2",
+          "hash": "ae86266560e45a903298634ef5fadf89785a20816901fa5d72750633516b1d7a",
           "path": "scripts/verify.sh"
         }
       ],
@@ -1232,6 +1441,23 @@
       "importConfidence": "full",
       "name": "scripts",
       "origin": "authored",
+      "outsidePlaces": [
+        {
+          "reads": 1,
+          "where": [
+            "caller"
+          ],
+          "writes": 2
+        },
+        {
+          "reads": 0,
+          "where": [
+            "cwd:test-preset/"
+          ],
+          "writes": 3
+        }
+      ],
+      "outsideReads": 1,
       "outsideWrites": 5,
       "role": "code",
       "testedBy": 0,
@@ -1246,83 +1472,93 @@
       "externals": 0,
       "files": [
         {
-          "hash": "eece744cedd91d88f7835db98abff8dab923c531e21d242880240fb8184f9d66",
+          "hash": "56892728f57c017b85c64111384737e8eb83732d6706c6511b3602cffa4f89e2",
           "path": "site/astro.config.mjs"
         },
         {
-          "hash": "b5578baf42cab82e5e7b451b6992cb929aeb6ff8d02d8e11ab690e6f67fea144",
+          "hash": "af5d4f54dca60686724d306eb58759fb25b6f5ba4d66559ab84a968112a184e5",
           "path": "site/package-lock.json"
         },
         {
-          "hash": "cff923d88f356795747a843362ca300b43d09c5715e6356f904b4d5fa06a7fae",
+          "hash": "17ed487ab5049bb52f8c5e35f77f21be7da639f1fb6a3fa70e9b02ffabfe7be6",
           "path": "site/package.json"
         },
         {
-          "hash": "d7d5956d1e9f91152eb7a9b83a84b20b2881ec482c2b3ab15f3e1786c4183718",
+          "constantOnly": true,
+          "hash": "610fa60f7288aae9bffecfce11c7b30094caf4835b8c47b21386e679303a9d8d",
           "path": "site/src/content.config.ts"
         },
         {
-          "hash": "777b02251d5ec69e8da10f6510c47884d1ee1372ea270449efd61d492b0efaa6",
+          "hash": "22d2238d7e996b0b6141a0deb1e4719c6d0048baa722de6ec0ecdb6310950bf7",
           "path": "site/src/content/docs/handbook/architecture.md"
         },
         {
-          "hash": "c569939fcca7f8ffa62dc0d8cefdfc25d60a61b060975756d6d57d1df7a902d3",
+          "hash": "6cca27a1af72e93863858996c926649d9c63d4bef54a8c52e38f09a9d268338a",
           "path": "site/src/content/docs/handbook/beginners.md"
         },
         {
-          "hash": "876b6a5d8df863596dd984259966c98879216f7c882d3eb6c1814f319efb41e9",
+          "hash": "7ac26ba7ed7e9811fe8d3c8cb047fe93a1dec7be75c75aa1123edae9512317c4",
           "path": "site/src/content/docs/handbook/cli-reference.md"
         },
         {
-          "hash": "37816168c192f306b7d6a3dc43f974bf9b02ef6f47e4286d242eca2d8dc83354",
+          "hash": "da79ff58322590148d7f2040078326bb04e377696a3a523663f0dc7938562c58",
           "path": "site/src/content/docs/handbook/cockpit-and-jams.md"
         },
         {
-          "hash": "a8fdf04744af4bd12dfe96168801324e23f0602e3788c0e9e6d8a8b1b3ebac5e",
+          "hash": "3996d681974d1d6be2ec5b611fa15bcb2e1c1d62bc16a0e695258120a1bc9916",
           "path": "site/src/content/docs/handbook/deployment.md"
         },
         {
-          "hash": "626a55ab883836cd32b46e1358429cae8b2f6c4420e7ae5f6665c7fb498bd770",
+          "hash": "36d2079974ed8197cced6b61c635095c4f5e5748b30db121f87b81555fbbe718",
           "path": "site/src/content/docs/handbook/getting-started.md"
         },
         {
-          "hash": "8d131ab31123d66b05462dece0d4e2df60d0a99eeb20af95134cec2ce20f6847",
+          "hash": "f8eea738beb9d1707e6de2382c21e02431957b39eb528c4f89358e0f963053df",
           "path": "site/src/content/docs/handbook/index.md"
         },
         {
-          "hash": "7e763e6d50cf15fbad39665b40aefd3c8e8f143d9f1976972cf2e9c93d3e504f",
+          "hash": "7c04ccb32ae89d759e547dc1a7161f2198cfa3b9418a1863ece09a187445c78d",
           "path": "site/src/content/docs/handbook/reference.md"
         },
         {
-          "hash": "8a16cc5a86e6466578080cc61f165dcc8dd9654158763dfbfe7f10325260d233",
+          "hash": "d7812c64665a6ef58bad31d0b157d59a5fedabd4c61a1a9eec155a6b78f5c3ab",
           "path": "site/src/content/docs/handbook/score-format.md"
         },
         {
-          "hash": "3f499adb36e456818b682d1777a7d8f09456f2aecf37b7bd10fe4a8455bc224d",
+          "hash": "6211ccc489c5109bb1072e781ec242caaf0898231cc2661ad9483b50f4d02629",
           "path": "site/src/content/docs/handbook/troubleshooting.md"
         },
         {
-          "hash": "5620988e5b4af1f0997946b4a33bf85416941b6029b494bc026748e5907d8fdd",
+          "hash": "9696494ef6fa2b8386965381ff45f890d66f1924641ebc92b26a529369b6661a",
           "path": "site/src/content/docs/handbook/voice-presets.md"
         },
         {
-          "hash": "a699ad78a6d27d6864ccfe4c3a4a01993aca28ecb4a3d20893f37db9f9b1a522",
+          "hash": "391533713539035d3c92282579d43de0f137067867fdb502d7eaea3c74601d2a",
+          "importOrder": [
+            "site/src/styles/global.css",
+            "site/src/site-config.ts"
+          ],
+          "importsFiles": [
+            "site/src/site-config.ts",
+            "site/src/styles/global.css"
+          ],
           "path": "site/src/pages/index.astro"
         },
         {
-          "hash": "4db41e1417035581609948be217b2f75062f220c971a9ed01e692ae86ce33f6d",
+          "constantOnly": true,
+          "hash": "472d7fceea7af0f57be9125d1517824397b28d39488a479f5d273389af37d251",
           "path": "site/src/site-config.ts"
         },
         {
-          "hash": "5995279a40a9a63426a93feec129006b261cc7200426a398914d0317722ef19b",
+          "hash": "29ee8df91833e694bdba973126b34a6177de4cf01dab6d9ef7d3126e8e2b67fb",
           "path": "site/src/styles/global.css"
         },
         {
-          "hash": "b6174dbfd9b109ed7ddd6709db294965d492d472aa384850478e91929394de12",
+          "hash": "0bb761c911dffaeaa93702426edf1c251707d509bab7380ffcb87fda8e5b1b39",
           "path": "site/src/styles/starlight-custom.css"
         },
         {
-          "hash": "61fc24492db9aef7ec38eb91cfeebaef96155014bb5f22648fd8ed2327c6cae2",
+          "hash": "b5b0a5b04a14cddd7713c5e1c82e86c79c17c2f86b170e26e9b170b3d5e01cd9",
           "path": "site/tsconfig.json"
         }
       ],
@@ -1337,10 +1573,10 @@
       "unresolvedSites": 0
     },
     {
-      "dynamicReads": 8,
+      "dynamicReads": 4,
       "dynamicSpawns": 0,
       "dynamicSpawnsInTests": 0,
-      "dynamicWrites": 4,
+      "dynamicWrites": 0,
       "entryPoints": [
         "src/cli/analyze.ts",
         "src/cli/build-preset.ts",
@@ -1362,11 +1598,41 @@
             "parseFiniteNumber",
             "runCli"
           ],
-          "hash": "6570efaa89d6dfb918b5d6356bcc8081f94b64e488d105c2cbec6bccfbf11d7e",
+          "failurePaths": [
+            {
+              "in": "parseFiniteNumber",
+              "kind": "throw",
+              "line": 59
+            },
+            {
+              "in": "parseFiniteNumber",
+              "kind": "throw",
+              "line": 67
+            }
+          ],
+          "hash": "5cc55c0ff443b5a12324c333d1a737917c3e0d2c76ba971c7ab42427b097efe5",
           "path": "src/cli/_runner.ts"
         },
         {
-          "hash": "09f89ef50c6c79187fc2c3f2097e02e1bd67d6b6022bee3535af4341195570a0",
+          "failurePaths": [
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 50
+            },
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 81
+            }
+          ],
+          "hash": "22914dc848e932911880b8161efc4528f6dc84cb8a191ffad9b0940d1e02bce8",
+          "importOrder": [
+            "src/dsp/fft.ts",
+            "src/dsp/pitch.ts",
+            "src/preset/loader.ts",
+            "src/cli/_runner.ts"
+          ],
           "importsFiles": [
             "src/cli/_runner.ts",
             "src/dsp/fft.ts",
@@ -1421,7 +1687,45 @@
           ]
         },
         {
-          "hash": "335c01d3edce93358f78eb3b42f5b93f23ca8a9cc2154b81ea31b39b76c61a9b",
+          "failurePaths": [
+            {
+              "in": "analyzeWav",
+              "kind": "throw",
+              "line": 63
+            },
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 158
+            },
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 176
+            },
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 185
+            },
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 190
+            },
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 213
+            }
+          ],
+          "hash": "a2694ef6edeb164776f48233bcf0fe9a4ca07be35adc2ce7e39d1663285f387c",
+          "importOrder": [
+            "src/dsp/fft.ts",
+            "src/dsp/pitch.ts",
+            "src/preset/loader.ts",
+            "src/cli/_runner.ts"
+          ],
           "importsFiles": [
             "src/cli/_runner.ts",
             "src/dsp/fft.ts",
@@ -1501,7 +1805,29 @@
           ]
         },
         {
-          "hash": "ca1cff0a9078015af25a9d066a9fccbaead431b7a37f50fb6818da3145408918",
+          "failurePaths": [
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 57
+            },
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 107
+            },
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 114
+            }
+          ],
+          "hash": "af6c3f1681490d94976fe7135bd90600cbe25d4cadb2e74ab612b77265adc065",
+          "importOrder": [
+            "src/dsp/fft.ts",
+            "src/dsp/pitch.ts",
+            "src/cli/_runner.ts"
+          ],
           "importsFiles": [
             "src/cli/_runner.ts",
             "src/dsp/fft.ts",
@@ -1556,14 +1882,25 @@
           ]
         },
         {
-          "hash": "c5854bf2e88a69ef11c51e83339e5f823afc6c59046e462213fff402c3905997",
+          "hash": "3333082fe13bae75389bbae469ff781a4e8c56fbee3dff2d8ae6b80dc3f852ba",
           "importsFiles": [
             "src/cli/_runner.ts"
           ],
           "path": "src/cli/gen-vowel-wav.ts"
         },
         {
-          "hash": "ce454167ddb87a0757046a26e66cb6d417da67ff7aacbffef6b2102c412f1d75",
+          "failurePaths": [
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 44
+            }
+          ],
+          "hash": "a779c09075be0015688f1d5ce75e96edc630640fe9d6092d9ded3fcf23a2e52e",
+          "importOrder": [
+            "src/preset/loader.ts",
+            "src/cli/_runner.ts"
+          ],
           "importsFiles": [
             "src/cli/_runner.ts",
             "src/preset/loader.ts"
@@ -1595,7 +1932,59 @@
           ]
         },
         {
-          "hash": "d9f09e382097401d987b4c57dfe070d5e06e4dd50ae89e8f06b0ddf71d4e45a3",
+          "failurePaths": [
+            {
+              "in": "parseArgs",
+              "kind": "throw",
+              "line": 101
+            },
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 120
+            },
+            {
+              "in": "main",
+              "kind": "catch",
+              "line": 124
+            },
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 129
+            },
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 135
+            },
+            {
+              "in": "main",
+              "kind": "catch",
+              "line": 144
+            },
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 149
+            },
+            {
+              "in": "main",
+              "kind": "catch",
+              "line": 154
+            },
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 159
+            }
+          ],
+          "hash": "9570ebd27f1c2ac6b2a5f8faeb70de04c90a5d797f296b63a2f14f311d6aa3c1",
+          "importOrder": [
+            "src/phonemize/index.ts",
+            "src/types/score.ts",
+            "src/cli/_runner.ts"
+          ],
           "importsFiles": [
             "src/cli/_runner.ts",
             "src/phonemize/index.ts",
@@ -1674,7 +2063,30 @@
           ]
         },
         {
-          "hash": "cf638a5f85e9e4d3423c6cc70425a175f42ddb6692e57fe04fb2e1a29e3263a4",
+          "failurePaths": [
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 52
+            },
+            {
+              "in": "main",
+              "kind": "catch",
+              "line": 65
+            },
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 68
+            }
+          ],
+          "hash": "524cb6ac0a30dbbe11734fa99e8216d4afd55dae72e7c73f9edb498e148fad02",
+          "importOrder": [
+            "src/preset/loader.ts",
+            "src/engine/StreamingVocalSynthEngine.ts",
+            "src/types/score.ts",
+            "src/cli/_runner.ts"
+          ],
           "importsFiles": [
             "src/cli/_runner.ts",
             "src/engine/StreamingVocalSynthEngine.ts",
@@ -1723,7 +2135,23 @@
           ]
         },
         {
-          "hash": "f1709b5a56c35d62996b0e4a2445a7f2e455b3ec64e74097c7a9fd35e943bd56",
+          "failurePaths": [
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 39
+            },
+            {
+              "kind": "throw",
+              "line": 168
+            }
+          ],
+          "hash": "29be50a66f8be55c6bb4f52ba54d8e51c89321013dbf45923d26cd9c4e8a6bcb",
+          "importOrder": [
+            "src/cli/_runner.ts",
+            "src/preset/loader.ts",
+            "src/engine/StreamingVocalSynthEngine.ts"
+          ],
           "importsFiles": [
             "src/cli/_runner.ts",
             "src/engine/StreamingVocalSynthEngine.ts",
@@ -1732,7 +2160,33 @@
           "path": "src/cli/realtime-demo.ts"
         },
         {
-          "hash": "74d18c3874e9e6465c28b829cf1a9dde986a8eda73506227e5736e694c623d62",
+          "failurePaths": [
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 67
+            },
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 77
+            },
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 81
+            },
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 91
+            }
+          ],
+          "hash": "71c2a8bf318b7230e66a134e3f1840154a01d08192b5f6ac4b45ec6dc31fbe4e",
+          "importOrder": [
+            "src/preset/loader.ts",
+            "src/cli/_runner.ts"
+          ],
           "importsFiles": [
             "src/cli/_runner.ts",
             "src/preset/loader.ts"
@@ -1764,7 +2218,68 @@
           ]
         },
         {
-          "hash": "1c89f6f70c674fbe2005c983aa25bcc6bc085d9f4b7a92a0c49744768cff4641",
+          "failurePaths": [
+            {
+              "in": "parseArgs",
+              "kind": "throw",
+              "line": 126
+            },
+            {
+              "in": "parseArgs",
+              "kind": "throw",
+              "line": 131
+            },
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 184
+            },
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 191
+            },
+            {
+              "in": "main",
+              "kind": "catch",
+              "line": 198
+            },
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 203
+            },
+            {
+              "in": "main",
+              "kind": "catch",
+              "line": 209
+            },
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 212
+            },
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 223
+            },
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 243
+            },
+            {
+              "in": "main",
+              "kind": "throw",
+              "line": 305
+            }
+          ],
+          "hash": "02f14c01a8a0e1d3d150e375f65c98277b44f430fd789d9e549a070b60a5a119",
+          "importOrder": [
+            "src/types/score.ts",
+            "src/cli/_runner.ts"
+          ],
           "importsFiles": [
             "src/cli/_runner.ts",
             "src/types/score.ts"
@@ -1834,7 +2349,19 @@
             "fft",
             "ifft"
           ],
-          "hash": "a3d7eb46cee6cd6aa0647dbd7806c556ca054893180412c6204b7bf9df6300db",
+          "failurePaths": [
+            {
+              "in": "fft",
+              "kind": "throw",
+              "line": 3
+            },
+            {
+              "in": "fft",
+              "kind": "throw",
+              "line": 6
+            }
+          ],
+          "hash": "b7d96f891cc1851fc0c5343ac94bc0548a1c3ed4eb2c7c036d065daa5fd030d3",
           "path": "src/dsp/fft.ts",
           "sequences": []
         },
@@ -1842,11 +2369,130 @@
           "exports": [
             "findPitchYin"
           ],
-          "hash": "0f6db48876f26974cf687b3c01594cb0208de2e2206bc570fb8af67a6ef871a6",
+          "failurePaths": [
+            {
+              "in": "findPitchYin",
+              "kind": "throw",
+              "line": 27
+            }
+          ],
+          "hash": "58be7b350f3716473b9780306bcc64670c35cabf6ce0009d94d71ef009fe1d44",
           "path": "src/dsp/pitch.ts"
         },
         {
-          "hash": "1b1fd08edc216cc45159c5ca01c355c04ef50ebd8e6e8e16c5b44c78d5a35817",
+          "failurePaths": [
+            {
+              "in": "validateNoteOnParams",
+              "kind": "throw",
+              "line": 228
+            },
+            {
+              "in": "validateNoteOnParams",
+              "kind": "throw",
+              "line": 231
+            },
+            {
+              "in": "validateNoteOnParams",
+              "kind": "throw",
+              "line": 234
+            },
+            {
+              "in": "validateNoteOnParams",
+              "kind": "throw",
+              "line": 241
+            },
+            {
+              "in": "validateNoteOnParams",
+              "kind": "throw",
+              "line": 244
+            },
+            {
+              "in": "validateNoteOnParams",
+              "kind": "throw",
+              "line": 247
+            },
+            {
+              "in": "validateNoteOnParams",
+              "kind": "throw",
+              "line": 251
+            },
+            {
+              "in": "validateNoteOnParams",
+              "kind": "throw",
+              "line": 256
+            },
+            {
+              "in": "validateNoteOnParams",
+              "kind": "throw",
+              "line": 262
+            },
+            {
+              "in": "validateNoteOnParams",
+              "kind": "throw",
+              "line": 265
+            },
+            {
+              "in": "validateNoteOnParams",
+              "kind": "throw",
+              "line": 268
+            },
+            {
+              "in": "updateConfig",
+              "kind": "throw",
+              "line": 381
+            },
+            {
+              "in": "updateConfig",
+              "kind": "throw",
+              "line": 385
+            },
+            {
+              "in": "updateConfig",
+              "kind": "throw",
+              "line": 393
+            },
+            {
+              "in": "updateConfig",
+              "kind": "throw",
+              "line": 402
+            },
+            {
+              "in": "updateConfig",
+              "kind": "throw",
+              "line": 405
+            },
+            {
+              "in": "updateConfig",
+              "kind": "throw",
+              "line": 411
+            },
+            {
+              "in": "updateConfig",
+              "kind": "throw",
+              "line": 418
+            },
+            {
+              "in": "updateConfig",
+              "kind": "throw",
+              "line": 424
+            },
+            {
+              "in": "setTimbreWeights",
+              "kind": "throw",
+              "line": 491
+            },
+            {
+              "in": "setTimbreWeights",
+              "kind": "throw",
+              "line": 498
+            }
+          ],
+          "hash": "29affc14f9fa57da6c81a1e8e9f66361261a6a53a90d6344ae8e615d83c2a99c",
+          "importOrder": [
+            "src/preset/schema.ts",
+            "src/engine/renderer.ts",
+            "src/engine/curves.ts"
+          ],
           "importsFiles": [
             "src/engine/curves.ts",
             "src/engine/renderer.ts",
@@ -1855,7 +2501,77 @@
           "path": "src/engine/LiveSynthEngine.ts"
         },
         {
-          "hash": "28a23375411565e6fa5c95dfc659bb89bc6ee9821201039843c1062bbcc76288",
+          "failurePaths": [
+            {
+              "in": "constructor",
+              "kind": "throw",
+              "line": 143
+            },
+            {
+              "in": "constructor",
+              "kind": "throw",
+              "line": 146
+            },
+            {
+              "in": "constructor",
+              "kind": "throw",
+              "line": 152
+            },
+            {
+              "in": "constructor",
+              "kind": "throw",
+              "line": 157
+            },
+            {
+              "in": "constructor",
+              "kind": "throw",
+              "line": 163
+            },
+            {
+              "in": "constructor",
+              "kind": "throw",
+              "line": 170
+            },
+            {
+              "in": "constructor",
+              "kind": "throw",
+              "line": 177
+            },
+            {
+              "in": "constructor",
+              "kind": "throw",
+              "line": 184
+            },
+            {
+              "in": "constructor",
+              "kind": "throw",
+              "line": 189
+            },
+            {
+              "in": "render",
+              "kind": "throw",
+              "line": 372
+            },
+            {
+              "in": "render",
+              "kind": "throw",
+              "line": 380
+            },
+            {
+              "in": "seek",
+              "kind": "throw",
+              "line": 749
+            }
+          ],
+          "hash": "d8cf289c19dfa52f64ec78b58ee6be569f5d5251a4b307ead21596b870f8717e",
+          "importOrder": [
+            "src/types/score.ts",
+            "src/preset/schema.ts",
+            "src/engine/renderer.ts",
+            "src/engine/curves.ts",
+            "src/engine/consonantProfiles.ts",
+            "src/phonemize/arpabet.ts"
+          ],
           "importsFiles": [
             "src/engine/consonantProfiles.ts",
             "src/engine/curves.ts",
@@ -1872,7 +2588,7 @@
             "getConsonantProfile",
             "isKnownConsonantKind"
           ],
-          "hash": "2be8d7bd895af782b1e18222bf5bd53fdab5136d6bc2ce7b8a5254eba6ee20c1",
+          "hash": "a1a049ef7e1019067fc5a0faa4d0e63d05b10864887262041584eef6018de382",
           "path": "src/engine/consonantProfiles.ts"
         },
         {
@@ -1888,14 +2604,18 @@
             "midiToHz",
             "xorshift32"
           ],
-          "hash": "f435f9cbfbaccefb025e9a2ad76494948ae55fc8ef58932dedcc075d2849e55d",
+          "hash": "2e65c14dbc395978f2a6b9304b9eb175ce287da00bb006af45fcabaea820ee74",
           "importsFiles": [
             "src/types/score.ts"
           ],
           "path": "src/engine/curves.ts"
         },
         {
-          "hash": "179dc489d8c471593aa2b285a39592456077df3a1f802ed3e9eb7522e58dc514",
+          "hash": "0ef41f0b119c568ee29b2baa33c07bbdbfc54439cbd2a6b978b7389c1e30555b",
+          "importOrder": [
+            "src/preset/schema.ts",
+            "src/engine/curves.ts"
+          ],
           "importsFiles": [
             "src/engine/curves.ts",
             "src/preset/schema.ts"
@@ -1903,7 +2623,18 @@
           "path": "src/engine/renderer.ts"
         },
         {
-          "hash": "fa2bc694ddaea87e658f8f583608a1dec0afe26ebf1862c2b842938d269e12f3",
+          "hash": "17cf63e3abb48c369f86d0b34071aaeced94806e53b3f62c4616474fad27007b",
+          "importOrder": [
+            "src/engine/LiveSynthEngine.ts",
+            "src/engine/StreamingVocalSynthEngine.ts",
+            "src/engine/renderer.ts",
+            "src/engine/curves.ts",
+            "src/engine/consonantProfiles.ts",
+            "src/preset/loader.ts",
+            "src/preset/schema.ts",
+            "src/types/scoreSchema.ts",
+            "src/types/score.ts"
+          ],
           "importsFiles": [
             "src/engine/LiveSynthEngine.ts",
             "src/engine/StreamingVocalSynthEngine.ts",
@@ -1915,12 +2646,41 @@
             "src/types/score.ts",
             "src/types/scoreSchema.ts"
           ],
-          "path": "src/index.ts"
+          "path": "src/index.ts",
+          "reexportsOnly": true
         },
         {
           "entry": "main",
           "entryRule": 1,
-          "hash": "eb506e402b5f8e09e0725af14e002faa16824dcb6672388b6af8a05827e26494",
+          "failurePaths": [
+            {
+              "kind": "catch",
+              "line": 118
+            },
+            {
+              "kind": "catch",
+              "line": 217
+            },
+            {
+              "kind": "catch",
+              "line": 251
+            },
+            {
+              "kind": "catch",
+              "line": 300
+            },
+            {
+              "kind": "catch",
+              "line": 374
+            }
+          ],
+          "hash": "6a162c081a921e86a42c6cde105772d3d56e239b341e8e682aafdc742cad7a30",
+          "importOrder": [
+            "src/preset/loader.ts",
+            "src/server/services/renderScoreToWav.ts",
+            "src/phonemize/index.ts",
+            "src/types/score.ts"
+          ],
           "importsFiles": [
             "src/phonemize/index.ts",
             "src/preset/loader.ts",
@@ -1938,7 +2698,7 @@
             "parsePronunciation",
             "stripStress"
           ],
-          "hash": "9a018f253ee28d619be6679e958986d9c8bd041d46d1c611e1398dff8ee1c6fd",
+          "hash": "1e2b3b419d2b72cf73a93c947c8bd8a2da09c3312bfca68d656ceeb1b27497f1",
           "path": "src/phonemize/arpabet.ts"
         },
         {
@@ -1949,7 +2709,7 @@
             "tokenizeLyrics",
             "wordToPhonemes"
           ],
-          "hash": "eda80870d4d62f46e2a66382e963659847e599db7a4afdfb46ec71ce4ad92989",
+          "hash": "f944d67039be7350cf0a03bf7e2ceb96996fde04d6fe146cc2c22f4e0b81f5f2",
           "importsFiles": [
             "src/phonemize/arpabet.ts"
           ],
@@ -1961,7 +2721,7 @@
           "exports": [
             "phonemizeLyrics"
           ],
-          "hash": "b8d84400939cb5a91f2f8497aae7c79132732c419f072726f9d9f8e6a8d29a68",
+          "hash": "5760f995a6cb4e94906c3c6bc3d98eff9d311868930ff2cb653405287413075e",
           "importsFiles": [
             "src/phonemize/arpabet.ts",
             "src/phonemize/g2p.ts",
@@ -2023,7 +2783,7 @@
             "splitCluster",
             "syllabify"
           ],
-          "hash": "dfa50046f3d569273a6f1838dd47f1b762702364a29a2ef147413a4b640f201d",
+          "hash": "84ea39a57e731284c2e4994c8545aee6c26232d6d2994c8bd3c2964383c32919",
           "importsFiles": [
             "src/phonemize/arpabet.ts"
           ],
@@ -2036,7 +2796,49 @@
             "computeAssetsHash",
             "loadVoicePreset"
           ],
-          "hash": "bc81324c72d8231e9f84e10605e5e20f7f0922737a1969a66002f1319c555b12",
+          "failurePaths": [
+            {
+              "in": "resolveAssetPathSafe",
+              "kind": "throw",
+              "line": 60
+            },
+            {
+              "in": "resolveAssetPathSafe",
+              "kind": "throw",
+              "line": 71
+            },
+            {
+              "in": "bytesToFloat32",
+              "kind": "throw",
+              "line": 94
+            },
+            {
+              "in": "loadVoicePreset",
+              "kind": "throw",
+              "line": 150
+            },
+            {
+              "in": "loadVoicePreset",
+              "kind": "throw",
+              "line": 179
+            },
+            {
+              "in": "loadVoicePreset",
+              "kind": "throw",
+              "line": 184
+            },
+            {
+              "in": "loadVoicePreset",
+              "kind": "throw",
+              "line": 211
+            },
+            {
+              "in": "loadVoicePreset",
+              "kind": "throw",
+              "line": 241
+            }
+          ],
+          "hash": "7161afc002cf032e68bfc2c3a314781b4e07c7293914d7ab46aeaca32026d754",
           "importsFiles": [
             "src/preset/schema.ts"
           ],
@@ -2060,14 +2862,45 @@
           ]
         },
         {
-          "hash": "1d28ace62b70f196d89a7c73db67fecf7620595318a37ea0d7a4f1f51ae01fb4",
+          "hash": "ed87d93e4851f2d62386a26540895a55bf4cd6909ad840ffee8bf0992d961b76",
           "path": "src/preset/schema.ts"
         },
         {
           "exports": [
             "createApp"
           ],
-          "hash": "3f30d90d382de29c75d3b3c1962e0220b6e3daaa4786bb4fde3b3d8d0ec57a33",
+          "failurePaths": [
+            {
+              "in": "createApp",
+              "kind": "catch",
+              "line": 130
+            },
+            {
+              "in": "createApp",
+              "kind": "catch",
+              "line": 137
+            }
+          ],
+          "hash": "94058348663a0e474c06b0c054fc651bbd2e42c30ed565038c0c2410933cb216",
+          "importOrder": [
+            "src/server/routes/health.ts",
+            "src/server/routes/render.ts",
+            "src/server/routes/renders.ts",
+            "src/server/routes/presets.ts",
+            "src/server/routes/phonemize.ts",
+            "src/server/routes/metrics.ts",
+            "src/server/routes/probes.ts",
+            "src/server/routes/openapi.ts",
+            "src/server/middleware/auth.ts",
+            "src/server/middleware/rateLimit.ts",
+            "src/server/middleware/requestId.ts",
+            "src/server/middleware/structuredLog.ts",
+            "src/server/middleware/metricsMiddleware.ts",
+            "src/server/middleware/errorHandler.ts",
+            "src/server/util/metrics.ts",
+            "src/server/services/renderQueue.ts",
+            "src/server/storage/renderStore.ts"
+          ],
           "importsFiles": [
             "src/server/middleware/auth.ts",
             "src/server/middleware/errorHandler.ts",
@@ -2090,7 +2923,33 @@
           "path": "src/server/app.ts"
         },
         {
-          "hash": "bb1bc87c5ea0db35dc3cb873b4404cf6c91683fdfa5f3134afe6bb6ccfc09091",
+          "failurePaths": [
+            {
+              "in": "startDevServer",
+              "kind": "catch",
+              "line": 89
+            },
+            {
+              "in": "startDevServer",
+              "kind": "catch",
+              "line": 152
+            }
+          ],
+          "hash": "2d092348a3930ea983477b85766b575dae58a07f0f23a90b3d6263adc9d39cdf",
+          "importOrder": [
+            "src/server/app.ts",
+            "src/server/middleware/auth.ts",
+            "src/server/services/renderScoreToWav.ts",
+            "src/server/services/LiveSession.ts",
+            "src/server/services/JamSessionManager.ts",
+            "src/server/services/wsSchemas.ts",
+            "src/types/live.ts",
+            "src/types/jam.ts",
+            "src/server/util/logger.ts",
+            "src/server/util/wsHeartbeat.ts",
+            "src/server/util/gracefulShutdown.ts",
+            "src/server/services/renderQueue.ts"
+          ],
           "importsFiles": [
             "src/server/app.ts",
             "src/server/middleware/auth.ts",
@@ -2108,7 +2967,31 @@
           "path": "src/server/index.dev.ts"
         },
         {
-          "hash": "2b522ebe2f31116632277c01459479e494105d0de086e887b7436de804471870",
+          "failurePaths": [
+            {
+              "kind": "catch",
+              "line": 102
+            },
+            {
+              "kind": "catch",
+              "line": 165
+            }
+          ],
+          "hash": "b695a03dfc5ba98dddad28df003ba3286dccb514f9d51f744be116282ef69448",
+          "importOrder": [
+            "src/server/app.ts",
+            "src/server/middleware/auth.ts",
+            "src/server/services/renderScoreToWav.ts",
+            "src/server/services/LiveSession.ts",
+            "src/server/services/JamSessionManager.ts",
+            "src/server/services/wsSchemas.ts",
+            "src/types/live.ts",
+            "src/types/jam.ts",
+            "src/server/util/logger.ts",
+            "src/server/util/wsHeartbeat.ts",
+            "src/server/util/gracefulShutdown.ts",
+            "src/server/services/renderQueue.ts"
+          ],
           "importsFiles": [
             "src/server/app.ts",
             "src/server/middleware/auth.ts",
@@ -2134,7 +3017,34 @@
             "requireWsAuth",
             "resolveWsPrincipal"
           ],
-          "hash": "87c89e2f37d27c405ad98a88cd5c1aab110721835958b39b2084664ba1c9dcb2",
+          "failurePaths": [
+            {
+              "in": "parseKeyArray",
+              "kind": "throw",
+              "line": 55
+            },
+            {
+              "in": "parseKeyArray",
+              "kind": "throw",
+              "line": 62
+            },
+            {
+              "in": "parseKeyArray",
+              "kind": "throw",
+              "line": 67
+            },
+            {
+              "in": "parseKeyArray",
+              "kind": "throw",
+              "line": 70
+            },
+            {
+              "in": "parseKeyArray",
+              "kind": "throw",
+              "line": 73
+            }
+          ],
+          "hash": "6988b3fb0dd45e20d3a9f1b37aea3a09b525b50e263ca4334173fa928d9440cb",
           "importsFiles": [
             "src/server/util/metrics.ts"
           ],
@@ -2145,7 +3055,7 @@
             "apiNotFoundHandler",
             "errorHandler"
           ],
-          "hash": "a572d34e6ef0e60af8b42b0b7d1f67e3fc1b9ecdd9e94db294feece5b16966bc",
+          "hash": "3db49edb2334517f4e8472a507dc73bfa689464f5140caa4d425e732132b7c65",
           "importsFiles": [
             "src/server/util/logger.ts"
           ],
@@ -2155,7 +3065,7 @@
           "exports": [
             "metricsMiddleware"
           ],
-          "hash": "2b8ce85e07c083c44da3a3ebf68f3467672ff59e31e198fbc576d0bd0e22d9a0",
+          "hash": "bf6a03df940b7ec9f6d55becc13f91fa556a120459e420efaaad2e8f25b27770",
           "importsFiles": [
             "src/server/util/metrics.ts"
           ],
@@ -2166,7 +3076,7 @@
             "_resetRateLimitForTests",
             "rateLimit"
           ],
-          "hash": "aa64ee590b38bff0e742fe51e42af54cd8b6e1848bada97a05a2ee951b3b1b03",
+          "hash": "335c041c7e37440adf5dd936b441af77709cc45d9fff374bd8499358f774a7db",
           "importsFiles": [
             "src/server/util/metrics.ts"
           ],
@@ -2176,14 +3086,14 @@
           "exports": [
             "requestIdMiddleware"
           ],
-          "hash": "cc7c4efc95ae6ac44ac214fcdf15e5f36a0922b9074a29c14660eeda94ea8630",
+          "hash": "2d9aa70f90eacfa7ca0e3a499d4a1768ce62f338c0b9076a63c80f544f9b6a42",
           "path": "src/server/middleware/requestId.ts"
         },
         {
           "exports": [
             "structuredLog"
           ],
-          "hash": "ae2ab0c315383751c58e32ae02884accbd94c56f61a3378a74cd3aa946626bdf",
+          "hash": "596efcb395d66cef3e05c284ca47e9f2aa229d576a1e9b405d64e0ba27f342b5",
           "importsFiles": [
             "src/server/util/logger.ts"
           ],
@@ -2194,11 +3104,17 @@
             "isSafeId",
             "validateBody"
           ],
-          "hash": "9fd28e6c1f55858a4f4424d6929d00fedde2b608efa3ee43fb7a60820a5dc294",
+          "hash": "c75ec7a06e52c2c874ef69ec4dbfd35e04600a2fff3d430c3c26016145f16d8e",
           "path": "src/server/middleware/validate.ts"
         },
         {
-          "hash": "f607ccbad9fa5123bf36a6d69cad88b3ca5e34eba4fc158d10a9ddf5f1a39bbe",
+          "hash": "0a795a83e2563740d7380fc13e0397bbaccdf3fa4fb932382cfc778301e69714",
+          "importOrder": [
+            "src/server/services/renderScoreToWav.ts",
+            "src/server/middleware/auth.ts",
+            "src/server/storage/renderStore.ts",
+            "src/server/services/renderQueue.ts"
+          ],
           "importsFiles": [
             "src/server/middleware/auth.ts",
             "src/server/services/renderQueue.ts",
@@ -2208,7 +3124,25 @@
           "path": "src/server/routes/health.ts"
         },
         {
-          "hash": "fdef40035a81cbf961e52c2c504012b8b6d5842cb21dc7c1d8b30d79a1aff33c",
+          "failurePaths": [
+            {
+              "in": "refreshSampledGauges",
+              "kind": "catch",
+              "line": 37
+            },
+            {
+              "in": "refreshSampledGauges",
+              "kind": "catch",
+              "line": 44
+            }
+          ],
+          "hash": "84f8d89a89181a4e371e3d77b4a455043ec0cdfdf05e6780a9ebf7f2d6cc6836",
+          "importOrder": [
+            "src/server/middleware/auth.ts",
+            "src/server/util/metrics.ts",
+            "src/server/services/renderQueue.ts",
+            "src/server/storage/renderStore.ts"
+          ],
           "importsFiles": [
             "src/server/middleware/auth.ts",
             "src/server/services/renderQueue.ts",
@@ -2221,14 +3155,26 @@
           "exports": [
             "_resetOpenApiCacheForTests"
           ],
-          "hash": "f0f765c684b139f22ff621d89f5847365ff8c6103abff16c76c551d4738ab53d",
+          "failurePaths": [
+            {
+              "kind": "catch",
+              "line": 364
+            }
+          ],
+          "hash": "5b0d8323aa9622c78dbf8b5d0e43f5c138109a1fe483f8e161b2cb7a7cd35699",
           "importsFiles": [
             "src/server/routes/render.ts"
           ],
           "path": "src/server/routes/openapi.ts"
         },
         {
-          "hash": "84b971c346269d320174177254b4f1273580fb7ef019965a479c2efd45632904",
+          "failurePaths": [
+            {
+              "kind": "catch",
+              "line": 44
+            }
+          ],
+          "hash": "88c271bcd00f64fd53130298763b7bd4976222eba42173e74a80d40ab0c4cb70",
           "importsFiles": [
             "src/phonemize/index.ts",
             "src/server/middleware/validate.ts"
@@ -2236,7 +3182,17 @@
           "path": "src/server/routes/phonemize.ts"
         },
         {
-          "hash": "8454f64bfd9c56fa461008b94aa9a3dedcc04dfc950c15f021962ed07bca818c",
+          "failurePaths": [
+            {
+              "kind": "catch",
+              "line": 24
+            }
+          ],
+          "hash": "13e7ed41f6054016cda5103af9a301118f2e56f3af71cf3cd3e33577e5861307",
+          "importOrder": [
+            "src/server/services/renderScoreToWav.ts",
+            "src/server/middleware/errorHandler.ts"
+          ],
           "importsFiles": [
             "src/server/middleware/errorHandler.ts",
             "src/server/services/renderScoreToWav.ts"
@@ -2247,14 +3203,84 @@
           "exports": [
             "markInitComplete"
           ],
-          "hash": "97eec6fb716fd695ad04c97d4211784e7a2625eaef379d373d2d7519dc436024",
+          "failurePaths": [
+            {
+              "kind": "catch",
+              "line": 64
+            },
+            {
+              "kind": "catch",
+              "line": 81
+            },
+            {
+              "kind": "catch",
+              "line": 90
+            }
+          ],
+          "hash": "f87aa567fa6b96a705c49db1ddcc4b1ccf0c2531b3c791e7e4c633a0e71ac728",
           "importsFiles": [
             "src/server/services/renderQueue.ts"
           ],
           "path": "src/server/routes/probes.ts"
         },
         {
-          "hash": "ed36349ae164d75624fb8d56b959b9cfe0046796f0cb08043997160765431425",
+          "failurePaths": [
+            {
+              "kind": "throw",
+              "line": 123
+            },
+            {
+              "kind": "catch",
+              "line": 142
+            },
+            {
+              "kind": "throw",
+              "line": 144
+            },
+            {
+              "kind": "throw",
+              "line": 150
+            },
+            {
+              "kind": "throw",
+              "line": 152
+            },
+            {
+              "kind": "catch",
+              "line": 176
+            },
+            {
+              "kind": "throw",
+              "line": 240
+            },
+            {
+              "kind": "throw",
+              "line": 247
+            },
+            {
+              "kind": "catch",
+              "line": 252
+            },
+            {
+              "kind": "throw",
+              "line": 265
+            },
+            {
+              "kind": "throw",
+              "line": 272
+            },
+            {
+              "kind": "catch",
+              "line": 277
+            }
+          ],
+          "hash": "6f32b26389f7c3d097db51f674dd70dfdfab1f9e07c5f1c699e5292a583f8e7c",
+          "importOrder": [
+            "src/server/services/renderQueue.ts",
+            "src/server/storage/renderStore.ts",
+            "src/server/middleware/validate.ts",
+            "src/server/middleware/errorHandler.ts"
+          ],
           "importsFiles": [
             "src/server/middleware/errorHandler.ts",
             "src/server/middleware/validate.ts",
@@ -2264,7 +3290,68 @@
           "path": "src/server/routes/render.ts"
         },
         {
-          "hash": "d1a9598aa50903c72b1532482be722876e2a0e4e51eeec768705315b69227750",
+          "failurePaths": [
+            {
+              "in": "resolveRenderDirOr400",
+              "kind": "catch",
+              "line": 40
+            },
+            {
+              "in": "authorizeRenderRead",
+              "kind": "catch",
+              "line": 88
+            },
+            {
+              "in": "streamJsonFile",
+              "kind": "catch",
+              "line": 119
+            },
+            {
+              "in": "streamJsonFile",
+              "kind": "catch",
+              "line": 126
+            },
+            {
+              "kind": "catch",
+              "line": 216
+            },
+            {
+              "kind": "catch",
+              "line": 234
+            },
+            {
+              "kind": "catch",
+              "line": 279
+            },
+            {
+              "kind": "catch",
+              "line": 305
+            },
+            {
+              "kind": "throw",
+              "line": 307
+            },
+            {
+              "kind": "throw",
+              "line": 313
+            },
+            {
+              "kind": "throw",
+              "line": 315
+            },
+            {
+              "kind": "catch",
+              "line": 334
+            }
+          ],
+          "hash": "4668eb97e87feafb5ae13dd7a14ccd1805fb3a1548019a5d0085b300b02c4ffc",
+          "importOrder": [
+            "src/server/storage/renderStore.ts",
+            "src/server/services/renderQueue.ts",
+            "src/server/middleware/validate.ts",
+            "src/server/routes/render.ts",
+            "src/server/middleware/errorHandler.ts"
+          ],
           "importsFiles": [
             "src/server/middleware/errorHandler.ts",
             "src/server/middleware/validate.ts",
@@ -2275,7 +3362,23 @@
           "path": "src/server/routes/renders.ts"
         },
         {
-          "hash": "b80e9d34cc43b655c307c4f08ae1b46eb74ef14b5c21bf5ca80b21a37f149f6d",
+          "failurePaths": [
+            {
+              "in": "exportRecording",
+              "kind": "catch",
+              "line": 340
+            }
+          ],
+          "hash": "889a2522edd7ee5cf02a809b87f9de664495b258fd75e7e4093065069201401d",
+          "importOrder": [
+            "src/engine/LiveSynthEngine.ts",
+            "src/preset/loader.ts",
+            "src/server/services/renderScoreToWav.ts",
+            "src/server/storage/renderStore.ts",
+            "src/server/services/jamExport.ts",
+            "src/types/jam.ts",
+            "src/types/score.ts"
+          ],
           "importsFiles": [
             "src/engine/LiveSynthEngine.ts",
             "src/preset/loader.ts",
@@ -2288,7 +3391,14 @@
           "path": "src/server/services/JamSession.ts"
         },
         {
-          "hash": "af7aa1384e8ffd55c7203ec28d42561b22cb45b5fd53d29b28d7d8edbecf4d89",
+          "failurePaths": [
+            {
+              "in": "handleTrack",
+              "kind": "catch",
+              "line": 400
+            }
+          ],
+          "hash": "3f9394f8ecf265b6475429523759e2487cba31ed6c4b30949a01803b55e19131",
           "importsFiles": [
             "src/server/services/JamSession.ts",
             "src/types/jam.ts"
@@ -2296,7 +3406,33 @@
           "path": "src/server/services/JamSessionManager.ts"
         },
         {
-          "hash": "26f268348e6cbddabad897f581dfce9d885c7f51a8130eb7fd2bac83dc6e7c7e",
+          "failurePaths": [
+            {
+              "in": "init",
+              "kind": "catch",
+              "line": 111
+            },
+            {
+              "in": "handleParamUpdate",
+              "kind": "catch",
+              "line": 350
+            },
+            {
+              "in": "handleRecordStop",
+              "kind": "catch",
+              "line": 499
+            }
+          ],
+          "hash": "02bac1c816be94514d0f2346681586cd35589c4ad6b8ef844da93ad4a7928380",
+          "importOrder": [
+            "src/preset/loader.ts",
+            "src/preset/schema.ts",
+            "src/engine/LiveSynthEngine.ts",
+            "src/server/services/renderScoreToWav.ts",
+            "src/types/live.ts",
+            "src/server/storage/renderStore.ts",
+            "src/server/util/gitCommit.ts"
+          ],
           "importsFiles": [
             "src/engine/LiveSynthEngine.ts",
             "src/preset/loader.ts",
@@ -2312,7 +3448,14 @@
           "exports": [
             "exportEventTapeToWav"
           ],
-          "hash": "39f3eafdd6bc7da5dcdb9210720236aac650ee79cd52866b84e47b6928b02e10",
+          "hash": "24f0770ad512d0612e7ef4e6e100f2938eda1641959c066f011b1a096fe04cca",
+          "importOrder": [
+            "src/server/util/gitCommit.ts",
+            "src/engine/LiveSynthEngine.ts",
+            "src/preset/loader.ts",
+            "src/server/services/renderScoreToWav.ts",
+            "src/types/jam.ts"
+          ],
           "importsFiles": [
             "src/engine/LiveSynthEngine.ts",
             "src/preset/loader.ts",
@@ -2326,7 +3469,38 @@
           "exports": [
             "getRenderQueue"
           ],
-          "hash": "18a23ed8a0fd615eca093805f616cea38c85da0ee7780cbdc8fc160471fa193e",
+          "failurePaths": [
+            {
+              "in": "submit",
+              "kind": "throw",
+              "line": 124
+            },
+            {
+              "in": "submit",
+              "kind": "throw",
+              "line": 133
+            },
+            {
+              "in": "run",
+              "kind": "catch",
+              "line": 237
+            },
+            {
+              "in": "executeJob",
+              "kind": "throw",
+              "line": 340
+            }
+          ],
+          "hash": "f9cca98070353287605493764f2b65903ae070435d0a266ed959d4fd941cc894",
+          "importOrder": [
+            "src/preset/loader.ts",
+            "src/engine/StreamingVocalSynthEngine.ts",
+            "src/server/util/gitCommit.ts",
+            "src/server/services/renderScoreToWav.ts",
+            "src/server/util/logger.ts",
+            "src/phonemize/index.ts",
+            "src/server/util/metrics.ts"
+          ],
           "importsFiles": [
             "src/engine/StreamingVocalSynthEngine.ts",
             "src/phonemize/index.ts",
@@ -2347,7 +3521,40 @@
             "renderScoreToWav",
             "resolvePresetPath"
           ],
-          "hash": "293c29a955dbd59adeaef16c253c345162c5920bc1ae0c99f9648e0ad5ae18b8",
+          "failurePaths": [
+            {
+              "in": "resolvePresetPath",
+              "kind": "throw",
+              "line": 38
+            },
+            {
+              "in": "resolvePresetPath",
+              "kind": "throw",
+              "line": 53
+            },
+            {
+              "in": "resolvePresetPath",
+              "kind": "throw",
+              "line": 65
+            },
+            {
+              "in": "listPresets",
+              "kind": "catch",
+              "line": 96
+            },
+            {
+              "in": "listPresets",
+              "kind": "catch",
+              "line": 109
+            }
+          ],
+          "hash": "4378ecb6f9aa33c18fa6f9f01df05abf3a7d64fba81a827417d5011a4f8da6a6",
+          "importOrder": [
+            "src/server/util/gitCommit.ts",
+            "src/preset/loader.ts",
+            "src/engine/StreamingVocalSynthEngine.ts",
+            "src/phonemize/index.ts"
+          ],
           "importsFiles": [
             "src/engine/StreamingVocalSynthEngine.ts",
             "src/phonemize/index.ts",
@@ -2357,7 +3564,7 @@
           "path": "src/server/services/renderScoreToWav.ts"
         },
         {
-          "hash": "1d00c1fb075b3109b0785d463b4e372413a1805d3a0e89b442b8dd568e34f6db",
+          "hash": "2e660872ea454d4ffd0889261ea7d0e3cca6265ccf2b2ded8a6d2280a9d75bbf",
           "path": "src/server/services/wsSchemas.ts"
         },
         {
@@ -2375,7 +3582,84 @@
             "saveRender",
             "updateRenderMeta"
           ],
-          "hash": "5c4d1248e42846315c9065d0df67f97f4ab2196d6bae59fa08caf90b6ed0846e",
+          "failurePaths": [
+            {
+              "in": "safeRenderDir",
+              "kind": "throw",
+              "line": 53
+            },
+            {
+              "in": "safeRenderDir",
+              "kind": "throw",
+              "line": 62
+            },
+            {
+              "in": "listRenders",
+              "kind": "catch",
+              "line": 84
+            },
+            {
+              "in": "listRenders",
+              "kind": "catch",
+              "line": 93
+            },
+            {
+              "in": "nextUntitledBaseNum",
+              "kind": "catch",
+              "line": 143
+            },
+            {
+              "in": "mkdirExclusive",
+              "kind": "catch",
+              "line": 152
+            },
+            {
+              "in": "mkdirExclusive",
+              "kind": "throw",
+              "line": 154
+            },
+            {
+              "in": "saveLastRender",
+              "kind": "catch",
+              "line": 352
+            },
+            {
+              "in": "saveLastRender",
+              "kind": "catch",
+              "line": 357
+            },
+            {
+              "in": "saveLastRender",
+              "kind": "throw",
+              "line": 359
+            },
+            {
+              "in": "saveLastRender",
+              "kind": "catch",
+              "line": 367
+            },
+            {
+              "in": "getRenderStoreSizeBytes",
+              "kind": "catch",
+              "line": 455
+            },
+            {
+              "in": "getRenderStoreSizeBytes",
+              "kind": "catch",
+              "line": 457
+            },
+            {
+              "in": "assertRenderBudget",
+              "kind": "throw",
+              "line": 489
+            },
+            {
+              "in": "assertRenderBudget",
+              "kind": "throw",
+              "line": 498
+            }
+          ],
+          "hash": "0cc947521a88d6d95cb7776da31c5c9ad268fd6581e74eb3291f01e345158fcd",
           "importsFiles": [
             "src/server/util/logger.ts"
           ],
@@ -2385,14 +3669,48 @@
           "exports": [
             "getGitCommit"
           ],
-          "hash": "6e67f571386ff78aabec809c6db952d60cd69088866b24240a741f8bbc6ccd24",
+          "failurePaths": [
+            {
+              "in": "resolveCommit",
+              "kind": "catch",
+              "line": 26
+            }
+          ],
+          "hash": "82fe4ccada3d136dd676ae08188cc95a042ed456c2f24becf9f020d333d4143c",
           "path": "src/server/util/gitCommit.ts"
         },
         {
           "exports": [
             "installGracefulShutdown"
           ],
-          "hash": "b0ad69ee8891ce304212453f1e45400adf9dd8c9b59ddf2d7f8e2f93e8accd06",
+          "failurePaths": [
+            {
+              "in": "runShutdown",
+              "kind": "catch",
+              "line": 106
+            },
+            {
+              "in": "runShutdown",
+              "kind": "catch",
+              "line": 119
+            },
+            {
+              "in": "runShutdown",
+              "kind": "catch",
+              "line": 120
+            },
+            {
+              "in": "runShutdown",
+              "kind": "catch",
+              "line": 125
+            },
+            {
+              "in": "runShutdown",
+              "kind": "catch",
+              "line": 134
+            }
+          ],
+          "hash": "3c6e6e9d563acd35aefae2622a48063b906d486983efb574636514d4b4b266af",
           "importsFiles": [
             "src/server/util/logger.ts"
           ],
@@ -2402,7 +3720,14 @@
           "exports": [
             "getLogger"
           ],
-          "hash": "ffb82e7a51265d1c4a6fd67e4cfaf86071e12f051e7477228c058ab54d055f02",
+          "failurePaths": [
+            {
+              "in": "getLogger",
+              "kind": "catch",
+              "line": 103
+            }
+          ],
+          "hash": "74a422eb40bc9ff32d0c7687e02be7e341810b3c2b2d8fe55e7318d055383e0e",
           "path": "src/server/util/logger.ts"
         },
         {
@@ -2412,32 +3737,56 @@
             "startSamplers",
             "stopSamplers"
           ],
-          "hash": "9593cb778c8cf33a34031dd81289ac71cd77bd67db41049eafb3532fceaf9a21",
+          "failurePaths": [
+            {
+              "in": "startSamplers",
+              "kind": "catch",
+              "line": 145
+            }
+          ],
+          "hash": "d1aafe44eb0f5bac22c443da803c941f02a01bda58a9585195188d083583be75",
           "path": "src/server/util/metrics.ts"
         },
         {
           "exports": [
             "attachHeartbeat"
           ],
-          "hash": "75385769376ef44f696c5786e358b92eeaa984fc1a7c27c6448019a90f7cc635",
+          "failurePaths": [
+            {
+              "in": "attachHeartbeat",
+              "kind": "catch",
+              "line": 73
+            },
+            {
+              "in": "attachHeartbeat",
+              "kind": "catch",
+              "line": 74
+            },
+            {
+              "in": "attachHeartbeat",
+              "kind": "catch",
+              "line": 84
+            }
+          ],
+          "hash": "9b6e24b232562a640c3957163745ca94252cf947d8362577433ce5ebb1918345",
           "importsFiles": [
             "src/server/util/logger.ts"
           ],
           "path": "src/server/util/wsHeartbeat.ts"
         },
         {
-          "hash": "de45a0788550f26df6fcaf0f94c86b4e921e7747d3753b46f8d4cd56e4c82627",
+          "hash": "e0f2b63f095835908abb9441cf07dfa5c2e9688f39a3f8592cc802183743b6be",
           "importsFiles": [
             "src/types/score.ts"
           ],
           "path": "src/types/jam.ts"
         },
         {
-          "hash": "bc70efa43433c696a71478f1b48ee0dc13f50baa45972183a5120f77e8cce293",
+          "hash": "8bb9c01f2fab36c53aa2f496748a2ae424328bbcb780e5daab618d0323833070",
           "path": "src/types/live.ts"
         },
         {
-          "hash": "bc4bb3205d115fd8aa04259b84a71a7691987dc07464412ccaf0962939d37832",
+          "hash": "ecb53d1bf97f607f82c6e59f4806b847a46965e3c58a53f81e530b2d820210b8",
           "importsFiles": [
             "src/types/scoreSchema.ts"
           ],
@@ -2447,9 +3796,19 @@
           "exports": [
             "parseVocalScore"
           ],
-          "hash": "f6968694a045ac9496bf34d108ee2bb2dc371caecddedd3cfdad0d3c873fe366",
+          "failurePaths": [
+            {
+              "in": "parseVocalScore",
+              "kind": "throw",
+              "line": 132
+            }
+          ],
+          "hash": "7fc70746b86196107eea8d1da33852a5f0e195cd2c348b5ec7e3616391ef1b2e",
           "path": "src/types/scoreSchema.ts"
         }
+      ],
+      "frameworks": [
+        "mcp"
       ],
       "globs": [
         "src/**"
@@ -2457,30 +3816,104 @@
       "importConfidence": "full",
       "name": "src",
       "origin": "authored",
-      "outsideReads": 50,
-      "outsideWrites": 28,
+      "outsidePlaces": [
+        {
+          "reads": 20,
+          "where": [
+            "caller"
+          ],
+          "writes": 5
+        },
+        {
+          "reads": 24,
+          "where": [
+            "caller",
+            "cwd:.vscockpit/"
+          ],
+          "writes": 23
+        },
+        {
+          "reads": 0,
+          "where": [
+            "caller",
+            "cwd:assets/"
+          ],
+          "writes": 2
+        },
+        {
+          "reads": 0,
+          "where": [
+            "caller",
+            "cwd:calib/"
+          ],
+          "writes": 2
+        },
+        {
+          "reads": 2,
+          "where": [
+            "caller",
+            "cwd:presets"
+          ],
+          "writes": 0
+        },
+        {
+          "reads": 7,
+          "where": [
+            "caller",
+            "cwd:presets/"
+          ],
+          "writes": 0
+        },
+        {
+          "reads": 0,
+          "where": [
+            "caller",
+            "cwd:voicepreset.json"
+          ],
+          "writes": 1
+        },
+        {
+          "reads": 0,
+          "where": [
+            "cwd"
+          ],
+          "writes": 1
+        },
+        {
+          "reads": 1,
+          "where": [
+            "cwd:apps/"
+          ],
+          "writes": 0
+        }
+      ],
+      "outsideReads": 54,
+      "outsideWrites": 34,
       "role": "code",
+      "testRunners": [
+        "vitest"
+      ],
       "testedBy": 17,
       "unresolvedSites": 0
     },
     {
       "dynamicReads": 0,
-      "dynamicSpawns": 1,
-      "dynamicSpawnsInTests": 1,
+      "dynamicSpawns": 0,
+      "dynamicSpawnsInTests": 0,
       "dynamicWrites": 0,
       "entryPoints": [],
       "externals": 0,
       "files": [
         {
-          "hash": "be7caf6f59b8f1af1dc76bebcf0dcd3c53bfed228d82dc30e9422af3fd90af36",
+          "hash": "18d4d25dc2c2f221905e4984700f990f7b9e4612d14f30ade6c5a27419d84436",
           "path": "tests/__bench__/baseline.json"
         },
         {
-          "hash": "a4e1d8fe817f873ea4f280f0c403f3725c555a80965bbda90a46834a9acd52bc",
+          "hash": "6bcd1f15e5eabea55d4a6701db74ee36cfd0539c4893b6c72d472d3f49a6f653",
           "path": "tests/__snapshots__/score-fixtures.test.ts.snap"
         },
         {
-          "hash": "2f288ffa494256d27a3d993c4286d33c6a6be398c5ea14adde189ceb707208d7",
+          "hash": "652442ee6ccbf548bd99f5bedffb8fe2501e0f41d997da1f8a3bbde17203e819",
           "importsFiles": [
             "src/engine/LiveSynthEngine.ts",
             "src/preset/loader.ts",
@@ -2488,17 +3921,30 @@
             "src/server/app.ts",
             "tests/helpers/index.ts"
           ],
-          "path": "tests/cross-domain-stage-c.test.ts"
+          "names": [
+            "src/cli/analyze.ts"
+          ],
+          "path": "tests/cross-domain-stage-c.test.ts",
+          "testFramework": "vitest"
         },
         {
-          "hash": "6a75477729abf5fcfa56fdfdde09763bfad0cc409f6e53f0e8cd0a1453abc766",
+          "hash": "0a1bf0e01d06ccb8b575e2c33212fc57194c16b2f051859c792fccf9c3eb0495",
           "importsFiles": [
             "src/engine/curves.ts"
           ],
-          "path": "tests/curves.test.ts"
+          "path": "tests/curves.test.ts",
+          "testFramework": "vitest"
         },
         {
-          "hash": "7dbd2ddb1a55c5bae619f248f6b390a71933c086aad10d021fac8f84b28f9852",
+          "hash": "ba680540fecede627e29acd6005151263cc824f9a0eed83f1b98e0be23a6b60a",
+          "importOrder": [
+            "src/preset/loader.ts",
+            "src/engine/StreamingVocalSynthEngine.ts",
+            "src/engine/LiveSynthEngine.ts",
+            "src/preset/schema.ts",
+            "src/types/score.ts",
+            "tests/helpers/index.ts"
+          ],
           "importsFiles": [
             "src/engine/LiveSynthEngine.ts",
             "src/engine/StreamingVocalSynthEngine.ts",
@@ -2507,10 +3953,19 @@
             "src/types/score.ts",
             "tests/helpers/index.ts"
           ],
-          "path": "tests/engine-determinism.test.ts"
+          "path": "tests/engine-determinism.test.ts",
+          "testFramework": "vitest"
         },
         {
-          "hash": "dfb02ec5b3bedf3c5fdd2f9bc1d3b52e01347d621a800e0dc6671b3fd25b3e9b",
+          "hash": "8dba1af137bbc57761ab3a3b41d09e7dd3e8ec2e59134a8ac913666c0a8eb305",
+          "importOrder": [
+            "src/engine/consonantProfiles.ts",
+            "src/dsp/pitch.ts",
+            "src/engine/LiveSynthEngine.ts",
+            "src/preset/loader.ts",
+            "src/preset/schema.ts",
+            "tests/helpers/index.ts"
+          ],
           "importsFiles": [
             "src/dsp/pitch.ts",
             "src/engine/LiveSynthEngine.ts",
@@ -2519,24 +3974,33 @@
             "src/preset/schema.ts",
             "tests/helpers/index.ts"
           ],
-          "path": "tests/engine-medium.test.ts"
+          "path": "tests/engine-medium.test.ts",
+          "testFramework": "vitest"
         },
         {
-          "hash": "0f30b106fe7243e024749c6882f13b74bc4633734ecf30d0c3b4df8fbc803bc0",
+          "hash": "baaa13bb2ebe29b05ad4f864cc1ff07e225d05e8a5f3cd5730a0b37be67a2c1b",
+          "importOrder": [
+            "src/preset/loader.ts",
+            "src/engine/LiveSynthEngine.ts",
+            "src/preset/schema.ts",
+            "tests/helpers/index.ts"
+          ],
           "importsFiles": [
             "src/engine/LiveSynthEngine.ts",
             "src/preset/loader.ts",
             "src/preset/schema.ts",
             "tests/helpers/index.ts"
           ],
-          "path": "tests/envelope.test.ts"
+          "path": "tests/envelope.test.ts",
+          "testFramework": "vitest"
         },
         {
-          "hash": "07ff5b50bbb4550fa17564f3e75451a13909993e481439bd7e0e66f45767ac31",
+          "hash": "b166d513603deb159c4358873c7c181fac3da9ffd19d71eaedcd8e97ba5caf4c",
           "importsFiles": [
             "src/dsp/fft.ts"
           ],
-          "path": "tests/fft.test.ts"
+          "path": "tests/fft.test.ts",
+          "testFramework": "vitest"
         },
         {
           "exports": [
@@ -2544,34 +4008,46 @@
             "startTestServer",
             "stopTestServer"
           ],
-          "hash": "fb944dfc8456e627b8d986353508cec68d1e88bf6a80dfc00497b18909d9ff41",
+          "hash": "38f08272c7b0ca13e31801802e093adc5cbac0cbd15b5c40d71f118d899b56aa",
           "path": "tests/helpers/index.ts"
         },
         {
-          "hash": "8f7fcaead9e56c011eaca149baa4c992ddf0366c88d91ac6204dd07f557352f4",
+          "hash": "b5f5dcef706d92c1f90de5611de72851e847f41eed95bbd0b42162d0678005f7",
           "importsFiles": [
             "src/server/services/JamSession.ts",
             "src/server/services/JamSessionManager.ts",
             "src/server/services/LiveSession.ts"
           ],
-          "path": "tests/jam-session.test.ts"
+          "path": "tests/jam-session.test.ts",
+          "testFramework": "vitest"
         },
         {
-          "hash": "f58994d930f7a81f95b16979c4c392bcb6511a7996831d7664eb9db22fa972f8",
+          "hash": "a0a58d0423abfa92d205a3f1f1845131d494f8a532078d731ef934a178f56a01",
           "importsFiles": [
             "src/dsp/pitch.ts"
           ],
-          "path": "tests/pitch.test.ts"
+          "path": "tests/pitch.test.ts",
+          "testFramework": "vitest"
         },
         {
-          "hash": "dc38309a0c2c29563e4820f83db6749c0a81bfcfe088093548b36a727d62890f",
+          "hash": "2044f3965e69102e594ef4ebf09dd75f54631687203b4a0918c6c29a711cd6d6",
           "importsFiles": [
             "src/preset/loader.ts"
           ],
-          "path": "tests/preset-integrity.test.ts"
+          "path": "tests/preset-integrity.test.ts",
+          "testFramework": "vitest"
         },
         {
-          "hash": "e2a3fda987381c3ebc532c3aed72397cba18d8fc4da2463f972e64561ab86625",
+          "hash": "b0cfeb4270edbed769d47da5a258492e685a676af9f479a1e46f7859ec53f10a",
+          "importOrder": [
+            "src/server/services/wsSchemas.ts",
+            "src/preset/loader.ts",
+            "src/engine/StreamingVocalSynthEngine.ts",
+            "src/engine/curves.ts",
+            "src/preset/schema.ts",
+            "src/types/score.ts",
+            "tests/helpers/index.ts"
+          ],
           "importsFiles": [
             "src/engine/StreamingVocalSynthEngine.ts",
             "src/engine/curves.ts",
@@ -2581,10 +4057,20 @@
             "src/types/score.ts",
             "tests/helpers/index.ts"
           ],
-          "path": "tests/property-based.test.ts"
+          "path": "tests/property-based.test.ts",
+          "testFramework": "vitest"
         },
         {
-          "hash": "4ea494dcf20f7beaf8065c8d40bedf92a8770e03e51594feaab0ac3b44fbe0e3",
+          "hash": "3bcc0ec5af307394281b3fc6a57c5d1d4decda8f2c872233e6e69849e978e333",
+          "importOrder": [
+            "src/preset/loader.ts",
+            "src/engine/StreamingVocalSynthEngine.ts",
+            "src/engine/LiveSynthEngine.ts",
+            "src/phonemize/index.ts",
+            "src/preset/schema.ts",
+            "src/types/score.ts",
+            "tests/helpers/index.ts"
+          ],
           "importsFiles": [
             "src/engine/LiveSynthEngine.ts",
             "src/engine/StreamingVocalSynthEngine.ts",
@@ -2594,10 +4080,18 @@
             "src/types/score.ts",
             "tests/helpers/index.ts"
           ],
-          "path": "tests/render.bench.ts"
+          "path": "tests/render.bench.ts",
+          "testFramework": "vitest"
         },
         {
-          "hash": "2583b7fb7267c94ba097a9a32d39e5336dedec15ebbe006aa70dee50fcd0e3da",
+          "hash": "8d673f89c4779b247ec050f317f67e87ee04e75c156e386abbab714134fd0e1b",
+          "importOrder": [
+            "src/preset/loader.ts",
+            "src/engine/StreamingVocalSynthEngine.ts",
+            "src/preset/schema.ts",
+            "src/types/score.ts",
+            "tests/helpers/index.ts"
+          ],
           "importsFiles": [
             "src/engine/StreamingVocalSynthEngine.ts",
             "src/preset/loader.ts",
@@ -2605,46 +4099,53 @@
             "src/types/score.ts",
             "tests/helpers/index.ts"
           ],
-          "path": "tests/score-fixtures.test.ts"
+          "path": "tests/score-fixtures.test.ts",
+          "testFramework": "vitest"
         },
         {
-          "hash": "e79179e507bf464c9cc28fa8944ea2632325e9dc5be0d912ce542fce356dbed0",
+          "hash": "a1351ae0e144580bdb8fd2840989a3207802f97409c3e313637bc4757538e32b",
           "importsFiles": [
             "src/server/app.ts"
           ],
-          "path": "tests/server-auth.test.ts"
+          "path": "tests/server-auth.test.ts",
+          "testFramework": "vitest"
         },
         {
-          "hash": "dbdcfe527220c7355c21ccbfc83dc4bb4d015392be630fa455076c2e42b58f02",
+          "hash": "7974cd09723f741729d13855c341adffd23588699e25bf5eab6722aaad964188",
           "importsFiles": [
             "src/server/app.ts"
           ],
-          "path": "tests/server-medium.test.ts"
+          "path": "tests/server-medium.test.ts",
+          "testFramework": "vitest"
         },
         {
-          "hash": "e081d11434ed5404c970938ab00b1ebe170fc1ba0550a20f405185dd3f28fa2d",
+          "hash": "245d82438f5d16614fe5e38e123694909ef996571881458c3d2c25187d26f724",
           "importsFiles": [
             "src/server/app.ts"
           ],
-          "path": "tests/server-pathtraversal.test.ts"
+          "path": "tests/server-pathtraversal.test.ts",
+          "testFramework": "vitest"
         },
         {
-          "hash": "88b2a8c2d399b21fda07fbc60fff0d640f647d32cb854ec94ad4bb1b4b588c97",
+          "hash": "a83f887a68ff364255d9a45fdc2470c4114ce7fa40cdee7b8bb411733d558b72",
           "importsFiles": [
             "src/server/app.ts"
           ],
-          "path": "tests/server-validation.test.ts"
+          "path": "tests/server-validation.test.ts",
+          "testFramework": "vitest"
         },
         {
-          "hash": "cd69a2ff94fc145fa37361bbd180302872904b1e6b5d8d3b93a9fc3193e39e7b",
-          "path": "tests/version-alignment.test.ts"
+          "hash": "22fef50bc28c053fef365ee9b1b404e18a7e7c08cac7fd42ea3d581b18e3bc77",
+          "path": "tests/version-alignment.test.ts",
+          "testFramework": "vitest"
         },
         {
-          "hash": "843ad801faf2bb1fc6409262afb3776deaf798c7c3c6af9585f9652ab2372e22",
+          "hash": "fe4974e529aa844405380f45fdd31587e108fb52a015b7f348c39cec26ed4de6",
           "importsFiles": [
             "src/server/services/wsSchemas.ts"
           ],
-          "path": "tests/ws-schema-fuzz.test.ts"
+          "path": "tests/ws-schema-fuzz.test.ts",
+          "testFramework": "vitest"
         }
       ],
       "globs": [
@@ -2654,85 +4155,243 @@
       "name": "tests",
       "origin": "mixed",
       "role": "test",
+      "testRunners": [
+        "vitest"
+      ],
       "testedBy": 0,
       "unresolvedSites": 0
     }
   ],
   "doors": [
     {
-      "checksCount": 1,
+      "checksCount": 0,
       "commands": [
         {
+          "dir": "",
           "job": "lint-and-test",
-          "step": "Atlas check",
-          "text": "npx --yes @dogfood-lab/atlas@1.17.0 check"
+          "programs": [
+            "npx"
+          ],
+          "step": "Atlas check"
         },
         {
+          "dir": "",
           "job": "lint-and-test",
-          "step": "Install dependencies",
-          "text": "npm ci"
+          "programs": [
+            "npm"
+          ],
+          "step": "Install dependencies"
         },
         {
+          "dir": "",
           "job": "lint-and-test",
-          "step": "Lint",
-          "text": "npm run lint --if-present"
+          "programs": [
+            "npm"
+          ],
+          "step": "Lint"
         },
         {
+          "dir": "",
           "job": "lint-and-test",
-          "step": "Test",
-          "text": "npm test --if-present"
+          "programs": [
+            "npm"
+          ],
+          "step": "Test"
         },
         {
+          "dir": "",
           "job": "lint-and-test",
-          "step": "Build",
-          "text": "npm run build:server"
+          "programs": [
+            "npm"
+          ],
+          "step": "Build"
         },
         {
+          "dir": "",
           "job": "lint-and-test",
-          "step": "Security audit",
-          "text": "npm audit --audit-level=high --omit=dev"
+          "programs": [
+            "npm"
+          ],
+          "step": "Security audit"
         },
         {
+          "dir": "",
           "job": "cockpit-tests",
-          "step": "Install root dependencies",
-          "text": "npm ci"
+          "programs": [
+            "npm"
+          ],
+          "step": "Install root dependencies"
         },
         {
+          "dir": "",
           "job": "cockpit-tests",
-          "step": "Install cockpit dependencies",
-          "text": "npm --prefix apps/cockpit ci || npm --prefix apps/cockpit install"
+          "programs": [
+            "npm"
+          ],
+          "step": "Install cockpit dependencies"
         },
         {
+          "dir": "",
           "job": "cockpit-tests",
-          "step": "Install Playwright browsers (chromium only)",
-          "text": "npx playwright install --with-deps chromium"
+          "programs": [
+            "npx"
+          ],
+          "step": "Install Playwright browsers (chromium only)"
         },
         {
+          "dir": "",
           "job": "cockpit-tests",
-          "step": "Run cockpit smoke tests",
-          "text": "npm run test:cockpit"
+          "programs": [
+            "npm"
+          ],
+          "step": "Run cockpit smoke tests"
         },
         {
+          "dir": "",
           "job": "bench-gate",
-          "step": "Install dependencies",
-          "text": "npm ci"
+          "programs": [
+            "npm"
+          ],
+          "step": "Install dependencies"
         },
         {
+          "dir": "",
           "job": "bench-gate",
-          "step": "Run benches",
-          "text": "npm run bench"
+          "programs": [
+            "npm"
+          ],
+          "step": "Run benches"
         },
         {
+          "dir": "",
           "job": "bench-gate",
-          "step": "Compare against baseline (fail on > 2x regression)",
-          "text": "npm run bench:gate"
+          "programs": [
+            "npm"
+          ],
+          "step": "Compare against baseline (fail on > 2x regression)"
         }
       ],
       "elsewhere": [],
       "file": ".github/workflows/ci.yml",
-      "landings": [
-        "tests/__bench__/baseline.json"
+      "jobs": [
+        {
+          "basis": "declared",
+          "name": "lint-and-test",
+          "runsOn": [
+            {
+              "labels": [
+                "ubuntu-latest"
+              ],
+              "platform": {
+                "cpu": "x64",
+                "libc": "glibc",
+                "os": "linux"
+              }
+            },
+            {
+              "labels": [
+                "windows-latest"
+              ],
+              "platform": {
+                "cpu": "x64",
+                "os": "win32"
+              }
+            }
+          ],
+          "setup": [
+            {
+              "ranges": [
+                {
+                  "from": "20",
+                  "range": ">=20.0.0 <21.0.0-0"
+                },
+                {
+                  "from": "22",
+                  "range": ">=22.0.0 <23.0.0-0"
+                }
+              ],
+              "step": "1",
+              "uses": "actions/setup-node",
+              "version": "${{ matrix.node-version }}"
+            }
+          ]
+        },
+        {
+          "basis": "declared",
+          "name": "codecov",
+          "runsOn": [
+            {
+              "labels": [
+                "ubuntu-latest"
+              ],
+              "platform": {
+                "cpu": "x64",
+                "libc": "glibc",
+                "os": "linux"
+              }
+            }
+          ]
+        },
+        {
+          "basis": "declared",
+          "name": "cockpit-tests",
+          "runsOn": [
+            {
+              "labels": [
+                "ubuntu-latest"
+              ],
+              "platform": {
+                "cpu": "x64",
+                "libc": "glibc",
+                "os": "linux"
+              }
+            }
+          ],
+          "setup": [
+            {
+              "ranges": [
+                {
+                  "from": "20",
+                  "range": ">=20.0.0 <21.0.0-0"
+                }
+              ],
+              "step": "1",
+              "uses": "actions/setup-node",
+              "version": "20"
+            }
+          ]
+        },
+        {
+          "basis": "declared",
+          "name": "bench-gate",
+          "runsOn": [
+            {
+              "labels": [
+                "ubuntu-latest"
+              ],
+              "platform": {
+                "cpu": "x64",
+                "libc": "glibc",
+                "os": "linux"
+              }
+            }
+          ],
+          "setup": [
+            {
+              "ranges": [
+                {
+                  "from": "20",
+                  "range": ">=20.0.0 <21.0.0-0"
+                }
+              ],
+              "step": "1",
+              "uses": "actions/setup-node",
+              "version": "20"
+            }
+          ]
+        }
       ],
+      "landings": [],
       "mentions": [
         {
           "job": "lint-and-test",
@@ -2740,7 +4399,10 @@
         }
       ],
       "name": "CI",
-      "permissions": [],
+      "permissions": [
+        "contents:read",
+        "id-token:write"
+      ],
       "pushes": false,
       "reach": [
         {
@@ -2759,20 +4421,7 @@
           "files": 18
         }
       ],
-      "readers": [
-        {
-          "by": "scripts/bench-gate.mjs",
-          "call": "existsSync",
-          "confidence": "ast",
-          "target": "tests/__bench__/baseline.json"
-        },
-        {
-          "by": "scripts/bench-gate.mjs",
-          "call": "readFileSync",
-          "confidence": "ast",
-          "target": "tests/__bench__/baseline.json"
-        }
-      ],
+      "readers": [],
       "runs": [
         {
           "job": "bench-gate",
@@ -2780,11 +4429,12 @@
           "runKind": "executes"
         },
         {
+          "built": true,
           "directory": true,
           "job": "lint-and-test",
           "matched": true,
           "path": "src/",
-          "runKind": "checks",
+          "runKind": "executes",
           "via": "tsc tsconfig.json"
         },
         {
@@ -3039,6 +4689,28 @@
         "releases": false
       },
       "stages": [],
+      "tests": [
+        {
+          "config": "vitest.config.ts",
+          "coverage": true,
+          "files": 17,
+          "job": "lint-and-test",
+          "junit": true,
+          "runner": "vitest",
+          "step": "Test",
+          "through": [
+            "npm test"
+          ]
+        },
+        {
+          "job": "cockpit-tests",
+          "runner": "playwright test",
+          "step": "Run cockpit smoke tests",
+          "through": [
+            "npm run test:cockpit"
+          ]
+        }
+      ],
       "triggers": [
         {
           "branches": [
@@ -3048,6 +4720,7 @@
           "paths": [
             ".github/workflows/**",
             "atlas/**",
+            "codecov.yml",
             "lib/**",
             "package-lock.json",
             "package.json",
@@ -3066,6 +4739,7 @@
           "paths": [
             ".github/workflows/**",
             "atlas/**",
+            "codecov.yml",
             "lib/**",
             "package-lock.json",
             "package.json",
@@ -3086,43 +4760,79 @@
       ],
       "uses": [
         "actions/checkout",
+        "actions/download-artifact",
         "actions/setup-node",
-        "actions/upload-artifact"
+        "actions/upload-artifact",
+        "codecov/codecov-action"
       ],
       "usesWorkflowToken": false
     },
     {
-      "checksCount": 1,
+      "checksCount": 0,
       "commands": [
         {
+          "dir": "",
           "job": "dogfood",
-          "step": "2",
-          "text": "npm ci"
+          "programs": [
+            "npm"
+          ],
+          "step": "2"
         },
         {
+          "dir": "",
           "job": "dogfood",
-          "step": "3",
-          "text": "npm run build:server"
+          "programs": [
+            "npm"
+          ],
+          "step": "3"
         },
         {
+          "dir": "",
           "job": "dogfood",
-          "step": "Run scenario",
-          "text": "set +e\n# Start the server in background\nnode dist/server/index.prod.js &\nSERVER_PID=$!\n\n# Wait for server to be ready\nSTART_OK=fail\nfor i in $(seq 1 20); do\n  if curl -sf http://localhost:4321/api/health > /dev/null 2>&1; then\n    START_OK=pass\n    break\n  fi\n  sleep 1\ndone\necho \"start_status=$START_OK\" >> \"$GITHUB_OUTPUT\"\n\n# Health check\nHEALTH_OK=fail\nif [ \"$START_OK\" = \"pass\" ]; then\n  curl -sf http://localhost:4321/api/health | tee /tmp/health.json\n  if jq -e '.ok == true' /tmp/health.json > /dev/null 2>&1; then\n    HEALTH_OK=pass\n  fi\nfi\necho \"health_status=$HEALTH_OK\" >> \"$GITHUB_OUTPUT\"\n\n# Presets check\nPRESETS_OK=fail\nif [ \"$START_OK\" = \"pass\" ]; then\n  curl -sf http://localhost:4321/api/presets 2>&1 | tee /tmp/presets.json\n  if [ -s /tmp/presets.json ]; then\n    PRESETS_OK=pass\n  fi\nfi\necho \"presets_status=$PRESETS_OK\" >> \"$GITHUB_OUTPUT\"\n\n# Verify output\n# S-018: public /api/health response trimmed to {ok, version, uptimeSec};\n# full details now live behind requireAuth at /api/health/detailed.\n# The verify check only asserts the trimmed public shape.\nVERIFY_OK=fail\nif [ \"$HEALTH_OK\" = \"pass\" ] && jq -e '.ok and .version and (.uptimeSec | type == \"number\")' /tmp/health.json > /dev/null 2>&1; then\n  VERIFY_OK=pass\nfi\necho \"verify_status=$VERIFY_OK\" >> \"$GITHUB_OUTPUT\"\n\n# Stop server\nkill $SERVER_PID 2>/dev/null || true\n"
+          "programs": [
+            "1",
+            "curl",
+            "echo",
+            "jq",
+            "kill",
+            "node",
+            "seq",
+            "sleep",
+            "tee"
+          ],
+          "step": "Run scenario"
         },
         {
+          "dir": "",
           "job": "dogfood",
-          "step": "Determine overall verdict",
-          "text": "S=\"${{ steps.scenario.outputs.start_status }}\"\nH=\"${{ steps.scenario.outputs.health_status }}\"\nP=\"${{ steps.scenario.outputs.presets_status }}\"\nV=\"${{ steps.scenario.outputs.verify_status }}\"\nif [ \"$S\" = \"pass\" ] && [ \"$H\" = \"pass\" ] && [ \"$P\" = \"pass\" ] && [ \"$V\" = \"pass\" ]; then\n  echo \"verdict=pass\" >> \"$GITHUB_OUTPUT\"\nelse\n  echo \"verdict=fail\" >> \"$GITHUB_OUTPUT\"\nfi\n"
+          "programs": [
+            "echo"
+          ],
+          "step": "Determine overall verdict"
         },
         {
+          "dir": "",
           "job": "dogfood",
-          "step": "Build submission",
-          "text": "FINISHED_AT=$(date -u +\"%Y-%m-%dT%H:%M:%SZ\")\ncat > /tmp/submission.json << 'INNER_EOF'\n{\n  \"schema_version\": \"1.0.0\",\n  \"run_id\": \"vocal-synth-engine-RUN_ID-ATTEMPT\",\n  \"repo\": \"REPO_SLUG\",\n  \"ref\": {\n    \"branch\": \"REF_NAME\",\n    \"commit_sha\": \"COMMIT_SHA\"\n  },\n  \"source\": {\n    \"provider\": \"github\",\n    \"workflow\": \"dogfood.yml\",\n    \"provider_run_id\": \"PROVIDER_RUN_ID\",\n    \"attempt\": ATTEMPT_NUM,\n    \"run_url\": \"RUN_URL_PLACEHOLDER\",\n    \"actor\": \"ACTOR_NAME\"\n  },\n  \"timing\": {\n    \"started_at\": \"STARTED_PLACEHOLDER\",\n    \"finished_at\": \"FINISHED_PLACEHOLDER\",\n    \"duration_ms\": 0\n  },\n  \"ci_checks\": [],\n  \"scenario_results\": [\n    {\n      \"scenario_id\": \"health-and-presets-roundtrip\",\n      \"scenario_name\": \"Start server, verify health and presets endpoints\",\n      \"scenario_version\": \"1.0.0\",\n      \"product_surface\": \"api\",\n      \"execution_mode\": \"bot\",\n      \"verdict\": \"VERDICT_PLACEHOLDER\",\n      \"step_results\": [\n        { \"step_id\": \"start-server\", \"status\": \"START_STATUS\" },\n        { \"step_id\": \"health-check\", \"status\": \"HEALTH_STATUS\" },\n        { \"step_id\": \"presets-check\", \"status\": \"PRESETS_STATUS\" },\n        { \"step_id\": \"verify-output\", \"status\": \"VERIFY_STATUS\" }\n      ],\n      \"evidence\": [\n        {\n          \"kind\": \"log\",\n          \"url\": \"RUN_URL_PLACEHOLDER\",\n          \"description\": \"CI run log with health + presets response\"\n        }\n      ],\n      \"notes\": \"Bot-driven API health and presets roundtrip\"\n    }\n  ],\n  \"overall_verdict\": \"VERDICT_PLACEHOLDER\",\n  \"notes\": \"Phase 2 rollout: vocal-synth-engine API dogfood.\"\n}\nINNER_EOF\n\nsed -i \"s|REPO_SLUG|${GITHUB_REPOSITORY}|g\" /tmp/submission.json\nsed -i \"s|REF_NAME|${GITHUB_REF_NAME}|g\" /tmp/submission.json\nsed -i \"s|COMMIT_SHA|${GITHUB_SHA}|g\" /tmp/submission.json\nsed -i \"s|PROVIDER_RUN_ID|${GITHUB_RUN_ID}|g\" /tmp/submission.json\nsed -i \"s|ATTEMPT_NUM|${GITHUB_RUN_ATTEMPT}|g\" /tmp/submission.json\nsed -i \"s|RUN_URL_PLACEHOLDER|https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}|g\" /tmp/submission.json\nsed -i \"s|ACTOR_NAME|${GITHUB_ACTOR}|g\" /tmp/submission.json\nsed -i \"s|STARTED_PLACEHOLDER|${{ github.event.head_commit.timestamp || github.event.repository.pushed_at }}|g\" /tmp/submission.json\nsed -i \"s|FINISHED_PLACEHOLDER|${FINISHED_AT}|g\" /tmp/submission.json\nsed -i \"s|vocal-synth-engine-RUN_ID-ATTEMPT|vocal-synth-engine-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}|g\" /tmp/submission.json\nsed -i \"s|VERDICT_PLACEHOLDER|${{ steps.verdict.outputs.verdict }}|g\" /tmp/submission.json\nsed -i \"s|START_STATUS|${{ steps.scenario.outputs.start_status }}|g\" /tmp/submission.json\nsed -i \"s|HEALTH_STATUS|${{ steps.scenario.outputs.health_status }}|g\" /tmp/submission.json\nsed -i \"s|PRESETS_STATUS|${{ steps.scenario.outputs.presets_status }}|g\" /tmp/submission.json\nsed -i \"s|VERIFY_STATUS|${{ steps.scenario.outputs.verify_status }}|g\" /tmp/submission.json\n\njq empty /tmp/submission.json\necho \"Submission built:\"\njq '.run_id, .overall_verdict' /tmp/submission.json\n"
+          "programs": [
+            "cat",
+            "date",
+            "echo",
+            "jq",
+            "sed"
+          ],
+          "step": "Build submission"
         },
         {
+          "dir": "",
           "job": "dogfood",
-          "step": "Dispatch to dogfood-labs",
-          "text": "SUBMISSION=$(cat /tmp/submission.json)\nRUN_ID=$(echo \"$SUBMISSION\" | jq -r '.run_id')\n\nif [ -z \"$GH_TOKEN\" ]; then\n  echo \"::warning::DOGFOOD_TOKEN not set — skipping dispatch\"\n  exit 0\nfi\n\n# Dispatch is best-effort: the dogfood-labs receiver may not be\n# deployed yet. The scenario verdict above is what actually gates\n# this workflow — so any dispatch failure becomes a warning.\nset +e\nDISPATCH_OUT=$(jq -n --argjson sub \"$SUBMISSION\" \\\n  '{\"event_type\":\"dogfood_submission\",\"client_payload\":{\"submission\":$sub}}' \\\n  | gh api repos/mcp-tool-shop-org/dogfood-labs/dispatches \\\n    --input - --silent 2>&1)\nDISPATCH_RC=$?\nset -e\n\nif [ $DISPATCH_RC -ne 0 ]; then\n  echo \"::warning::Dispatch to mcp-tool-shop-org/dogfood-labs failed (rc=$DISPATCH_RC): $DISPATCH_OUT — scenario verdict above still gates this job\"\n  exit 0\nfi\n\necho \"Dispatched $RUN_ID to dogfood-labs\"\n"
+          "programs": [
+            "1",
+            "cat",
+            "echo",
+            "gh",
+            "jq"
+          ],
+          "step": "Dispatch to dogfood-labs"
         }
       ],
       "elsewhere": [],
@@ -3142,6 +4852,37 @@
               "main"
             ]
           }
+        }
+      ],
+      "jobs": [
+        {
+          "basis": "declared",
+          "name": "dogfood",
+          "runsOn": [
+            {
+              "labels": [
+                "ubuntu-latest"
+              ],
+              "platform": {
+                "cpu": "x64",
+                "libc": "glibc",
+                "os": "linux"
+              }
+            }
+          ],
+          "setup": [
+            {
+              "ranges": [
+                {
+                  "from": "20",
+                  "range": ">=20.0.0 <21.0.0-0"
+                }
+              ],
+              "step": "1",
+              "uses": "actions/setup-node",
+              "version": "20"
+            }
+          ]
         }
       ],
       "landings": [],
@@ -3167,11 +4908,12 @@
       "readers": [],
       "runs": [
         {
+          "built": true,
           "directory": true,
           "job": "dogfood",
           "matched": true,
           "path": "src/",
-          "runKind": "checks",
+          "runKind": "executes",
           "via": "tsc tsconfig.json",
           "when": {
             "branches": [
@@ -3231,18 +4973,74 @@
       "checksCount": 0,
       "commands": [
         {
+          "dir": "site",
           "job": "build",
-          "step": "Install site dependencies",
-          "text": "npm ci"
+          "programs": [
+            "npm"
+          ],
+          "step": "Install site dependencies"
         },
         {
+          "dir": "site",
           "job": "build",
-          "step": "Build site",
-          "text": "npm run build"
+          "programs": [
+            "npm"
+          ],
+          "step": "Build site"
         }
       ],
       "elsewhere": [],
       "file": ".github/workflows/pages.yml",
+      "jobs": [
+        {
+          "basis": "declared",
+          "name": "build",
+          "runsOn": [
+            {
+              "labels": [
+                "ubuntu-latest"
+              ],
+              "platform": {
+                "cpu": "x64",
+                "libc": "glibc",
+                "os": "linux"
+              }
+            }
+          ],
+          "setup": [
+            {
+              "ranges": [
+                {
+                  "from": "22",
+                  "range": ">=22.0.0 <23.0.0-0"
+                }
+              ],
+              "step": "1",
+              "uses": "actions/setup-node",
+              "version": "22"
+            }
+          ]
+        },
+        {
+          "basis": "declared",
+          "environment": {
+            "name": "github-pages"
+          },
+          "name": "deploy",
+          "runsOn": [
+            {
+              "labels": [
+                "ubuntu-latest"
+              ],
+              "platform": {
+                "cpu": "x64",
+                "libc": "glibc",
+                "os": "linux"
+              }
+            }
+          ]
+        }
+      ],
       "landings": [],
       "mentions": [],
       "name": "Deploy site to GitHub Pages",
@@ -3256,7 +5054,7 @@
         {
           "boundary": "site",
           "depth": 0,
-          "files": 3
+          "files": 5
         }
       ],
       "readers": [],
@@ -3314,66 +5112,162 @@
       "usesWorkflowToken": false
     },
     {
-      "checksCount": 1,
+      "checksCount": 0,
       "commands": [
         {
+          "dir": "",
           "job": "verify",
-          "step": "Install dependencies",
-          "text": "npm ci"
+          "programs": [
+            "npm"
+          ],
+          "step": "Install dependencies"
         },
         {
+          "dir": "",
           "job": "verify",
-          "step": "Lint",
-          "text": "npm run lint --if-present"
+          "programs": [
+            "npm"
+          ],
+          "step": "Lint"
         },
         {
+          "dir": "",
           "job": "verify",
-          "step": "Test",
-          "text": "npm test"
+          "programs": [
+            "npm"
+          ],
+          "step": "Test"
         },
         {
+          "dir": "",
           "job": "verify",
-          "step": "Build",
-          "text": "npm run build:server"
+          "programs": [
+            "npm"
+          ],
+          "step": "Build"
         },
         {
+          "dir": "",
           "job": "verify",
-          "step": "Verify gate",
-          "text": "bash scripts/verify.sh"
+          "programs": [
+            "bash"
+          ],
+          "step": "Verify gate"
         },
         {
+          "dir": "",
           "job": "ship",
-          "step": "Install dependencies",
-          "text": "npm ci"
+          "programs": [
+            "npm"
+          ],
+          "step": "Install dependencies"
         },
         {
+          "dir": "",
           "job": "ship",
-          "step": "Build",
-          "text": "npm run build:server"
+          "programs": [
+            "npm"
+          ],
+          "step": "Build"
         },
         {
+          "dir": "",
           "job": "ship",
-          "step": "Tag-vs-package.json version equality",
-          "text": "TAG_REF=\"${GITHUB_REF_NAME}\"\n# Strip leading `v` from tag name\nTAG_VERSION=\"${TAG_REF#v}\"\nPKG_VERSION=$(node -p \"require('./package.json').version\")\necho \"tag_ref=$TAG_REF\"\necho \"tag_version=$TAG_VERSION\"\necho \"pkg_version=$PKG_VERSION\"\nif [ \"$TAG_VERSION\" != \"$PKG_VERSION\" ]; then\n  echo \"::error::Tag $TAG_REF does not match package.json version $PKG_VERSION (expected v$PKG_VERSION)\"\n  exit 1\nfi\necho \"version=$PKG_VERSION\" >> \"$GITHUB_OUTPUT\"\n"
+          "programs": [
+            "echo",
+            "node"
+          ],
+          "step": "Tag-vs-package.json version equality"
         },
         {
+          "dir": "",
           "job": "ship",
-          "step": "Publish to npm with provenance",
-          "text": "npm publish --provenance --access public"
+          "programs": [
+            "npm"
+          ],
+          "step": "Publish to npm with provenance"
         },
         {
+          "dir": "",
           "job": "ship",
-          "step": "Extract CHANGELOG entry",
-          "text": "VERSION=\"${{ steps.version-check.outputs.version }}\"\n# awk: when we hit the `## [VERSION]` header, start printing.\n# When we hit the NEXT `## [` header, stop.\nBODY=$(awk -v v=\"$VERSION\" '\n  $0 ~ \"^## \\\\[\" v \"\\\\]\" { found=1; next }\n  found && /^## \\[/      { exit }\n  found                  { print }\n' CHANGELOG.md)\nif [ -z \"$BODY\" ]; then\n  BODY=\"See CHANGELOG.md for v$VERSION details.\"\nfi\n# Write to a tempfile so we don't have to escape newlines for\n# GITHUB_OUTPUT. The release step reads it via --notes-file.\necho \"$BODY\" > /tmp/release-notes.md\necho \"notes_file=/tmp/release-notes.md\" >> \"$GITHUB_OUTPUT\"\necho \"--- extracted release notes ---\"\ncat /tmp/release-notes.md\necho \"--- end ---\"\n"
+          "programs": [
+            "awk",
+            "cat",
+            "echo"
+          ],
+          "step": "Extract CHANGELOG entry"
         },
         {
+          "dir": "",
           "job": "ship",
-          "step": "Create GitHub release",
-          "text": "gh release create \"$GITHUB_REF_NAME\" \\\n  --title \"$GITHUB_REF_NAME\" \\\n  --notes-file \"${{ steps.changelog.outputs.notes_file }}\" \\\n  --verify-tag\n"
+          "programs": [
+            "gh"
+          ],
+          "step": "Create GitHub release"
         }
       ],
       "elsewhere": [],
       "file": ".github/workflows/release.yml",
+      "jobs": [
+        {
+          "basis": "declared",
+          "name": "verify",
+          "runsOn": [
+            {
+              "labels": [
+                "ubuntu-latest"
+              ],
+              "platform": {
+                "cpu": "x64",
+                "libc": "glibc",
+                "os": "linux"
+              }
+            }
+          ],
+          "setup": [
+            {
+              "ranges": [
+                {
+                  "from": "20",
+                  "range": ">=20.0.0 <21.0.0-0"
+                }
+              ],
+              "step": "1",
+              "uses": "actions/setup-node",
+              "version": "20"
+            }
+          ]
+        },
+        {
+          "basis": "declared",
+          "name": "ship",
+          "runsOn": [
+            {
+              "labels": [
+                "ubuntu-latest"
+              ],
+              "platform": {
+                "cpu": "x64",
+                "libc": "glibc",
+                "os": "linux"
+              }
+            }
+          ],
+          "setup": [
+            {
+              "ranges": [
+                {
+                  "from": "20",
+                  "range": ">=20.0.0 <21.0.0-0"
+                }
+              ],
+              "step": "1",
+              "uses": "actions/setup-node",
+              "version": "20"
+            }
+          ]
+        }
+      ],
       "landings": [],
       "mentions": [
         {
@@ -3425,19 +5319,21 @@
           "runKind": "executes"
         },
         {
+          "built": true,
           "directory": true,
           "job": "ship",
           "matched": true,
           "path": "src/",
-          "runKind": "checks",
+          "runKind": "executes",
           "via": "tsc tsconfig.json"
         },
         {
+          "built": true,
           "directory": true,
           "job": "verify",
           "matched": true,
           "path": "src/",
-          "runKind": "checks",
+          "runKind": "executes",
           "via": "tsc tsconfig.json"
         },
         {
@@ -3585,6 +5481,18 @@
         "releases": true
       },
       "stages": [],
+      "tests": [
+        {
+          "config": "vitest.config.ts",
+          "files": 17,
+          "job": "verify",
+          "runner": "vitest",
+          "step": "Test",
+          "through": [
+            "npm test"
+          ]
+        }
+      ],
       "triggers": [
         {
           "event": "push",
@@ -3733,9 +5641,7 @@
       "elsewhere": [],
       "file": "package.json",
       "kind": "command",
-      "landings": [
-        "assets"
-      ],
+      "landings": [],
       "mentions": [],
       "name": "vse-analyze",
       "permissions": [],
@@ -4110,8 +6016,20 @@
   ],
   "edges": [
     {
+      "from": "cockpit",
+      "kind": "http",
+      "routes": 11,
+      "to": "src"
+    },
+    {
       "from": "scripts",
       "kind": "file",
+      "to": "src"
+    },
+    {
+      "from": "scripts",
+      "kind": "http",
+      "routes": 1,
       "to": "src"
     },
     {
@@ -4121,15 +6039,17 @@
       "to": "src"
     }
   ],
+  "engine": "1.24.0",
   "generatedFrom": {
-    "commit": "f8fe895f7a07bdf1d2c127e038bfc986b2987c3b",
-    "tracked": 365
+    "commit": "231081dbbac002788a8e6f41e3fd214d839a6da5",
+    "tracked": 366
   },
   "landings": [
     {
       "readers": [
         {
-          "by": ".github/workflows/release.yml"
+          "by": ".github/workflows/release.yml",
+          "confidence": "config"
         },
         {
           "by": "tests/version-alignment.test.ts",
@@ -4153,19 +6073,10 @@
       "writers": []
     },
     {
-      "readers": [],
-      "target": "assets",
-      "writers": [
-        {
-          "by": "src/cli/analyze.ts",
-          "confidence": "ast"
-        }
-      ]
-    },
-    {
       "readers": [
         {
-          "by": ".github/workflows/release.yml"
+          "by": ".github/workflows/release.yml",
+          "confidence": "config"
         },
         {
           "by": "tests/version-alignment.test.ts",
@@ -4247,18 +6158,6 @@
           "fromTests": true
         }
       ],
-      "target": "test-score-lyrics.json",
-      "writers": []
-    },
-    {
-      "readers": [
-        {
-          "by": "tests/score-fixtures.test.ts",
-          "call": "literal",
-          "confidence": "ast",
-          "fromTests": true
-        }
-      ],
       "target": "test-score-morph.json",
       "writers": []
     },
@@ -4272,18 +6171,6 @@
         }
       ],
       "target": "test-score-poly.json",
-      "writers": []
-    },
-    {
-      "readers": [
-        {
-          "by": "tests/score-fixtures.test.ts",
-          "call": "literal",
-          "confidence": "ast",
-          "fromTests": true
-        }
-      ],
-      "target": "test-score.json",
       "writers": []
     },
     {
@@ -4315,7 +6202,9 @@
         {
           "by": "scripts/bench-gate.mjs",
           "confidence": "ast",
-          "stamps": true
+          "unless": [
+            "exists"
+          ]
         }
       ]
     },
@@ -4338,13 +6227,16 @@
     {
       "readers": [
         {
-          "by": ".github/workflows/ci.yml"
+          "by": ".github/workflows/ci.yml",
+          "confidence": "config"
         },
         {
-          "by": ".github/workflows/dogfood.yml"
+          "by": ".github/workflows/dogfood.yml",
+          "confidence": "config"
         },
         {
-          "by": ".github/workflows/release.yml"
+          "by": ".github/workflows/release.yml",
+          "confidence": "config"
         }
       ],
       "target": "tsconfig.json",
@@ -4355,5 +6247,15 @@
   "submodules": [],
   "symlinks": [],
   "testFiles": 22,
-  "unassigned": []
+  "unassigned": [],
+  "unseen": [
+    {
+      "files": [
+        "Dockerfile",
+        "fly.toml",
+        "render.yaml"
+      ],
+      "kind": "deploy"
+    }
+  ]
 }
