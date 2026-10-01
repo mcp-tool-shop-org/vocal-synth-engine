@@ -203,8 +203,8 @@
         "path": ".github/pull_request_template.md"
       },
       {
-        "commits": 17,
-        "lines": 439,
+        "commits": 19,
+        "lines": 451,
         "path": ".github/workflows/ci.yml"
       },
       {
@@ -393,8 +393,8 @@
         "path": "assets/logo.png"
       },
       {
-        "commits": 4,
-        "lines": 344,
+        "commits": 6,
+        "lines": 370,
         "path": "atlas/README.md"
       },
       {
@@ -403,18 +403,18 @@
         "path": "atlas/boundaries.yaml"
       },
       {
-        "commits": 4,
-        "lines": 1558,
+        "commits": 6,
+        "lines": 1620,
         "path": "atlas/page.json"
       },
       {
-        "commits": 4,
-        "lines": 4320,
+        "commits": 6,
+        "lines": 4380,
         "path": "atlas/statistics.json"
       },
       {
-        "commits": 4,
-        "lines": 14058,
+        "commits": 6,
+        "lines": 14070,
         "path": "atlas/structure.json"
       },
       {
@@ -2078,9 +2078,9 @@
     "level": "low",
     "reason": "fewer than 30 qualifying commits in the window, and fewer than 25 source files reach 10 revisions"
   },
-  "generatedAt": "2026-10-01T00:13:12.892Z",
+  "generatedAt": "2026-10-01T02:14:35.687Z",
   "generatedFrom": {
-    "commit": "907e15979c730d298f55ce3100744fcb7a72cf22"
+    "commit": "9f610c67eb51015efc7cebe7bad107c512217fde"
   },
   "pairs": [
     {
@@ -2101,16 +2101,16 @@
     "floor": "fallen",
     "floorHeld": false,
     "floorTrigger": "both",
-    "headDate": "2026-09-30T14:02:15-07:00",
+    "headDate": "2026-09-30T17:23:47-07:00",
     "inScopeFiles": 371,
     "pinnedStart": null,
     "priorFloor": "fallen",
-    "qualifyingCommits": 23,
+    "qualifyingCommits": 24,
     "qualifyingMinimum": 30,
     "revisions": 5,
     "shared": 10,
     "sharedFloorUsed": 3,
-    "since": "2026-04-03T21:02:15.000Z",
+    "since": "2026-04-04T00:23:47.000Z",
     "sourceExtensions": [
       ".js",
       ".mjs",
