@@ -42,43 +42,36 @@
   ],
   "changes": {
     "fileCounts": {
-      "added": 1,
-      "changed": 203,
+      "added": 0,
+      "changed": 1,
       "moved": 0,
-      "parts": 9,
+      "parts": 1,
       "removed": 0
     },
     "items": [
       {
         "kind": "door",
-        "sentence": "CI's pull request trigger now also names `codecov.yml`.",
+        "sentence": "CI's pull request trigger now also names `apps/cockpit/**`.",
         "subjects": [
           ".github/workflows/ci.yml"
         ]
       },
       {
         "kind": "door",
-        "sentence": "CI's push trigger now also names `codecov.yml`.",
+        "sentence": "CI's push trigger now also names `apps/cockpit/**`.",
         "subjects": [
           ".github/workflows/ci.yml"
         ]
       },
       {
-        "kind": "origin",
-        "sentence": "assets was generated and is now authored.",
-        "subjects": [
-          "assets"
-        ]
-      },
-      {
         "kind": "counts",
-        "sentence": "1 file added and 203 changed content, across 9 parts.",
+        "sentence": "1 file changed content, across 1 part.",
         "subjects": []
       }
     ],
     "since": {
-      "commit": "f8fe895f7a07bdf1d2c127e038bfc986b2987c3b",
-      "generatedAt": "2026-09-24T08:29:57.961Z"
+      "commit": "231081dbbac002788a8e6f41e3fd214d839a6da5",
+      "generatedAt": "2026-09-30T20:14:20.747Z"
     },
     "unchanged": false
   },
@@ -87,7 +80,7 @@
     "Window: 180 days; a pair counts from 3 shared commits, since the window holds fewer than 30 qualifying commits."
   ],
   "changesTogetherWithTests": 0,
-  "commit": "231081dbbac002788a8e6f41e3fd214d839a6da5",
+  "commit": "907e15979c730d298f55ce3100744fcb7a72cf22",
   "defaultBranch": "main",
   "derived": "10 parts, mostly TypeScript (99 files), JavaScript (3), Astro (2), CSS (2), shell (2), HTML (1) and Python (1). Work enters through 15 doors; CI and Release each reach 3 parts, and CI is followed because a pull request goes through it. It publishes to npm. It deploys a site to GitHub Pages. People run vocal-synth-engine-mcp, vse-analyze, vse-build-preset, vse-compare, vse-gen-vowel-wav, vse-inspect, vse-phonemize, vse-play-score, vse-resynth and vse-score-from-midi. People import @mcptoolshop/vocal-synth-engine.",
   "doors": [
@@ -147,8 +140,8 @@
       ],
       "stages": [],
       "triggers": [
-        "on a pull request to main touching 11 paths",
-        "on a push to main touching 11 paths",
+        "on a pull request to main touching 12 paths",
+        "on a push to main touching 12 paths",
         "on a schedule (`0 6 * * 1`), Monday at 06:00 UTC",
         "or by hand"
       ]
@@ -621,7 +614,7 @@
       ]
     }
   ],
-  "generatedAt": "2026-09-30T20:14:20.747Z",
+  "generatedAt": "2026-10-01T00:13:12.892Z",
   "limits": [
     "4 reads use paths built at run time and are not named here.",
     "28 writes and 33 reads go to the directory the command is run in (.vscockpit/, assets/, calib/ and 2 more places) or a path their caller passes, not to this repository.",

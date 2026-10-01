@@ -29,7 +29,7 @@
           "path": ".github/pull_request_template.md"
         },
         {
-          "hash": "2f670984f9eaf708c42c82764094c69d7ceb58c2912c0d313059fecddb670880",
+          "hash": "ee9afd7fa65de4d599fe2f2d8494d4015918d9fd6c69c071884ec9b3fa761c7b",
           "path": ".github/workflows/ci.yml"
         },
         {
@@ -4719,6 +4719,7 @@
           "event": "pull_request",
           "paths": [
             ".github/workflows/**",
+            "apps/cockpit/**",
             "atlas/**",
             "codecov.yml",
             "lib/**",
@@ -4738,6 +4739,7 @@
           "event": "push",
           "paths": [
             ".github/workflows/**",
+            "apps/cockpit/**",
             "atlas/**",
             "codecov.yml",
             "lib/**",
@@ -6041,7 +6043,7 @@
   ],
   "engine": "1.24.0",
   "generatedFrom": {
-    "commit": "231081dbbac002788a8e6f41e3fd214d839a6da5",
+    "commit": "907e15979c730d298f55ce3100744fcb7a72cf22",
     "tracked": 366
   },
   "landings": [

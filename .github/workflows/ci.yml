@@ -22,6 +22,9 @@ on:
       - 'lib/**'
       - 'tests/**'
       - '.github/workflows/**'
+      # cockpit-tests installs and runs apps/cockpit (npm ci, Playwright), so its
+      # manifests, lockfile and sources decide that job's result.
+      - 'apps/cockpit/**'
       - 'atlas/**'
       - 'site/package.json'
       - 'site/package-lock.json'
@@ -37,6 +40,9 @@ on:
       - 'lib/**'
       - 'tests/**'
       - '.github/workflows/**'
+      # cockpit-tests installs and runs apps/cockpit (npm ci, Playwright), so its
+      # manifests, lockfile and sources decide that job's result.
+      - 'apps/cockpit/**'
       - 'atlas/**'
       - 'site/package.json'
       - 'site/package-lock.json'
