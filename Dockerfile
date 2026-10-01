@@ -7,7 +7,7 @@
 # Track the major, not a patch: a patch pin sitting below a toolchain floor
 # is exactly what broke this. For full reproducibility, pin to an immutable
 # digest (`@sha256:<digest>`) — see SCORECARD.md "Open Items" (C-014).
-FROM node:22-slim AS builder
+FROM node:26-slim AS builder
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -20,7 +20,7 @@ COPY apps/ apps/
 
 RUN npm run build
 
-FROM node:22-slim
+FROM node:26-slim
 RUN groupadd -r vsynth && useradd -r -g vsynth vsynth
 
 WORKDIR /app
