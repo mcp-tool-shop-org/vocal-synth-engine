@@ -31,24 +31,12 @@ on:
       - 'site/astro.config.mjs'
       # Codecov reads its status and comment settings from this file.
       - 'codecov.yml'
+  # No paths filter on pull requests, deliberately: this workflow emits the
+  # required status check, and a PR that matched no path (a docs-only change)
+  # would never report it and could never merge. Pushes to main stay
+  # paths-gated.
   pull_request:
     branches: [main]
-    paths:
-      - 'package.json'
-      - 'package-lock.json'
-      - 'src/**'
-      - 'lib/**'
-      - 'tests/**'
-      - '.github/workflows/**'
-      # cockpit-tests installs and runs apps/cockpit (npm ci, Playwright), so its
-      # manifests, lockfile and sources decide that job's result.
-      - 'apps/cockpit/**'
-      - 'atlas/**'
-      - 'site/package.json'
-      - 'site/package-lock.json'
-      - 'site/astro.config.mjs'
-      # Codecov reads its status and comment settings from this file.
-      - 'codecov.yml'
   schedule:
     # Weekly Monday 06:00 UTC scheduled audit catches new advisories on
     # dormant branches. Severity threshold documented in SECURITY.md.
