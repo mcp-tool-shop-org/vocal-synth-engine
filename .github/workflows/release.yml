@@ -7,10 +7,13 @@ name: Release
 # hard tag-vs-package.json check before npm publish + Sigstore provenance
 # attestation, then `gh release create` with CHANGELOG-extracted body.
 #
-# Required repo secrets:
-#   NPM_TOKEN — npm automation token with publish rights on
-#   @mcptoolshop/vocal-synth-engine. Provenance is generated via OIDC, but
-#   NPM_TOKEN is still needed for the publish call itself.
+# Authentication:
+#   npm Trusted Publishing (OIDC). The ship job exchanges its
+#   id-token for a short-lived npm publish credential at publish time,
+#   so no NPM_TOKEN secret is required. A Trusted Publisher must be
+#   configured on npmjs.com for @mcptoolshop/vocal-synth-engine bound
+#   to vocal-synth-engine / release.yml. The same OIDC token also
+#   signs the Sigstore provenance attestation.
 #
 # Triggering: push a `v*` tag (e.g. `git tag v1.0.4 && git push --tags`).
 # A tag whose name doesn't match the package.json version fails the
@@ -112,9 +115,13 @@ jobs:
           fi
           echo "version=$PKG_VERSION" >> "$GITHUB_OUTPUT"
 
+      # OIDC trusted publishing requires npm >= 11.5.1; Node 22 bundles
+      # npm 10.9.x, so upgrade the global npm before the publish call.
+      - name: Upgrade npm for OIDC trusted publishing (>= 11.5.1)
+        run: npm install -g npm@latest
+
       - name: Publish to npm with provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        # Auth via npm Trusted Publishing (OIDC) - intentionally NO NODE_AUTH_TOKEN.
         run: npm publish --provenance --access public
 
       # Extract the CHANGELOG section for this version. The format is
