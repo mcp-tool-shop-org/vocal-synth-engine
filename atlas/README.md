@@ -1,15 +1,14 @@
 # vocal-synth-engine: how it works
 
-Mapped at 2026-10-01 from commit 9f610c6 by Atlas 1.24.0.
+Mapped at 2026-10-14 from commit 71c2b54 by Atlas 1.24.0.
 
 ## What this is
 
 10 parts, mostly TypeScript (99 files), JavaScript (3), Astro (2), CSS (2), shell (2), HTML (1) and Python (1). Work enters through 15 doors; CI and Release each reach 3 parts, and CI is followed because a pull request goes through it. It publishes to npm. It deploys a site to GitHub Pages. People run vocal-synth-engine-mcp, vse-analyze, vse-build-preset, vse-compare, vse-gen-vowel-wav, vse-inspect, vse-phonemize, vse-play-score, vse-resynth and vse-score-from-midi. People import @mcptoolshop/vocal-synth-engine.
 
-## What changed since 2026-10-01 (907e159)
+## What changed since 2026-10-01 (9f610c6)
 
-- CI's pull request trigger no longer names `.github/workflows/**`, `apps/cockpit/**`, `atlas/**`, `codecov.yml`, `lib/**`, `package-lock.json`, `package.json`, `site/astro.config.mjs`, `site/package-lock.json`, `site/package.json`, `src/**` and `tests/**`.
-- 1 file changed content, across 1 part.
+Nothing structural changed since 2026-10-01; 7 files changed content.
 
 ## What comes in
 
