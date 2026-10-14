@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- The release workflow publishes to npm through Trusted Publishing (OIDC) instead of an `NPM_TOKEN` secret. The 1.1.1 tag's publish failed on the expired token; a manual run of `release.yml` with `tag` now re-releases an existing tag.
+
 ## [1.1.1] - 2026-10-14
 
 ### Changed
