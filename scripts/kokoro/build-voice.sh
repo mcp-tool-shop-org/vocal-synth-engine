@@ -15,7 +15,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 _ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-# On MSYS/Git Bash, pwd returns /c/Users/... but Node needs C:/Users/...
+# On MSYS/Git Bash, pwd returns /c/Users/<name> but Node needs C:/Users/<name>
 # Convert all paths to mixed-mode (forward slash, drive letter) for compat
 if command -v cygpath &>/dev/null; then
   ROOT="$(cygpath -m "$_ROOT")"
