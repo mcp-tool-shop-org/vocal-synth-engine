@@ -7,12 +7,15 @@ name: Release
 # hard tag-vs-package.json check before npm publish + Sigstore provenance
 # attestation, then `gh release create` with CHANGELOG-extracted body.
 #
-# Required repo secrets:
-#   NPM_TOKEN — npm automation token with publish rights on
-#   @mcptoolshop/vocal-synth-engine. Provenance is generated via OIDC, but
-#   NPM_TOKEN is still needed for the publish call itself.
+# Publishing is tokenless: npm Trusted Publishing (OIDC) for
+# @mcptoolshop/vocal-synth-engine, bound on npmjs.com to this repo and this
+# filename (release.yml). No NPM_TOKEN; do not rename this file. It needs
+# npm >= 11.5.1, which the ship job installs after `npm ci` (a newer npm run
+# before `npm ci` blocks dependency install scripts).
 #
 # Triggering: push a `v*` tag (e.g. `git tag v1.0.4 && git push --tags`).
+# workflow_dispatch with `tag` re-runs the release for an existing tag (the
+# tag's code, this workflow), e.g. when a publish failed after the tag landed.
 # A tag whose name doesn't match the package.json version fails the
 # tag-vs-pkg-version gate before any npm.publish side effect.
 #
@@ -24,12 +27,18 @@ name: Release
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing v* tag to release (its code is built and published with this workflow)
+        required: true
+        type: string
 
 permissions:
   contents: read
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-${{ inputs.tag || github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -46,6 +55,8 @@ jobs:
       FORCE_COLOR: '0'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.tag || github.ref }}
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -80,6 +91,8 @@ jobs:
       FORCE_COLOR: '0'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.tag || github.ref }}
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -98,8 +111,10 @@ jobs:
       # error and must fail loud before any npm.publish side effect.
       - name: Tag-vs-package.json version equality
         id: version-check
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
         run: |
-          TAG_REF="${GITHUB_REF_NAME}"
+          TAG_REF="${INPUT_TAG:-$GITHUB_REF_NAME}"
           # Strip leading `v` from tag name
           TAG_VERSION="${TAG_REF#v}"
           PKG_VERSION=$(node -p "require('./package.json').version")
@@ -111,10 +126,23 @@ jobs:
             exit 1
           fi
           echo "version=$PKG_VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG_REF" >> "$GITHUB_OUTPUT"
 
-      - name: Publish to npm with provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # Trusted Publishing needs npm >= 11.5.1; Node 20 ships npm 10. Install a
+      # pinned npm 11 into a sandbox and put it first on PATH (an in-place
+      # `npm i -g npm` can race on Node 20's npm). It comes after `npm ci` so
+      # the dependency install keeps Node's own npm and its install scripts.
+      - name: npm 11 for Trusted Publishing
+        run: |
+          SANDBOX="$HOME/.npm-cli-sandbox"
+          mkdir -p "$SANDBOX"
+          cd "$SANDBOX"
+          echo '{"name":"npm-cli-sandbox","version":"0.0.0","private":true}' > package.json
+          npm install --no-save --no-audit --no-fund --silent npm@^11.5.1
+          echo "$SANDBOX/node_modules/.bin" >> "$GITHUB_PATH"
+          echo "npm now: $("$SANDBOX/node_modules/.bin/npm" --version)"
+
+      - name: Publish to npm with provenance (Trusted Publishing, no token)
         run: npm publish --provenance --access public
 
       # Extract the CHANGELOG section for this version. The format is
@@ -147,7 +175,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "$GITHUB_REF_NAME" \
-            --title "$GITHUB_REF_NAME" \
+          gh release create "${{ steps.version-check.outputs.tag }}" \
+            --title "${{ steps.version-check.outputs.tag }}" \
             --notes-file "${{ steps.changelog.outputs.notes_file }}" \
             --verify-tag
