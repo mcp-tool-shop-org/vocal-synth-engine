@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+## [1.1.1] - 2026-10-14
+
+### Changed
+
+- Test fixtures build fake credentials at runtime so secret scanners do not flag them.
+
 ## [1.1.0] - 2026-05-16
 
 First release after standalone-repo restoration and full dogfood-swarm

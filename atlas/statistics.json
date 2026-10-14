@@ -165,7 +165,7 @@
       "confidence": "low",
       "highWater": null,
       "name": "tests",
-      "qualifyingSourceCommits": 3,
+      "qualifyingSourceCommits": 4,
       "rebaseline": null
     }
   ],
@@ -203,8 +203,8 @@
         "path": ".github/pull_request_template.md"
       },
       {
-        "commits": 19,
-        "lines": 451,
+        "commits": 21,
+        "lines": 491,
         "path": ".github/workflows/ci.yml"
       },
       {
@@ -228,8 +228,8 @@
         "path": ".gitignore"
       },
       {
-        "commits": 2,
-        "lines": 167,
+        "commits": 3,
+        "lines": 175,
         "path": "CHANGELOG.md"
       },
       {
@@ -243,8 +243,8 @@
         "path": "CONTRIBUTING.md"
       },
       {
-        "commits": 5,
-        "lines": 86,
+        "commits": 6,
+        "lines": 90,
         "path": "Dockerfile"
       },
       {
@@ -393,8 +393,8 @@
         "path": "assets/logo.png"
       },
       {
-        "commits": 6,
-        "lines": 370,
+        "commits": 9,
+        "lines": 395,
         "path": "atlas/README.md"
       },
       {
@@ -403,18 +403,18 @@
         "path": "atlas/boundaries.yaml"
       },
       {
-        "commits": 6,
-        "lines": 1620,
+        "commits": 9,
+        "lines": 1681,
         "path": "atlas/page.json"
       },
       {
-        "commits": 6,
-        "lines": 4380,
+        "commits": 9,
+        "lines": 4496,
         "path": "atlas/statistics.json"
       },
       {
-        "commits": 6,
-        "lines": 14070,
+        "commits": 9,
+        "lines": 14126,
         "path": "atlas/structure.json"
       },
       {
@@ -438,13 +438,13 @@
         "path": "out.wav"
       },
       {
-        "commits": 8,
-        "lines": 12533,
+        "commits": 10,
+        "lines": 12567,
         "path": "package-lock.json"
       },
       {
-        "commits": 7,
-        "lines": 185,
+        "commits": 8,
+        "lines": 187,
         "path": "package.json"
       },
       {
@@ -1428,8 +1428,8 @@
         "path": "scripts/generate-ref-wav.ts"
       },
       {
-        "commits": 2,
-        "lines": 197,
+        "commits": 3,
+        "lines": 199,
         "path": "scripts/kokoro/build-voice.sh"
       },
       {
@@ -1493,8 +1493,8 @@
         "path": "site/astro.config.mjs"
       },
       {
-        "commits": 2,
-        "lines": 13590,
+        "commits": 4,
+        "lines": 13602,
         "path": "site/package-lock.json"
       },
       {
@@ -2033,8 +2033,8 @@
         "path": "tests/score-fixtures.test.ts"
       },
       {
-        "commits": 1,
-        "lines": 174,
+        "commits": 2,
+        "lines": 180,
         "path": "tests/server-auth.test.ts"
       },
       {
@@ -2076,19 +2076,61 @@
   },
   "confidence": {
     "level": "low",
-    "reason": "fewer than 30 qualifying commits in the window, and fewer than 25 source files reach 10 revisions"
+    "reason": "fewer than 25 source files reach 10 revisions in the window"
   },
-  "generatedAt": "2026-10-01T02:14:35.687Z",
+  "generatedAt": "2026-10-14T22:51:03.381Z",
   "generatedFrom": {
-    "commit": "9f610c67eb51015efc7cebe7bad107c512217fde"
+    "commit": "334186ee7fffcc36cd5a9962c2eab611545ee827"
   },
   "pairs": [
     {
+      "a": "atlas/README.md",
+      "b": "atlas/page.json",
+      "either": 5,
+      "shared": 5,
+      "strength": 1
+    },
+    {
+      "a": "atlas/README.md",
+      "b": "atlas/statistics.json",
+      "either": 5,
+      "shared": 5,
+      "strength": 1
+    },
+    {
+      "a": "atlas/README.md",
+      "b": "atlas/structure.json",
+      "either": 5,
+      "shared": 5,
+      "strength": 1
+    },
+    {
+      "a": "atlas/page.json",
+      "b": "atlas/statistics.json",
+      "either": 5,
+      "shared": 5,
+      "strength": 1
+    },
+    {
+      "a": "atlas/page.json",
+      "b": "atlas/structure.json",
+      "either": 5,
+      "shared": 5,
+      "strength": 1
+    },
+    {
+      "a": "atlas/statistics.json",
+      "b": "atlas/structure.json",
+      "either": 5,
+      "shared": 5,
+      "strength": 1
+    },
+    {
       "a": "package-lock.json",
       "b": "package.json",
-      "either": 6,
-      "shared": 5,
-      "strength": 0.833333
+      "either": 8,
+      "shared": 6,
+      "strength": 0.75
     }
   ],
   "parameters": {
@@ -2100,17 +2142,17 @@
     "fallenShared": 3,
     "floor": "fallen",
     "floorHeld": false,
-    "floorTrigger": "both",
-    "headDate": "2026-09-30T17:23:47-07:00",
+    "floorTrigger": "revision-depth",
+    "headDate": "2026-10-14T18:48:38-04:00",
     "inScopeFiles": 371,
     "pinnedStart": null,
     "priorFloor": "fallen",
-    "qualifyingCommits": 24,
+    "qualifyingCommits": 30,
     "qualifyingMinimum": 30,
     "revisions": 5,
     "shared": 10,
     "sharedFloorUsed": 3,
-    "since": "2026-04-04T00:23:47.000Z",
+    "since": "2026-04-17T22:48:38.000Z",
     "sourceExtensions": [
       ".js",
       ".mjs",
