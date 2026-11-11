@@ -29,7 +29,7 @@
           "path": ".github/pull_request_template.md"
         },
         {
-          "hash": "0db270f8079d604d62dbdc063539b567c1794e4c8bd5525fe50a8b955b85e615",
+          "hash": "8a0edc7e05e9571835740e63b29d2cd92945c974f434be5b5c212ce4181030bd",
           "path": ".github/workflows/ci.yml"
         },
         {
@@ -37,11 +37,11 @@
           "path": ".github/workflows/dogfood.yml"
         },
         {
-          "hash": "b4c7389d36e2dfa750909d9f29eadadf535a0539eeeeb3f501e0cb23f09564b2",
+          "hash": "cf1ad38464c54f14127d46750a5763f224b286cac09ac46aafc8ebbcd993f3ff",
           "path": ".github/workflows/pages.yml"
         },
         {
-          "hash": "91f8c2f186c1bda265c2eab9efe37144f892cfa3d910023f87aa65844b2a72bc",
+          "hash": "aadf842b530fb07e8f5f34f5655cc1e6bbbf06db5ccc27b1f84a46ba5309c9ae",
           "path": ".github/workflows/release.yml"
         }
       ],
@@ -107,11 +107,11 @@
           "path": "apps/cockpit/index.html"
         },
         {
-          "hash": "71e96480607c434ae2e9e5a5615f33dcc6e5aa13b05ca80cd175f7fc9b6b1bbc",
+          "hash": "c67f2da4a9efd5ab889358fa8602b569f0e8f55281e20f735ed931d43017a1e7",
           "path": "apps/cockpit/package-lock.json"
         },
         {
-          "hash": "1ac7eba67cf19f0a49a3fe1a8fe308c39e05bfd54a0003adb1ae2ea1cae14fdc",
+          "hash": "d2c860208ae6c3b01197449df7c8d0d579aae3a256b1b2b5761bb72a3d4ed4a6",
           "path": "apps/cockpit/package.json"
         },
         {
@@ -1127,7 +1127,7 @@
           "path": ".gitignore"
         },
         {
-          "hash": "f1fa3501e10856d3f9c93975d518d0a4fbd0673767171777b8858cf7fc68e7e9",
+          "hash": "ccf437451f8a09de34295fe1f2c965564add80780de95347c80d48bd685d0502",
           "path": "CHANGELOG.md"
         },
         {
@@ -1476,11 +1476,11 @@
           "path": "site/astro.config.mjs"
         },
         {
-          "hash": "0607a19c4f60b635244a906c7ad2424359b50e20c4a83bc140f202abce4a941e",
+          "hash": "a5b59cecdeea3a569aacba1b031bceef94323bfb7efbac1a52abba4a929046b3",
           "path": "site/package-lock.json"
         },
         {
-          "hash": "17ed487ab5049bb52f8c5e35f77f21be7da639f1fb6a3fa70e9b02ffabfe7be6",
+          "hash": "7ad1c545c0cd9a659f2cf8f611acb4662f8b13c6d021a26b20224a3ad3821558",
           "path": "site/package.json"
         },
         {
@@ -5171,9 +5171,20 @@
           "dir": "",
           "job": "ship",
           "programs": [
+            "cd",
+            "echo",
+            "mkdir",
             "npm"
           ],
-          "step": "Publish to npm with provenance"
+          "step": "npm 11 for Trusted Publishing"
+        },
+        {
+          "dir": "",
+          "job": "ship",
+          "programs": [
+            "npm"
+          ],
+          "step": "Publish to npm with provenance (Trusted Publishing, no token)"
         },
         {
           "dir": "",
@@ -5446,8 +5457,7 @@
       ],
       "runsCount": 19,
       "secrets": [
-        "GITHUB_TOKEN",
-        "NPM_TOKEN"
+        "GITHUB_TOKEN"
       ],
       "sends": {
         "deploysPages": false,
@@ -5487,6 +5497,9 @@
           "tags": [
             "v*"
           ]
+        },
+        {
+          "event": "workflow_dispatch"
         }
       ],
       "uses": [
@@ -6027,9 +6040,9 @@
       "to": "src"
     }
   ],
-  "engine": "1.24.0",
+  "engine": "1.26.0",
   "generatedFrom": {
-    "commit": "334186ee7fffcc36cd5a9962c2eab611545ee827",
+    "commit": "fda7b3a58c91d00d3f042730d0e2ca7575b35a67",
     "tracked": 366
   },
   "landings": [

@@ -1,19 +1,20 @@
 # vocal-synth-engine: how it works
 
-Mapped at 2026-10-14 from commit 334186e by Atlas 1.24.0.
+Mapped at 2026-11-11 from commit fda7b3a by Atlas 1.26.0.
 
 ## What this is
 
 10 parts, mostly TypeScript (99 files), JavaScript (3), Astro (2), CSS (2), shell (2), HTML (1) and Python (1). Work enters through 15 doors; CI and Release each reach 3 parts, and CI is followed because a pull request goes through it. It publishes to npm. It deploys a site to GitHub Pages. People run vocal-synth-engine-mcp, vse-analyze, vse-build-preset, vse-compare, vse-gen-vowel-wav, vse-inspect, vse-phonemize, vse-play-score, vse-resynth and vse-score-from-midi. People import @mcptoolshop/vocal-synth-engine.
 
-## What changed since 2026-10-14 (71c2b54)
+## What changed since 2026-10-14 (334186e)
 
-Nothing structural changed since 2026-10-14; no file changed.
+- Release now also starts by hand.
+- 8 files changed content, across 4 parts.
 
 ## What comes in
 
 1. **CI.** On a pull request to main; on a push to main touching 12 paths; on a schedule (`0 6 * * 1`), Monday at 06:00 UTC; or by hand. Runs scripts/bench-gate.mjs, tests/cross-domain-stage-c.test.ts, tests/curves.test.ts and 15 more; builds src/.
-2. **Release.** When a tag matching `v*` is pushed. Runs scripts/verify.sh, tests/cross-domain-stage-c.test.ts, tests/curves.test.ts and 15 more; builds src/.
+2. **Release.** When a tag matching `v*` is pushed; or by hand. Runs scripts/verify.sh, tests/cross-domain-stage-c.test.ts, tests/curves.test.ts and 15 more; builds src/.
 3. **Deploy site to GitHub Pages.** On a push to main touching 2 paths; or by hand. Runs site/astro.config.mjs and site/src/.
 4. **Dogfood.** On a push to main touching 3 paths; or by hand. On main, it runs src/server/index.prod.ts; builds src/.
 5. **@mcptoolshop/vocal-synth-engine** (the package people import). Loads src/index.ts, src/engine/LiveSynthEngine.ts, src/engine/StreamingVocalSynthEngine.ts and 8 more.
@@ -84,8 +85,6 @@ Window: 180 days; a pair counts from 3 shared commits, since 0 source files reac
 - **cockpit** is imported by no test.
 - **scripts** is imported by no test.
 
-apps/cockpit/tests/smoke.spec.ts runs in no workflow.
-
 ## Written but never read
 
 - **ref/ah_sustain.wav** is written by scripts/generate-ref-wav.ts and read by nothing else in this repository.
@@ -117,7 +116,7 @@ Read those in order to follow one pull request end to end.
 - 4 writes and 1 read go to the directory the command is run in, not to this repository.
 - cockpit calls src over HTTP at 11 routes, a link no import shows: the map draws it, and no door's reach follows it.
 - scripts calls src over HTTP at 1 route, a link no import shows: the map draws it, and no door's reach follows it.
-- There is a Dockerfile, a fly.toml and a render.yaml that no workflow runs; what deploys from them does so from outside this repository, and is not on this page.
+- There are a Dockerfile, a fly.toml and a render.yaml that no workflow runs; what deploys from them does so from outside this repository, and is not on this page.
 - Statistics confidence is low: fewer than 25 source files reach 10 revisions in the window.
 
 Regenerate with `npx --yes @dogfood-lab/atlas map`.

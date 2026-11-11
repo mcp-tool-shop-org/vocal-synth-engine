@@ -213,13 +213,13 @@
         "path": ".github/workflows/dogfood.yml"
       },
       {
-        "commits": 9,
-        "lines": 68,
+        "commits": 10,
+        "lines": 70,
         "path": ".github/workflows/pages.yml"
       },
       {
-        "commits": 4,
-        "lines": 169,
+        "commits": 5,
+        "lines": 219,
         "path": ".github/workflows/release.yml"
       },
       {
@@ -228,8 +228,8 @@
         "path": ".gitignore"
       },
       {
-        "commits": 3,
-        "lines": 175,
+        "commits": 4,
+        "lines": 179,
         "path": "CHANGELOG.md"
       },
       {
@@ -333,13 +333,13 @@
         "path": "apps/cockpit/index.html"
       },
       {
-        "commits": 2,
-        "lines": 2124,
+        "commits": 3,
+        "lines": 2534,
         "path": "apps/cockpit/package-lock.json"
       },
       {
-        "commits": 2,
-        "lines": 15,
+        "commits": 3,
+        "lines": 17,
         "path": "apps/cockpit/package.json"
       },
       {
@@ -394,7 +394,7 @@
       },
       {
         "commits": 9,
-        "lines": 395,
+        "lines": 399,
         "path": "atlas/README.md"
       },
       {
@@ -404,12 +404,12 @@
       },
       {
         "commits": 9,
-        "lines": 1681,
+        "lines": 1685,
         "path": "atlas/page.json"
       },
       {
         "commits": 9,
-        "lines": 4496,
+        "lines": 4552,
         "path": "atlas/statistics.json"
       },
       {
@@ -1493,13 +1493,13 @@
         "path": "site/astro.config.mjs"
       },
       {
-        "commits": 4,
-        "lines": 13602,
+        "commits": 5,
+        "lines": 14043,
         "path": "site/package-lock.json"
       },
       {
-        "commits": 2,
-        "lines": 24,
+        "commits": 3,
+        "lines": 28,
         "path": "site/package.json"
       },
       {
@@ -2078,9 +2078,9 @@
     "level": "low",
     "reason": "fewer than 25 source files reach 10 revisions in the window"
   },
-  "generatedAt": "2026-10-14T22:51:03.381Z",
+  "generatedAt": "2026-11-11T22:50:22.513Z",
   "generatedFrom": {
-    "commit": "334186ee7fffcc36cd5a9962c2eab611545ee827"
+    "commit": "fda7b3a58c91d00d3f042730d0e2ca7575b35a67"
   },
   "pairs": [
     {
@@ -2143,16 +2143,16 @@
     "floor": "fallen",
     "floorHeld": false,
     "floorTrigger": "revision-depth",
-    "headDate": "2026-10-14T18:48:38-04:00",
+    "headDate": "2026-10-15T11:28:30-07:00",
     "inScopeFiles": 371,
     "pinnedStart": null,
     "priorFloor": "fallen",
-    "qualifyingCommits": 30,
+    "qualifyingCommits": 34,
     "qualifyingMinimum": 30,
     "revisions": 5,
     "shared": 10,
     "sharedFloorUsed": 3,
-    "since": "2026-04-17T22:48:38.000Z",
+    "since": "2026-04-18T18:28:30.000Z",
     "sourceExtensions": [
       ".js",
       ".mjs",
